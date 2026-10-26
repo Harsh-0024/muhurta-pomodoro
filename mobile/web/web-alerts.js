@@ -178,24 +178,24 @@
 
   // Like the Mac app's menu bar, as far as an iPhone web app can go: iOS can't
   // tick a clock in a notification for it, so as the app leaves the screen
-  // with a clock running, it posts one quiet note saying until when ("Focus ·
-  // Rhythm, until 9:32 AM"). The end-of-block push takes its place (sw.js);
+  // with a clock running, it posts one quiet note saying until when ("Rhythm,
+  // until 9:32 AM"). The end-of-block push takes its place (sw.js);
   // pausing or stopping takes it away. Posted once per block, not every time
   // the app is left.
   const RUNNING_TAG = "muhurta-running";
   const SHOWN_KEY = "muhurta-running-shown";
-  const PHASES = { work: "Focus", rest: "Rest", cumulative: "Pool rest" };
+  const PHASES = { work: true, rest: true, cumulative: true };
   const clock = (ms) => new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
 
   function runningNote() {
     const rhythm = saved(TIMER_KEY);
     if (rhythm && rhythm.running) {
       if (PHASES[rhythm.mode] && rhythm.phaseEndsAt > Date.now()) {
-        return { key: `r${rhythm.phaseEndsAt}`, title: `${PHASES[rhythm.mode]} · Rhythm`, body: `Until ${clock(rhythm.phaseEndsAt)}` };
+        return { key: `r${rhythm.phaseEndsAt}`, title: "Rhythm", body: `Until ${clock(rhythm.phaseEndsAt)}` };
       }
       const s = rhythm.session || {};
       if (rhythm.mode === "extend" && s.segStartedAt) {
-        return { key: `e${s.segStartedAt}`, title: "Extra focus · Rhythm", body: `Since ${clock(s.segStartedAt)}` };
+        return { key: `e${s.segStartedAt}`, title: "Rhythm", body: `Overtime since ${clock(s.segStartedAt)}` };
       }
     }
     const countdown = saved(COUNTDOWN_KEY);
@@ -203,7 +203,7 @@
       return { key: `c${countdown.endsAt}`, title: "Timer", body: `Until ${clock(countdown.endsAt)}` };
     }
     if (countdown && countdown.mode === "overtime" && countdown.overtimeStartedAt) {
-      return { key: `o${countdown.overtimeStartedAt}`, title: "Timer · overtime", body: `Counting the extra time since ${clock(countdown.overtimeStartedAt)}` };
+      return { key: `o${countdown.overtimeStartedAt}`, title: "Timer", body: `Overtime since ${clock(countdown.overtimeStartedAt)}` };
     }
     const flow = saved(FLOW_KEY);
     if (flow && flow.mode === "running" && flow.runStartedAt) {

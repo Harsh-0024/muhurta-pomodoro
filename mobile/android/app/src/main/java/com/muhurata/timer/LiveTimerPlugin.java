@@ -22,7 +22,10 @@ import com.getcapacitor.annotation.CapacitorPlugin;
  * changes; the clock in the notification is an Android Chronometer, so it
  * keeps ticking while the app itself is paused in the background.
  *
- * show({label, up, sec, until, since, paused, plus}): a countdown ends at `until`
+ * show({label, status, icon, up, sec, until, since, paused, plus}): the row
+ * reads "Rhythm      23:47", with a small status line ("Paused") when set;
+ * icon ("focus", "rest", "timer", "flow") picks the status bar icon. A
+ * countdown ends at `until`
  * (ms since 1970); a count-up has run `sec` seconds plus the time since
  * `since`; paused, it stands still at `sec`. plus puts a "+" before the
  * time (past zero). hide() removes it.
@@ -32,6 +35,18 @@ public class LiveTimerPlugin extends Plugin {
 
     private static final String CHANNEL = "running";
     private static final int ID = 4100;
+    private static final int GOLD = 0xFFA98237;
+
+    // The status bar icon says what runs, like the Mac menu bar.
+    private static int iconFor(String mode) {
+        switch (mode) {
+            case "focus": return R.drawable.ic_mode_focus;
+            case "rest": return R.drawable.ic_mode_rest;
+            case "timer": return R.drawable.ic_mode_timer;
+            case "flow": return R.drawable.ic_mode_flow;
+            default: return R.drawable.ic_stat_chakra;
+        }
+    }
 
     @Override
     public void load() {
@@ -56,6 +71,9 @@ public class LiveTimerPlugin extends Plugin {
             return;
         }
         String label = call.getString("label", "Muhurta");
+        String status = call.getString("status", "");
+        String mode = call.getString("icon", "");
+        int icon = iconFor(mode);
         boolean up = Boolean.TRUE.equals(call.getBoolean("up", false));
         boolean paused = Boolean.TRUE.equals(call.getBoolean("paused", false));
         // optDouble: times like 1792560000000 arrive as whole numbers (longs),
@@ -78,6 +96,10 @@ public class LiveTimerPlugin extends Plugin {
 
         RemoteViews view = new RemoteViews(ctx.getPackageName(), R.layout.notification_live);
         view.setTextViewText(R.id.live_label, label);
+        view.setTextViewText(R.id.live_status, status);
+        view.setViewVisibility(R.id.live_status, status.isEmpty() ? android.view.View.GONE : android.view.View.VISIBLE);
+        // Paused: the time stands still, dimmed.
+        view.setFloat(R.id.live_clock, "setAlpha", paused ? 0.5f : 1f);
         view.setChronometer(R.id.live_clock, base, Boolean.TRUE.equals(call.getBoolean("plus", false)) ? "+%s" : null, !paused);
         view.setChronometerCountDown(R.id.live_clock, !up);
 
@@ -85,8 +107,8 @@ public class LiveTimerPlugin extends Plugin {
         PendingIntent tap = PendingIntent.getActivity(ctx, 0, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, CHANNEL)
-            .setSmallIcon(R.drawable.ic_stat_chakra)
-            .setColor(0xFFA98237)
+            .setSmallIcon(icon)
+            .setColor(GOLD)
             .setStyle(new NotificationCompat.DecoratedCustomViewStyle())
             .setCustomContentView(view)
             .setContentTitle(label)

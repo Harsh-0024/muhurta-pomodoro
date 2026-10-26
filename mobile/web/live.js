@@ -19,7 +19,10 @@
   const COUNTDOWN_KEY = "muhurat_countdown_session_v1";
   const FLOW_KEY = "muhurat_flow_session_v1";
   const ASKED_KEY = "muhurta-live-asked";
-  const PHASES = { work: "Focus", rest: "Rest", cumulative: "Pool rest" };
+  // One name per clock ("Rhythm", "Timer", "Flow"); the status bar icon says
+  // focus (flame) or rest (cup), like the Mac menu bar. The small line under
+  // the name only when something is special: paused, overtime, time's up.
+  const RHYTHM_ICONS = { work: "focus", rest: "rest", cumulative: "rest" };
 
   function saved(key) {
     try {
@@ -29,7 +32,7 @@
     }
   }
 
-  const paused = (label, sec, up) => ({ label: `${label} · paused`, up, sec, paused: true });
+  const paused = (label, icon, sec, up) => ({ label, icon, status: "Paused", up, sec, paused: true });
 
   function rhythmState(d) {
     if (!d) return null;
@@ -37,29 +40,31 @@
       const s = d.session || {};
       const sec = Number(s.extendSec || 0) - Number(d.extendBaseSec || 0);
       const open = s.segKind === "extend" && s.segStartedAt;
-      if (open && d.running) return { label: "Extra focus · Rhythm", up: true, sec, since: Number(s.segStartedAt), plus: true };
+      if (open && d.running) {
+        return { label: "Rhythm", icon: "focus", status: "Overtime", up: true, sec, since: Number(s.segStartedAt), plus: true };
+      }
       const extra = open ? Math.max(0, (Number(d.savedAt || Date.now()) - s.segStartedAt) / 1000) : 0;
-      return { ...paused("Extra focus", sec + extra, true), plus: true };
+      return { ...paused("Rhythm", "focus", sec + extra, true), plus: true };
     }
-    const phase = PHASES[d.mode];
-    if (!phase) return null;
+    const icon = RHYTHM_ICONS[d.mode];
+    if (!icon) return null;
     if (d.running && d.phaseEndsAt) {
       if (Number(d.phaseEndsAt) <= Date.now()) return null; // the bell's moment
-      return { label: `${phase} · Rhythm`, up: false, until: Number(d.phaseEndsAt) };
+      return { label: "Rhythm", icon, up: false, until: Number(d.phaseEndsAt) };
     }
-    return paused(phase, Number(d.remainingSec || 0), false);
+    return paused("Rhythm", icon, Number(d.remainingSec || 0), false);
   }
 
   function countdownState(d) {
     if (!d) return null;
     if (d.mode === "running" && d.endsAt) {
       if (Number(d.endsAt) <= Date.now()) return null;
-      return { label: "Timer", up: false, until: Number(d.endsAt) };
+      return { label: "Timer", icon: "timer", up: false, until: Number(d.endsAt) };
     }
-    if (d.mode === "paused") return paused("Timer", Number(d.remainingSec || 0), false);
-    if (d.mode === "ringing") return { label: "Time's up", up: false, sec: 0, paused: true };
+    if (d.mode === "paused") return paused("Timer", "timer", Number(d.remainingSec || 0), false);
+    if (d.mode === "ringing") return { label: "Timer", icon: "timer", status: "Time's up", up: false, sec: 0, paused: true };
     if (d.mode === "overtime" && d.overtimeStartedAt) {
-      return { label: "Timer · overtime", up: true, sec: 0, since: Number(d.overtimeStartedAt), plus: true };
+      return { label: "Timer", icon: "timer", status: "Overtime", up: true, sec: 0, since: Number(d.overtimeStartedAt), plus: true };
     }
     return null;
   }
@@ -67,8 +72,8 @@
   function flowState(d) {
     if (!d || (d.mode !== "running" && d.mode !== "paused")) return null;
     const sec = Number(d.focusedSec || 0);
-    if (d.mode === "running" && d.runStartedAt) return { label: "Flow", up: true, sec, since: Number(d.runStartedAt) };
-    return paused("Flow", sec, true);
+    if (d.mode === "running" && d.runStartedAt) return { label: "Flow", icon: "flow", up: true, sec, since: Number(d.runStartedAt) };
+    return paused("Flow", "flow", sec, true);
   }
 
   function current() {
