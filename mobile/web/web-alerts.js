@@ -307,8 +307,11 @@
         post({ action: "book", subscription, at: Date.now() + 3000, title: String(title), body: "Notifications are working. Lock your phone; they arrive there too." });
         return;
       }
+      // Not subscribed (yet): the open app can show this one, but nothing would
+      // reach it closed, so don't say they are working.
+      const body = "This one came from the open app. Alerts with the app closed are not set up yet: open the app online to finish.";
       navigator.serviceWorker.ready
-        .then((reg) => reg.showNotification(String(title), { body: String((options && options.body) || ""), tag: "muhurta-test" }))
+        .then((reg) => reg.showNotification(String(title), { body, tag: "muhurta-test" }))
         .catch(() => {});
     }
     static get permission() {
@@ -317,7 +320,9 @@
     static async requestPermission() {
       // Asked straight away, inside the tap: iOS only asks from a tap.
       const p = await Real.requestPermission();
-      if (p === "granted") await subscribe().catch((err) => console.warn("push subscription failed", err));
+      // Subscribing carries on in the background, so Settings shows the answer
+      // now even if Apple's push service is slow or never replies.
+      if (p === "granted") subscribe().catch((err) => console.warn("push subscription failed", err));
       return p;
     }
   };
