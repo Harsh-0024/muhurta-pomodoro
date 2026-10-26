@@ -8,8 +8,8 @@
     { keys: "R", action: "Reset" },
     { keys: "T", action: "Take rest from pool" },
     { keys: "K", action: "Skip remaining rest (during rest)" },
-    { keys: "B", action: "Rest (during extend)" },
-    { keys: "3", action: "Skip (during extend)" },
+    { keys: "B", action: "Rest (during overtime)" },
+    { keys: "3", action: "Skip (during overtime)" },
     { keys: "1 · 2 · 3", action: "Choose options when a dialog is open" },
   ];
 
