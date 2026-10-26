@@ -610,9 +610,14 @@
     if (!started) return;
     providerName = p.name;
     stepBeforeBrowser = STEPS.find((id) => !$(id).hidden) || "stepSignin";
+    if (!started.opened) {
+      // Not opened on this computer (a phone, or no default browser):
+      // continue in this tab; Google / Microsoft send it back here.
+      window.location.href = started.url;
+      return;
+    }
     $("browserLink").href = started.url;
     show("stepBrowser");
-    if (!started.opened) window.open(started.url, "_blank", "noopener");
     const until = Date.now() + 10 * 60 * 1000;
     clearInterval(waiting);
     waiting = setInterval(async () => {
