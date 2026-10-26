@@ -4450,14 +4450,6 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
   outline-offset: 1px;
 }
 
-.countdown-pick-unit {
-  margin-left: 0.15rem;
-  color: var(--muted);
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
 body.timer-ringing .countdown-ring-wrap .ring-progress {
   animation: ring-breathe 1.2s ease-in-out infinite;
 }

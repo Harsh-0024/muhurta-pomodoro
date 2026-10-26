@@ -90,6 +90,29 @@
     });
   }
 
+  // Six quick lengths from this person's own rhythms and last 30 days
+  // (quick-lengths.js); the page starts with 6 12 24 36 48 60 until then.
+  async function loadQuickLengths() {
+    const Q = window.MuhurtaQuickLengths;
+    if (!Q) return;
+    try {
+      const [history, presets, settings] = await Promise.all([
+        api("/api/activity/history?days=30"),
+        api("/api/presets"),
+        api("/api/settings"),
+      ]);
+      const all = [...(presets.builtins || []), ...(presets.custom || [])];
+      const level = all.find((p) => p.id === settings.default_preset_id);
+      const { lengths } = Q.pick({ segments: history.segments || [], presets: all, fallbackMin: level ? level.work_min : 24 });
+      $("timerQuick").innerHTML = lengths
+        .map((m) => `<button type="button" class="countdown-pick" data-min="${m}">${m}</button>`)
+        .join("");
+      markPick();
+    } catch (_) {
+      // Offline or no history: the starting six stay.
+    }
+  }
+
   function readLast() {
     try {
       const n = Number(localStorage.getItem(LAST_KEY));
@@ -340,6 +363,7 @@
     wire();
     render();
     startTicking();
+    loadQuickLengths();
   }
 
   document.addEventListener("DOMContentLoaded", init);
