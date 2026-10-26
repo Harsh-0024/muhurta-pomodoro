@@ -43,13 +43,13 @@
         </div>
       </div>
       <div class="countdown-quick" id="timerQuick" role="group" aria-label="Quick lengths in minutes">
-        <button type="button" class="countdown-pick" data-min="5">5</button>
-        <button type="button" class="countdown-pick" data-min="10">10</button>
-        <button type="button" class="countdown-pick" data-min="15">15</button>
-        <button type="button" class="countdown-pick" data-min="25">25</button>
-        <button type="button" class="countdown-pick" data-min="45">45</button>
+        <!-- Until timer.js fills in this person's own lengths (quick-lengths.js). -->
+        <button type="button" class="countdown-pick" data-min="6">6</button>
+        <button type="button" class="countdown-pick" data-min="12">12</button>
+        <button type="button" class="countdown-pick" data-min="24">24</button>
+        <button type="button" class="countdown-pick" data-min="36">36</button>
+        <button type="button" class="countdown-pick" data-min="48">48</button>
         <button type="button" class="countdown-pick" data-min="60">60</button>
-        <span class="countdown-pick-unit" aria-hidden="true">min</span>
       </div>
       <div class="controls" id="timerControls">
         <button type="button" class="btn btn-primary" id="btnTimerStart">Start</button>
@@ -68,5 +68,6 @@
 </section>
 {% endblock %}
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/quick-lengths.js') }}?v={{ asset_version }}" defer></script>
 <script src="{{ url_for('static', filename='js/timer.js') }}?v={{ asset_version }}" defer></script>
 {% endblock %}
