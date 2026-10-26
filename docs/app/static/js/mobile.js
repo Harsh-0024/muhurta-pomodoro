@@ -36,8 +36,12 @@
     combinations: "Your own focus and rest lengths",
     history: "Fix or add past sessions",
     sync: "Sign-in, profile, sync",
+    feedback: "Tell the maker what you think",
     about: "Version, updates, restore defaults",
   };
+
+  // Every section the computer has is on the phone too, except these.
+  const NOT_ON_PHONE = new Set(["keyboard"]);
 
   function settingsAsList() {
     if (!document.body.classList.contains("page-settings") || document.body.classList.contains("page-history")) return;
@@ -47,13 +51,15 @@
 
     // Until the phone has accounts, there is no Account section to open.
     const local = window.__MUHURTA_LOCAL__;
-    if (local && !local.cloudConfigured) delete SECTION_NOTES.sync;
-    // Phone notifications come later; the section still speaks of desktops.
-    if (local && !local.notifications) delete SECTION_NOTES.notifications;
+    if (local && !local.cloudConfigured) NOT_ON_PHONE.add("sync");
+    // Only where this phone can actually show them (Android, or the iPhone Home Screen app).
+    if (local && !local.notifications) NOT_ON_PHONE.add("notifications");
+
+    const onPhone = (id) => Boolean(id) && !NOT_ON_PHONE.has(id) && Boolean(document.getElementById(id));
 
     nav.querySelectorAll(".settings-nav-link").forEach((link) => {
       const id = link.getAttribute("href").slice(1);
-      if (!SECTION_NOTES[id]) { link.remove(); return; }
+      if (!onPhone(id)) { link.remove(); return; }
       const name = link.textContent.trim();
       link.innerHTML = "";
       const text = document.createElement("span");
@@ -61,8 +67,11 @@
       const strong = document.createElement("strong");
       strong.textContent = name;
       const note = document.createElement("span");
-      note.textContent = SECTION_NOTES[id];
-      text.append(strong, note);
+      text.append(strong);
+      if (SECTION_NOTES[id]) {
+        note.textContent = SECTION_NOTES[id];
+        text.append(note);
+      }
       const chev = document.createElement("span");
       chev.className = "settings-nav-chevron";
       chev.setAttribute("aria-hidden", "true");
@@ -70,7 +79,7 @@
     });
 
     document.querySelectorAll(".pref-section").forEach((sec) => {
-      if (!SECTION_NOTES[sec.id]) return;
+      if (!onPhone(sec.id)) return;
       const back = document.createElement("a");
       back.href = "#";
       back.className = "settings-back";
@@ -93,7 +102,7 @@
 
     function show() {
       const id = location.hash.slice(1);
-      const open = SECTION_NOTES[id] ? document.getElementById(id) : null;
+      const open = onPhone(id) ? document.getElementById(id) : null;
       document.querySelectorAll(".pref-section").forEach((sec) => sec.classList.toggle("is-open", sec === open));
       document.body.dataset.settingsView = open ? "section" : "list";
       window.scrollTo(0, 0);

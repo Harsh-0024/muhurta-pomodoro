@@ -78,7 +78,8 @@
 
   /* ---------- steps ---------- */
 
-  const STEPS = ["stepSignin", "stepDetails", "stepResetEmail", "stepCode", "stepPassword"];
+  const STEPS = ["stepSignin", "stepDetails", "stepResetEmail", "stepCode", "stepPassword", "stepBrowser", "stepProfile"];
+  let providerName = "";
 
   function copyFor(step) {
     const flow = mode === "reset" ? "Reset password" : "Create account";
@@ -93,6 +94,11 @@
         return mode === "reset"
           ? [`${flow} · step 3 of 3`, "Choose a new password", "You'll use it with your email to sign in.", 3]
           : [`${flow} · step 3 of 3`, "Choose a password", "Last step. You'll use it with your email to sign in.", 3];
+      case "stepBrowser":
+        return ["Continue in your browser", `Signing in with ${providerName}`,
+          "Your browser opened. Finish signing in there, and this window carries on by itself.", 0];
+      case "stepProfile":
+        return ["Almost done", "Finish your profile", `Signed in as ${email}. Choose how you appear in the app.`, 0];
       default:
         return ["Free · your own account", "Welcome back",
           "Sign in to pick up where you left off. Your sessions, combinations and settings follow you to every device you sign in on.", 0];
@@ -127,6 +133,8 @@
         : "Not there? Look in your Spam folder.";
       $("signinCode").value = "";
       $("signinCode").focus();
+    } else if (step === "stepProfile") {
+      $("profileFirstName").focus();
     } else if (step === "stepPassword") {
       $("passwordUsername").value = email; // lets password managers file it under this email
       $("newPasswordLabel").textContent = mode === "reset" ? "New password" : "Password";
@@ -564,6 +572,115 @@
     }
   });
 
+  /* ---------- Google / Microsoft ---------- */
+
+  const ICONS = {
+    google: '<svg viewBox="0 0 18 18" aria-hidden="true"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84a4.14 4.14 0 0 1-1.8 2.72v2.26h2.92c1.7-1.57 2.68-3.88 2.68-6.62z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.26c-.8.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.33A9 9 0 0 0 9 18z"/><path fill="#FBBC05" d="M3.97 10.72A5.4 5.4 0 0 1 3.68 9c0-.6.1-1.18.29-1.72V4.95H.96A9 9 0 0 0 0 9c0 1.45.35 2.83.96 4.05l3.01-2.33z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.59A9 9 0 0 0 .96 4.95l3.01 2.33C4.68 5.16 6.66 3.58 9 3.58z"/></svg>',
+    azure: '<svg viewBox="0 0 18 18" aria-hidden="true"><path fill="#F25022" d="M0 0h8.5v8.5H0z"/><path fill="#7FBA00" d="M9.5 0H18v8.5H9.5z"/><path fill="#00A4EF" d="M0 9.5h8.5V18H0z"/><path fill="#FFB900" d="M9.5 9.5H18V18H9.5z"/></svg>',
+  };
+
+  let waiting = null; // the poll while the browser sign-in is open
+  let stepBeforeBrowser = "stepSignin";
+
+  async function loadProviders() {
+    let list = [];
+    try {
+      const r = await fetch("/api/cloud/providers", { headers: { Accept: "application/json" } });
+      list = (await r.json()).providers || [];
+    } catch (_) {}
+    if (!list.length) return; // email only
+    document.querySelectorAll("[data-providers]").forEach((box) => {
+      const buttons = box.querySelector(".provider-buttons");
+      buttons.replaceChildren();
+      list.forEach((p) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "btn btn-quiet provider-button";
+        b.innerHTML = ICONS[p.id] || "";
+        b.append(document.createTextNode(`Continue with ${p.name}`));
+        b.addEventListener("click", () => startProvider(p, b));
+        buttons.append(b);
+      });
+      box.hidden = false;
+    });
+  }
+
+  async function startProvider(p, button) {
+    const started = await busy(button, "Opening your browser…", () => api("/api/cloud/oauth/start", { provider: p.id }));
+    if (!started) return;
+    providerName = p.name;
+    stepBeforeBrowser = STEPS.find((id) => !$(id).hidden) || "stepSignin";
+    if (!started.opened) {
+      // Not opened on this computer (a phone, or no default browser):
+      // continue in this tab; Google / Microsoft send it back here.
+      window.location.href = started.url;
+      return;
+    }
+    $("browserLink").href = started.url;
+    show("stepBrowser");
+    const until = Date.now() + 10 * 60 * 1000;
+    clearInterval(waiting);
+    waiting = setInterval(async () => {
+      if (Date.now() > until) {
+        clearInterval(waiting);
+        say("That took too long. Try again.", "error");
+        show(stepBeforeBrowser);
+        return;
+      }
+      try {
+        const r = await fetch("/api/cloud/status", { cache: "no-store" });
+        const st = await r.json();
+        if (!st.signed_in) return;
+        clearInterval(waiting);
+        if (st.profile) return enterApp(st);
+        askProfile(st.email, st.suggested_name);
+      } catch (_) {}
+    }, 1500);
+  }
+
+  $("btnBrowserCancel").addEventListener("click", () => {
+    clearInterval(waiting);
+    say("");
+    show(stepBeforeBrowser);
+  });
+
+  // A starting username from the name or email: lowercase, allowed
+  // characters only, starting with a letter. Checked live like any other.
+  function suggestUsername(first, last, mail) {
+    const base = [first, last].filter(Boolean).join(".") || (mail || "").split("@")[0];
+    let u = base.toLowerCase().normalize("NFKD").replace(/[^a-z0-9_.]/g, "").replace(/^[^a-z]+/, "");
+    if (u.length < 3) u = (u + "user").slice(0, 8);
+    return u.slice(0, 20);
+  }
+
+  function askProfile(mail, suggestedName) {
+    email = mail || email;
+    const parts = (suggestedName || "").trim().split(/\s+/).filter(Boolean);
+    const first = parts[0] || "";
+    const last = parts.slice(1).join(" ");
+    if (!$("profileFirstName").value) $("profileFirstName").value = first;
+    if (!$("profileLastName").value) $("profileLastName").value = last;
+    if (!$("profileUsername").value) {
+      $("profileUsername").value = suggestUsername(first, last, email);
+      $("profileUsername").dispatchEvent(new Event("input")); // live availability check
+    }
+    say("");
+    show("stepProfile");
+  }
+
+  wireUsername($("profileUsername"));
+
+  $("stepProfile").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    say("");
+    const p = readProfile($("profileFirstName"), $("profileLastName"), $("profileUsername"));
+    if (!p) return;
+    const st = await busy($("btnProfileSave"), "Saving…", () => api("/api/cloud/profile", p, "PUT"));
+    if (st) window.location.replace("/");
+  });
+
+  loadProviders();
+
   /* ---------- start ---------- */
 
   // Came back after the code but before choosing a password: pick up there.
@@ -584,7 +701,19 @@
     show("stepPassword");
     $("signinKicker").textContent = "Almost done";
     $("signinLede").textContent = `${pendingEmail} is confirmed. Choose a password to finish.`;
+  } else if (root.dataset.needsProfile) {
+    // Signed in (Google / Microsoft, or an older account) but no name yet.
+    askProfile(root.dataset.signedInEmail, root.dataset.suggestedName);
   } else {
     show("stepSignin");
+  }
+
+  // Phones come back here from Google / Microsoft; if it didn't work, say why.
+  const oauthError = new URLSearchParams(location.search).get("oauth_error");
+  if (oauthError) {
+    say(oauthError, "error");
+    try {
+      history.replaceState(null, "", location.pathname);
+    } catch (_) {}
   }
 })();

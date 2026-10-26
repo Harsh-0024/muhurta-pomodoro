@@ -5,6 +5,18 @@ a few short lines per version, about what they will notice. Versions with
 nothing worth telling can be left out.
 """
 NOTES = {
+    "1.13.0": [
+        "Sign in with Google or Microsoft: one tap on the sign-in screen, on the Mac, Windows, iPhone and "
+        "Android. Use the same email as before and it opens your existing account, with all your history.",
+        "New to the app? After Google or Microsoft you just pick a username, and you're in.",
+        "Creating a password is calmer, with a \"Suggest a strong password\" button and the website to save "
+        "it under in your password manager.",
+    ],
+    "1.12.1": [
+        "Phones now have Feedback in Settings too, like the computer.",
+        "Clearer icons in the phone's bottom bar: an hourglass for Rhythm, the infinity sign for Flow "
+        "(as on the Mac) and a cog for Settings.",
+    ],
     "1.12.0": [
         "iPhone: a bell and a notification now tell you when focus or rest ends, even with the phone "
         "locked. Add the app to your Home Screen, then turn it on in Settings > Notifications.",

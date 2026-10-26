@@ -18,8 +18,8 @@
   <title>Muhurta Pomodoro</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23040302'/%3E%3Cg fill='none' stroke='%23d8bd79' stroke-width='4' stroke-linecap='round'%3E%3Ccircle cx='32' cy='32' r='22'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M32 6v14M32 44v14M6 32h14M44 32h14M13.6 13.6l10 10M40.4 40.4l10 10M50.4 13.6l-10 10M23.6 40.4l-10 10'/%3E%3C/g%3E%3C/svg%3E" />
   <link href="/muhurta-pomodoro/app/fonts/fonts.css" rel="stylesheet" />
-  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/app.css?v=1.12.0" />
-  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/mobile.css?v=1.12.0" />
+  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/app.css?v=1.13.0" />
+  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/mobile.css?v=1.13.0" />
 </head>
 <body class="page-timer is-mobile" data-theme="system">
   <div class="ambient" aria-hidden="true"></div>
@@ -106,8 +106,8 @@
       <p class="session-notice hidden" id="timerNotice" role="status" aria-live="polite"></p>
     </div>
     <figure class="focus-quote" id="timerQuote" aria-live="polite">
-      <blockquote id="timerQuoteText">A person who never made a mistake never tried anything new.</blockquote>
-      <figcaption id="timerQuoteAuthor">Albert Einstein</figcaption>
+      <blockquote id="timerQuoteText">I walk slowly, but I never walk backward.</blockquote>
+      <figcaption id="timerQuoteAuthor">Abraham Lincoln</figcaption>
     </figure>
   </div>
 </section>
@@ -115,13 +115,13 @@
   
   <footer class="foot">
     <span>1 Muhurat = 48 min · 1 Ghadi = 24 min</span>
-    <span class="foot-version">v1.12.0</span>
+    <span class="foot-version">v1.13.0</span>
   </footer>
   
   
   <nav class="tabbar" aria-label="Main">
     <a href="/muhurta-pomodoro/app/" class="tab">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4h-4"/><circle cx="12" cy="12" r="2.2"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h12M6 21.5h12M7 2.5v3.2c0 2.4 5 4.6 5 6.3 0-1.7 5-3.9 5-6.3V2.5M7 21.5v-3.2c0-2.4 5-4.6 5-6.3 0 1.7 5 3.9 5 6.3v3.2M9.5 19.5h5"/></svg>
       <span>Rhythm</span>
     </a>
     <a href="/muhurta-pomodoro/app/timer.html" class="tab is-active">
@@ -129,7 +129,7 @@
       <span>Timer</span>
     </a>
     <a href="/muhurta-pomodoro/app/flow.html" class="tab">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2.5 0 2.5-6 5-6s2.5 6 5 6 2.5-6 5-6 3 3 3 3"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c-2-2.6-3.6-4-5.5-4a4 4 0 0 0 0 8c1.9 0 3.5-1.4 5.5-4zm0 0c2 2.6 3.6 4 5.5 4a4 4 0 0 0 0-8c-1.9 0-3.5 1.4-5.5 4z"/></svg>
       <span>Flow</span>
     </a>
     <a href="/muhurta-pomodoro/app/dashboard.html" class="tab">
@@ -137,7 +137,7 @@
       <span>Dashboard</span>
     </a>
     <a href="/muhurta-pomodoro/app/settings.html" class="tab">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span>Settings</span>
     </a>
   </nav>
@@ -177,22 +177,22 @@
     })();
   </script>
   
-  <script src="/muhurta-pomodoro/app/static/js/native.js?v=1.12.0"></script>
-  <script src="/muhurta-pomodoro/app/static/js/menubar.js?v=1.12.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/update-check.js?v=1.12.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/alive.js?v=1.12.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/native.js?v=1.13.0"></script>
+  <script src="/muhurta-pomodoro/app/static/js/menubar.js?v=1.13.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/update-check.js?v=1.13.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/alive.js?v=1.13.0" defer></script>
   
-  <script src="/muhurta-pomodoro/app/static/js/whats-new.js?v=1.12.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/sounds.js?v=1.12.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/session-monitor.js?v=1.12.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/one-clock.js?v=1.12.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/timer-core.js?v=1.12.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/dialog.js?v=1.12.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/shortcuts.js?v=1.12.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/whats-new.js?v=1.13.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/sounds.js?v=1.13.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/session-monitor.js?v=1.13.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/one-clock.js?v=1.13.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/timer-core.js?v=1.13.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/dialog.js?v=1.13.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/shortcuts.js?v=1.13.0" defer></script>
   
-  <script src="/muhurta-pomodoro/app/static/js/mobile.js?v=1.12.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/mobile.js?v=1.13.0" defer></script>
   
-<script src="/muhurta-pomodoro/app/static/js/timer.js?v=1.12.0" defer></script>
+<script src="/muhurta-pomodoro/app/static/js/timer.js?v=1.13.0" defer></script>
 
 </body>
 </html>

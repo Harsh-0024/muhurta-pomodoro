@@ -1091,7 +1091,7 @@
       : new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
   // What works before signing in (app.py OPEN_ENDPOINTS).
-  const OPEN = /^\/api\/(cloud\/(status|sign-in|send-code|verify|set-password|cancel|username-available)|alive|version|update\/restart)$/;
+  const OPEN = /^\/api\/(cloud\/(status|sign-in|send-code|verify|set-password|cancel|username-available|providers|oauth\/start)|alive|version|update\/restart)$/;
 
   async function handle(method, url, bodyText) {
     await ready;

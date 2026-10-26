@@ -12,7 +12,7 @@
 
   const KINDS = {
     work: { label: "Focus", focus: true },
-    extend: { label: "Extra focus", focus: true },
+    extend: { label: "Overtime", focus: true },
     flow: { label: "Flow", focus: true },
     timer: { label: "Timer", focus: true },
     rest: { label: "Rest", focus: false },

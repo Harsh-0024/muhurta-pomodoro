@@ -99,6 +99,13 @@
     return s && s.refresh_token ? s : null;
   };
 
+  // The name Google or Microsoft gave us, to fill in the profile step.
+  function nameFrom(user) {
+    const meta = user && user.user_metadata;
+    if (!meta || typeof meta !== "object") return "";
+    return String(meta.full_name || meta.name || "").trim().slice(0, 100);
+  }
+
   function profileFrom(user) {
     const meta = user && user.user_metadata;
     if (!meta || typeof meta !== "object" || !meta.username) return null;
@@ -111,8 +118,13 @@
   // And whether this phone is signed in, so a page can send you to sign-in
   // (or away from it) the moment it starts, before anything is drawn.
   const AUTH_KEY = "muhurta-signed-in";
+  // Signed in without a name yet: the sign-in page asks for it first.
+  const NEEDS_PROFILE_KEY = "muhurta-needs-profile";
   function rememberPending(s) {
     try {
+      if (s && !s.password_pending && !s.profile && s.from_provider) {
+        localStorage.setItem(NEEDS_PROFILE_KEY, JSON.stringify({ email: s.email || "", name: s.suggested_name || "" }));
+      } else localStorage.removeItem(NEEDS_PROFILE_KEY);
       if (s && s.password_pending) localStorage.setItem(PENDING_KEY, JSON.stringify({ email: s.email || "", profile: Boolean(s.profile) }));
       else localStorage.removeItem(PENDING_KEY);
       if (s && !s.password_pending) localStorage.setItem(AUTH_KEY, "1");
@@ -120,7 +132,7 @@
     } catch (_) {}
   }
 
-  async function saveSession(payload, passwordPending, profile) {
+  async function saveSession(payload, passwordPending, profile, fromProvider) {
     const user = payload.user || {};
     const expiresAt = payload.expires_at || Date.now() / 1000 + Number(payload.expires_in || 3600);
     const s = {
@@ -132,6 +144,8 @@
       email: user.email,
       password_pending: Boolean(passwordPending),
       profile: profileFrom(user) || profile || null,
+      suggested_name: nameFrom(user) || ((session() || {}).suggested_name || ""),
+      from_provider: Boolean(fromProvider),
     };
     await write([["kv", s]]);
     rememberPending(s);
@@ -152,6 +166,7 @@
       password_pending: pending,
       email: s ? s.email : null,
       profile: (s && s.profile) || null,
+      suggested_name: (s && s.suggested_name) || "",
     };
   }
 
@@ -213,7 +228,11 @@
     [code] = await request("PUT", "/auth/v1/user", { data: profile }, token);
     if (code >= 400) throw new HttpError(502, "Your name couldn't be saved. Try again.");
     const s = session();
-    if (s) await write([["kv", { ...s, profile }]]);
+    if (s) {
+      const next = { ...s, profile };
+      await write([["kv", next]]);
+      rememberPending(next); // a name now: the app opens normally from here on
+    }
   }
 
   let refreshing = null;
@@ -228,7 +247,7 @@
       const [code, payload] = await request("POST", "/auth/v1/token?grant_type=refresh_token", { refresh_token: s.refresh_token });
       if (code < 400 && payload && payload.access_token) {
         payload.user = payload.user || { id: s.user_id, email: s.email };
-        return (await saveSession(payload, s.password_pending, s.profile)).access_token;
+        return (await saveSession(payload, s.password_pending, s.profile, s.from_provider)).access_token;
       }
       if ([400, 401, 403].includes(code)) {
         // Revoked or expired (signed out elsewhere): sign out here too.
@@ -744,6 +763,102 @@
   });
 
   /* ------------------------------------------------------------------ */
+  /* sign in with Google / Microsoft (cloud.py's oauth_*, PKCE flow)     */
+  /* ------------------------------------------------------------------ */
+  // The phone leaves for Google / Microsoft and comes back with a one-time
+  // code, which only this phone can exchange (only it knows the verifier).
+  //   Android app:     back through its own link, com.muhurata.timer://auth-callback
+  //                    (the intent filter in AndroidManifest.xml, @capacitor/app).
+  //   iPhone web app:  back to its own sign-in page on the website.
+  // Supabase -> URL Configuration must allow both.
+  const PROVIDERS = { google: "Google", azure: "Microsoft" };
+  const OAUTH_KEY = "muhurta-oauth";
+  const OAUTH_TIMEOUT_MS = 10 * 60 * 1000;
+  const ANDROID_RETURN = "com.muhurata.timer://auth-callback";
+  const WEB_APP = D.platform === "ios";
+
+  const b64url = (bytes) => btoa(String.fromCharCode(...new Uint8Array(bytes)))
+    .replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+  function returnAddress() {
+    return WEB_APP ? location.origin + SIGN_IN : ANDROID_RETURN;
+  }
+
+  route("GET", /^\/api\/cloud\/providers$/, async () => {
+    try {
+      const [code, payload] = await request("GET", "/auth/v1/settings");
+      const external = code === 200 && payload && payload.external;
+      if (!external) return { providers: [] };
+      return { providers: Object.entries(PROVIDERS).filter(([id]) => external[id]).map(([id, name]) => ({ id, name })) };
+    } catch (_) {
+      return { providers: [] }; // offline: email only
+    }
+  });
+
+  route("POST", /^\/api\/cloud\/oauth\/start$/, async ({ body }) => {
+    const provider = String(body.provider || "");
+    if (!PROVIDERS[provider]) throw new HttpError(400, "That sign-in option isn't available.");
+    const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
+    const challenge = b64url(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(verifier)));
+    try {
+      localStorage.setItem(OAUTH_KEY, JSON.stringify({ verifier, provider, at: Date.now() }));
+    } catch (_) {}
+    const query = new URLSearchParams({ provider, redirect_to: returnAddress(), code_challenge: challenge,
+      code_challenge_method: "s256" });
+    if (provider === "azure") query.set("scopes", "email"); // Microsoft leaves the email out otherwise
+    // Not opened here: the page goes there itself (the Android app hands it to the browser).
+    return { url: `${URL_BASE}/auth/v1/authorize?${query}`, opened: false };
+  });
+
+  // The way back: exchange the code, then reload the sign-in page, which
+  // sends you into the app or to "Finish your profile".
+  async function finishOAuth(params) {
+    let pending = null;
+    try {
+      pending = JSON.parse(localStorage.getItem(OAUTH_KEY) || "null");
+      localStorage.removeItem(OAUTH_KEY); // a code works once
+    } catch (_) {}
+    let message = "";
+    if (params.get("error")) {
+      message = params.get("error_description") || "The sign-in was cancelled.";
+    } else if (!pending || Date.now() - pending.at > OAUTH_TIMEOUT_MS) {
+      message = "This sign-in has expired. Try again.";
+    } else {
+      try {
+        const [code, payload] = await request("POST", "/auth/v1/token?grant_type=pkce",
+          { auth_code: params.get("code") || "", code_verifier: pending.verifier });
+        if (code >= 400 || !payload || !payload.access_token) message = "The sign-in couldn't be completed. Try again.";
+        else {
+          await saveSession(payload, false, null, true);
+          await enterAccount();
+        }
+      } catch (_) {
+        message = "No internet connection right now. Try again when you are online.";
+      }
+    }
+    location.replace(SIGN_IN + (message ? `?oauth_error=${encodeURIComponent(message.slice(0, 200))}` : ""));
+  }
+
+  function oauthReturn(url) {
+    try {
+      const u = new URL(url);
+      const params = new URLSearchParams(u.search || u.hash.replace(/^#/, ""));
+      if (params.get("code") || params.get("error")) L.ready.then(() => finishOAuth(params));
+    } catch (_) {}
+  }
+
+  // Android: the app is woken (or started) by its own link.
+  const AppPlugin = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+  if (!WEB_APP && AppPlugin) {
+    AppPlugin.addListener("appUrlOpen", (e) => {
+      if (String(e.url || "").startsWith(ANDROID_RETURN)) oauthReturn(e.url);
+    });
+    AppPlugin.getLaunchUrl().then((r) => {
+      if (r && String(r.url || "").startsWith(ANDROID_RETURN)) oauthReturn(r.url);
+    }).catch(() => {});
+  }
+
+  /* ------------------------------------------------------------------ */
   /* pages: signed out goes to sign-in; background sync while open       */
   /* ------------------------------------------------------------------ */
 
@@ -757,8 +872,28 @@
   try {
     quickSignedIn = localStorage.getItem(AUTH_KEY) === "1";
   } catch (_) {}
+  let needsProfile = null;
+  try {
+    needsProfile = JSON.parse(localStorage.getItem(NEEDS_PROFILE_KEY) || "null");
+  } catch (_) {}
+  // iPhone web app: back from Google / Microsoft on this very page.
+  const backFromProvider = onSignIn && WEB_APP && /[?&](code|error)=/.test(location.search);
   if (CONFIGURED && !quickSignedIn && !onSignIn) location.replace(SIGN_IN);
-  if (CONFIGURED && quickSignedIn && onSignIn) location.replace(HOME);
+  if (CONFIGURED && quickSignedIn && onSignIn && !needsProfile && !backFromProvider) location.replace(HOME);
+  if (backFromProvider) oauthReturn(location.href);
+
+  if (onSignIn && needsProfile && !backFromProvider) {
+    // Filled in as the page's #signin appears, so sign-in.js asks for a name.
+    const mo = new MutationObserver(() => {
+      const el = document.getElementById("signin");
+      if (!el) return;
+      mo.disconnect();
+      el.dataset.needsProfile = "1";
+      el.dataset.signedInEmail = needsProfile.email;
+      el.dataset.suggestedName = needsProfile.name;
+    });
+    mo.observe(document.documentElement, { childList: true, subtree: true });
+  }
 
   if (onSignIn) {
     let pending = null;
@@ -785,7 +920,7 @@
       location.replace(SIGN_IN);
       return;
     }
-    if (onSignIn && (!CONFIGURED || st.signed_in)) {
+    if (onSignIn && (!CONFIGURED || st.signed_in) && !needsProfile && !backFromProvider) {
       location.replace(HOME);
       return;
     }

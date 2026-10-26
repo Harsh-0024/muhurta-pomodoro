@@ -54,7 +54,7 @@
   {# Phones: the places live in a tab bar at the bottom, like other Android apps. #}
   <nav class="tabbar" aria-label="Main">
     <a href="{{ url_for('index') }}" class="tab{% if request.endpoint == 'index' %} is-active{% endif %}">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12a8 8 0 1 1-2.6-5.9M20 4v4h-4"/><circle cx="12" cy="12" r="2.2"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h12M6 21.5h12M7 2.5v3.2c0 2.4 5 4.6 5 6.3 0-1.7 5-3.9 5-6.3V2.5M7 21.5v-3.2c0-2.4 5-4.6 5-6.3 0 1.7 5 3.9 5 6.3v3.2M9.5 19.5h5"/></svg>
       <span>Rhythm</span>
     </a>
     <a href="{{ url_for('timer_page') }}" class="tab{% if request.endpoint == 'timer_page' %} is-active{% endif %}">
@@ -62,7 +62,7 @@
       <span>Timer</span>
     </a>
     <a href="{{ url_for('flow_page') }}" class="tab{% if request.endpoint == 'flow_page' %} is-active{% endif %}">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 15c2.5 0 2.5-6 5-6s2.5 6 5 6 2.5-6 5-6 3 3 3 3"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c-2-2.6-3.6-4-5.5-4a4 4 0 0 0 0 8c1.9 0 3.5-1.4 5.5-4zm0 0c2 2.6 3.6 4 5.5 4a4 4 0 0 0 0-8c-1.9 0-3.5 1.4-5.5 4z"/></svg>
       <span>Flow</span>
     </a>
     <a href="{{ url_for('dashboard_page') }}" class="tab{% if request.endpoint == 'dashboard_page' %} is-active{% endif %}">
@@ -70,7 +70,7 @@
       <span>Dashboard</span>
     </a>
     <a href="{{ url_for('settings_page') }}" class="tab{% if request.endpoint in ('settings_page', 'history_page') %} is-active{% endif %}">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M18.7 5.3l-2.1 2.1M7.4 16.6l-2.1 2.1"/></svg>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
       <span>Settings</span>
     </a>
   </nav>
