@@ -10,6 +10,7 @@ import sqlite3
 import threading
 import urllib.error
 import urllib.request
+import webbrowser
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
@@ -130,6 +131,7 @@ OPEN_ENDPOINTS = {
     "static", "sign_in_page", "api_cloud_status", "api_cloud_sign_in", "api_cloud_send_code",
     "api_cloud_verify", "api_cloud_set_password", "api_cloud_cancel", "api_cloud_username_available",
     "api_alive", "api_version", "api_update_restart", "api_update_progress", "api_window_show",
+    "api_cloud_providers", "api_cloud_oauth_start", "auth_callback",
 }
 
 
@@ -226,13 +228,18 @@ def index():
 @app.route("/sign-in")
 def sign_in_page():
     st = cloud.status()
-    if not st["configured"] or st["signed_in"]:
+    # Signed in with a name: nothing to do here. Signed in without one (new
+    # from Google / Microsoft): stay, to finish the profile.
+    if not st["configured"] or (st["signed_in"] and st["profile"]):
         return redirect(url_for("index"))
     # Stopped after the code, before choosing a password: carry on from there.
     return render_template("sign_in.html", bare=True,
                            pending_email=st["email"] if st["password_pending"] else "",
                            pending_has_profile=bool(st["profile"]), email_from=cloud.EMAIL_FROM,
-                           password_site=cloud.PASSWORD_SITE)
+                           password_site=cloud.PASSWORD_SITE,
+                           needs_profile=st["signed_in"] and not st["profile"],
+                           signed_in_email=st["email"] if st["signed_in"] else "",
+                           suggested_name=st.get("suggested_name") or "")
 
 
 @app.route("/timer")
@@ -499,6 +506,54 @@ def api_cloud_sign_in():
     # Fetch the account's data now, so the timer opens with it.
     sync.enter_account()
     return jsonify(_cloud_status())
+
+
+@app.get("/api/cloud/providers")
+def api_cloud_providers():
+    """Which "Continue with ..." buttons to show: only providers switched on
+    in Supabase."""
+    return jsonify({"providers": cloud.providers()})
+
+
+@app.post("/api/cloud/oauth/start")
+def api_cloud_oauth_start():
+    """Open Google / Microsoft sign-in in the person's own browser, where
+    their saved passwords and passkeys work. The browser comes back to
+    /auth/callback on this app's own address."""
+    body = request.get_json(silent=True) or {}
+    try:
+        url = cloud.oauth_start(str(body.get("provider") or ""), request.host_url + "auth/callback")
+    except cloud.CloudError as exc:
+        return jsonify({"error": str(exc)}), exc.status
+    opened = False
+    # Opening a browser only makes sense on this computer. From a phone on
+    # the same Wi-Fi the page carries on in its own tab instead.
+    on_this_computer = request.remote_addr in ("127.0.0.1", "::1")
+    if on_this_computer and not os.environ.get("MUHURATA_NO_BROWSER_OPEN"):  # tests
+        try:
+            opened = webbrowser.open(url)
+        except Exception:
+            opened = False
+    return jsonify({"url": url, "opened": opened})
+
+
+@app.get("/auth/callback")
+def auth_callback():
+    """Where the browser lands after Google / Microsoft. Finishes signing in;
+    the app's own window notices and carries on by itself."""
+    if request.args.get("error"):
+        message = request.args.get("error_description") or "The sign-in was cancelled."
+        return render_template("auth_done.html", bare=True, ok=False, message=message[:200])
+    try:
+        cloud.oauth_finish(str(request.args.get("code") or ""))
+    except cloud.CloudError as exc:
+        return render_template("auth_done.html", bare=True, ok=False, message=str(exc))
+    sync.enter_account()  # fetch the account's data now, like a password sign-in
+    if request.remote_addr not in ("127.0.0.1", "::1"):
+        # A phone on the same Wi-Fi: this tab is the app, so go straight in
+        # (or to "Finish your profile" for a new account).
+        return redirect(url_for("sign_in_page"))
+    return render_template("auth_done.html", bare=True, ok=True, message="")
 
 
 @app.post("/api/cloud/send-code")

@@ -18,13 +18,17 @@ supabase/schema.sql are what keep one person's data from another.
 """
 from __future__ import annotations
 
+import base64
+import hashlib
 import json
 import os
+import secrets
 import re
 import ssl
 import threading
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
@@ -151,6 +155,14 @@ def _profile_from(user: dict) -> dict | None:
     return {k: str(meta.get(k) or "") for k in PROFILE_KEYS}
 
 
+def _name_from(user: dict) -> str:
+    """The name Google or Microsoft gave us, to fill in the profile step."""
+    meta = user.get("user_metadata") if isinstance(user, dict) else None
+    if not isinstance(meta, dict):
+        return ""
+    return str(meta.get("full_name") or meta.get("name") or "").strip()[:100]
+
+
 def _save(payload: dict, password_pending: bool = False, profile: dict | None = None) -> dict:
     user = payload.get("user") or {}
     expires_at = payload.get("expires_at") or (time.time() + int(payload.get("expires_in") or 3600))
@@ -163,6 +175,7 @@ def _save(payload: dict, password_pending: bool = False, profile: dict | None = 
         "password_pending": password_pending,
         # Name and username, kept here so pages can show them offline.
         "profile": _profile_from(user) or profile,
+        "suggested_name": _name_from(user),
     }
     return _write(session)
 
@@ -197,6 +210,7 @@ def status() -> dict:
         "password_pending": pending,
         "email": session.get("email") if session else None,
         "profile": (session.get("profile") if session else None) or None,
+        "suggested_name": (session.get("suggested_name") if session else "") or "",
         # Only decides whether the Admin tab is shown; the data behind it is
         # checked by the server on every request (admin_overview()).
         "is_admin": bool(session and session.get("is_admin") and not pending),
@@ -428,6 +442,67 @@ def sign_out() -> dict:
             except CloudError:
                 pass  # offline or already invalid: forgetting locally is what matters
         _forget()
+    return status()
+
+
+# --------------------------------------------------------------------------- #
+# sign in with Google / Microsoft (Supabase OAuth, PKCE flow)
+# --------------------------------------------------------------------------- #
+# The person signs in in their own browser; Supabase sends the browser back
+# to this app's local address (/auth/callback) with a one-time code, which
+# only this app can exchange, because only it knows the code_verifier.
+# Supabase -> Authentication -> URL Configuration must allow that address:
+# http://127.0.0.1:*/auth/callback and http://localhost:*/auth/callback.
+PROVIDERS = {"google": "Google", "azure": "Microsoft"}  # Supabase name -> button label
+OAUTH_TIMEOUT = 10 * 60  # seconds a started sign-in stays valid
+
+_oauth_pending: dict | None = None
+
+
+def providers() -> list[dict]:
+    """The sign-in providers switched on in Supabase, for the buttons. Empty
+    when offline or none are set up, so the screen shows email only."""
+    try:
+        code, payload = _request("GET", "/auth/v1/settings")
+    except CloudError:
+        return []
+    external = payload.get("external") if code == 200 and isinstance(payload, dict) else None
+    if not isinstance(external, dict):
+        return []
+    return [{"id": pid, "name": name} for pid, name in PROVIDERS.items() if external.get(pid)]
+
+
+def oauth_start(provider: str, redirect_to: str) -> str:
+    """Begin signing in with a provider; returns the address to open in the
+    browser."""
+    global _oauth_pending
+    if provider not in PROVIDERS:
+        raise CloudError("That sign-in option isn't available.")
+    verifier = secrets.token_urlsafe(64)
+    challenge = base64.urlsafe_b64encode(hashlib.sha256(verifier.encode()).digest()).rstrip(b"=").decode()
+    _oauth_pending = {"verifier": verifier, "provider": provider, "at": time.time()}
+    query = {"provider": provider, "redirect_to": redirect_to,
+             "code_challenge": challenge, "code_challenge_method": "s256"}
+    if provider == "azure":
+        query["scopes"] = "email"  # Microsoft leaves the email out otherwise
+    return f"{SUPABASE_URL}/auth/v1/authorize?{urllib.parse.urlencode(query)}"
+
+
+def oauth_finish(code: str) -> dict:
+    """The browser came back with a code: swap it for a session."""
+    global _oauth_pending
+    pending = _oauth_pending
+    if not pending or time.time() - pending["at"] > OAUTH_TIMEOUT:
+        raise CloudError("This sign-in has expired. Go back to the app and try again.")
+    if not code:
+        raise CloudError("The sign-in didn't finish. Go back to the app and try again.")
+    status_code, payload = _request("POST", "/auth/v1/token?grant_type=pkce",
+                                    {"auth_code": code, "code_verifier": pending["verifier"]})
+    if status_code >= 400 or not isinstance(payload, dict) or "access_token" not in payload:
+        raise CloudError("The sign-in couldn't be completed. Go back to the app and try again.")
+    _oauth_pending = None  # a code works once
+    with _lock:
+        _save(payload)
     return status()
 
 

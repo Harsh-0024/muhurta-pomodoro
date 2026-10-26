@@ -90,6 +90,14 @@ jobs:
             *'"check_error":null'*|*'"check_error": null'*|*'update server answered'*) ;;
             *) echo "The built app can't check for updates."; exit 1 ;;
           esac
+          # Signing in with Google / Microsoft: the built app must reach
+          # Supabase over HTTPS and offer both buttons.
+          p=$(curl -fsS "$url/api/cloud/providers")
+          echo "sign-in providers: $p"
+          case "$p" in
+            *'"google"'*'"azure"'*) ;;
+            *) echo "The built app doesn't offer Google and Microsoft sign-in."; exit 1 ;;
+          esac
           kill $pid || true
           echo "Smoke test passed on $url"
 

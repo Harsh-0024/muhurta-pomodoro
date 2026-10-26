@@ -37,7 +37,7 @@
     
   </header>
   <main class="main">
-<section class="signin" id="signin" data-pending-email="" data-pending-profile="" data-email-from="muhurata.pomodoro.timer@gmail.com">
+<section class="signin" id="signin" data-pending-email="" data-pending-profile="" data-email-from="muhurata.pomodoro.timer@gmail.com" data-needs-profile="" data-signed-in-email="" data-suggested-name="">
   <div class="signin-card">
     <div class="signin-progress" id="signinProgress" hidden aria-hidden="true">
       <span class="signin-dot" data-dot="1"></span><span class="signin-dot" data-dot="2"></span><span class="signin-dot" data-dot="3"></span>
@@ -48,6 +48,10 @@
 
     <!-- sign in -->
     <form class="signin-step" id="stepSignin" novalidate>
+      <div class="providers" data-providers hidden>
+        <div class="provider-buttons"></div>
+        <p class="providers-or"><span>or with email</span></p>
+      </div>
       <div class="field">
         <label class="signin-label" for="signinEmail">Email</label>
         <input type="email" id="signinEmail" class="input" placeholder="you@example.com" autocomplete="username" required autofocus />
@@ -69,6 +73,10 @@
 
     <!-- create account, step 1: who you are -->
     <form class="signin-step" id="stepDetails" novalidate hidden>
+      <div class="providers" data-providers hidden>
+        <div class="provider-buttons"></div>
+        <p class="providers-or"><span>or with email</span></p>
+      </div>
       <div class="field-row">
         <div class="field">
           <label class="signin-label" for="firstName">First name</label>
@@ -178,6 +186,37 @@
       </details>
       <button type="submit" class="btn btn-primary signin-submit" id="btnSavePassword">Create account</button>
       <p class="signin-switch"><button type="button" class="signin-link" id="btnCancelPending">Start over with a different email</button></p>
+    </form>
+
+    <!-- signing in with Google / Microsoft in the browser -->
+    <div class="signin-step" id="stepBrowser" hidden>
+      <p class="browser-wait" id="browserWait">Waiting for you to finish in your browser…</p>
+      <p class="field-note">Didn't open? <a href="#" class="signin-link" id="browserLink" target="_blank" rel="noopener">Open the sign-in page</a></p>
+      <button type="button" class="btn btn-quiet signin-submit" id="btnBrowserCancel">Cancel</button>
+    </div>
+
+    <!-- first time with Google / Microsoft: name and username -->
+    <form class="signin-step" id="stepProfile" novalidate hidden>
+      <div class="field-row">
+        <div class="field">
+          <label class="signin-label" for="profileFirstName">First name</label>
+          <input type="text" id="profileFirstName" class="input" autocomplete="given-name" maxlength="50" required />
+        </div>
+        <div class="field">
+          <label class="signin-label" for="profileLastName">Last name <span class="optional">optional</span></label>
+          <input type="text" id="profileLastName" class="input" autocomplete="family-name" maxlength="50" />
+        </div>
+      </div>
+      <div class="field">
+        <label class="signin-label" for="profileUsername">Username</label>
+        <div class="username-wrap">
+          <span class="username-at" aria-hidden="true">@</span>
+          <input type="text" id="profileUsername" class="input" autocapitalize="none" spellcheck="false" maxlength="20" required aria-describedby="profileUsernameNote" />
+        </div>
+        <p class="field-note" id="profileUsernameNote">3–20 letters, numbers, _ or . — starting with a letter.</p>
+      </div>
+      <button type="submit" class="btn btn-primary signin-submit" id="btnProfileSave">Continue</button>
+      <p class="signin-switch"><a class="signin-link" href="/">Skip for now</a></p>
     </form>
 
     <p class="signin-message" id="signinMessage" role="status" aria-live="polite" hidden></p>

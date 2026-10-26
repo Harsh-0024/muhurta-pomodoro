@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Signed in{% endblock %}
+{% block body_class %}page-signin{% endblock %}
+{% block page_id %}auth-done{% endblock %}
+{% block content %}
+<section class="signin">
+  <div class="signin-card auth-done">
+    {% if ok %}
+    <p class="signin-kicker">Muhurta Pomodoro</p>
+    <h1 class="signin-title">You're signed in</h1>
+    <p class="signin-lede">You can close this tab and go back to the app. It carries on by itself.</p>
+    <a class="btn btn-quiet signin-submit" href="{{ url_for('sign_in_page') }}">Open the app here instead</a>
+    {% else %}
+    <p class="signin-kicker">Muhurta Pomodoro</p>
+    <h1 class="signin-title">That didn't work</h1>
+    <p class="signin-lede">{{ message }}</p>
+    <a class="btn btn-primary signin-submit" href="{{ url_for('sign_in_page') }}">Back to sign in</a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -4965,3 +4965,56 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
     width: 100%;
   }
 }
+
+/* sign-in: Continue with Google / Microsoft */
+.providers[hidden] {
+  display: none;
+}
+
+.provider-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.provider-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+}
+
+.provider-button svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.providers-or {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.1rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.providers-or::before,
+.providers-or::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.browser-wait {
+  margin: 0;
+  color: var(--ink);
+}
+
+.auth-done .btn {
+  display: block;
+  text-align: center;
+  text-decoration: none;
+}
