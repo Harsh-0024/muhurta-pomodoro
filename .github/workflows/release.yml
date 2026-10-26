@@ -93,6 +93,46 @@ jobs:
           kill $pid || true
           echo "Smoke test passed on $url"
 
+      # The Windows app draws its own window (pywebview + WebView2). Open it
+      # for real: the timer must load in it, starting the app again must
+      # bring that window forward, and closing it must stop the app.
+      - name: Smoke test the app window (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $data = "$env:LOCALAPPDATA\MuhurataTimer"
+          $log = "$data\launcher.log"
+          # As friends get it: Explorer's "Extract All" marks every file as
+          # downloaded from the internet, which once stopped the window
+          # loading (1.9.0) while this test, without the mark, passed.
+          Get-ChildItem -Recurse "dist\Muhurta Pomodoro" -File | ForEach-Object {
+            Set-Content -Path $_.FullName -Stream Zone.Identifier -Value "[ZoneTransfer]`r`nZoneId=3"
+          }
+          # The copy from the step above, if it outlived its shell.
+          Stop-Process -Name "Muhurta Pomodoro" -Force -ErrorAction SilentlyContinue
+          Start-Sleep 2
+          Remove-Item "$data\running.json" -ErrorAction SilentlyContinue
+          $before = @(Get-Content $log).Count
+          $since = { @(Get-Content $log) | Select-Object -Skip $before }
+          # Started directly (no shell), as it runs once a friend has said
+          # "Run anyway": the shell would stop here to ask about the mark.
+          $start = [System.Diagnostics.ProcessStartInfo]::new((Resolve-Path "dist\Muhurta Pomodoro\Muhurta Pomodoro.exe").Path)
+          $start.UseShellExecute = $false
+          $p = [System.Diagnostics.Process]::Start($start)
+          $opened = $false
+          for ($i = 0; $i -lt 60 -and -not $opened; $i++) {
+            Start-Sleep 1
+            $opened = [bool](& $since | Select-String "window has opened the timer")
+          }
+          if (-not $opened) { & $since; throw "The app's window did not open the timer." }
+          $url = (Get-Content "$data\running.json" | ConvertFrom-Json).url
+          $show = Invoke-WebRequest -UseBasicParsing -Method Post -Headers @{ "X-Muhurta" = "1" } "${url}api/window/show"
+          if ($show.StatusCode -ne 204) { throw "Starting the app again would not bring its window forward." }
+          taskkill /PID $p.Id  # no /F: asks the window to close, like its X button
+          if (-not $p.WaitForExit(30000)) { & $since; throw "Closing the window did not stop the app." }
+          if (-not (& $since | Select-String "Stopped\.")) { & $since; throw "The app did not stop cleanly." }
+          "App window test passed on $url"
+
       # Asset names deliberately carry no version number, so that
       # /releases/latest/download/<name> is a permanent direct-download link
       # the website can use without being updated each release.
@@ -120,8 +160,122 @@ jobs:
             Muhurta-Pomodoro-*.zip
             Muhurta-Pomodoro-*.dmg
 
+  # The Android app: the same screens, built into a signed .apk (mobile/).
+  android:
+    runs-on: ubuntu-latest
+    env:
+      # The release key's fingerprint. Every update must be signed with this
+      # key, or phones refuse to install it over the app they have.
+      RELEASE_CERT_SHA256: ec5b6e0713d66b1dfc819fab5be141c68bd4c7c1c87ecf852c64279ebab2631d
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          cd mobile && npm ci
+
+      - name: Check version.py matches the tag
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          file_v=$(python -c "from version import __version__; print(__version__)")
+          tag_v="${GITHUB_REF_NAME#v}"
+          [ "$file_v" = "$tag_v" ] || { echo "version.py says $file_v but tag is $tag_v" >&2; exit 1; }
+
+      - name: Build the pages and the app
+        env:
+          KEYSTORE_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+          MUHURTA_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          MUHURTA_KEY_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          MUHURTA_KEY_ALIAS: muhurta
+        run: |
+          [ -n "$KEYSTORE_B64" ] || { echo "The ANDROID_KEYSTORE_B64 secret is missing (see mobile/RELEASING.md)." >&2; exit 1; }
+          export MUHURTA_KEYSTORE_FILE="$RUNNER_TEMP/muhurta-release.jks"
+          echo "$KEYSTORE_B64" | base64 -d > "$MUHURTA_KEYSTORE_FILE"
+          cd mobile
+          python build_web.py
+          npx cap sync android
+          cd android && ./gradlew assembleRelease --no-daemon
+          rm -f "$MUHURTA_KEYSTORE_FILE"
+
+      - name: Check the app before releasing it
+        run: |
+          apk=mobile/android/app/build/outputs/apk/release/app-release.apk
+          tools="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)"
+          "$tools/apksigner" verify --print-certs "$apk" | tee certs.txt
+          grep -qi "SHA-256 digest: $RELEASE_CERT_SHA256" certs.txt || { echo "Signed with the wrong key." >&2; exit 1; }
+          "$tools/aapt2" dump badging "$apk" | head -1 | tee badging.txt
+          want=$(python -c "from version import __version__; print(__version__)")
+          grep -q "versionName='$want'" badging.txt || { echo "The app says a different version than version.py." >&2; exit 1; }
+          # The pages, the phone's own server and the account code are inside.
+          for f in index.html timer.html sign-in.html local-api.js account.js alerts.js mobile-data.js fonts/fonts.css; do
+            unzip -l "$apk" "assets/public/$f" > /dev/null || { echo "missing from the app: $f" >&2; exit 1; }
+          done
+          # Asset name without a version: a permanent link for the website.
+          cp "$apk" Muhurta-Pomodoro-android.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Muhurta-Pomodoro-android
+          path: Muhurta-Pomodoro-android.apk
+
+  # The iPhone app: the same screens as a web app on the website (docs/app,
+  # GitHub Pages from main). Rebuilt for the tag and committed to main; copies
+  # already on phones see the new version.json and update themselves.
+  iphone:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build, android]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+
+      - name: Build docs/app from the tagged code
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+          # The tag's screens, written into main's website folder.
+          git checkout "$GITHUB_SHA" -- . ':!docs'
+          python mobile/build_web.py --iphone
+          want="${GITHUB_REF_NAME#v}"
+          grep -q "\"$want\"" docs/app/version.json || { echo "docs/app is not version $want" >&2; exit 1; }
+          for f in index.html timer.html sign-in.html sw.js manifest.webmanifest local-api.js account.js pwa.js icons/apple-touch-icon.png; do
+            [ -f "docs/app/$f" ] || { echo "missing from the iPhone app: $f" >&2; exit 1; }
+          done
+
+      - name: Publish on the website
+        run: |
+          git reset -q
+          git checkout -- . ':!docs/app'
+          git add docs/app
+          if git diff --cached --quiet; then echo "docs/app already up to date"; exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "iPhone app: ${GITHUB_REF_NAME}"
+          git push origin HEAD:main
+
   release:
-    needs: build
+    needs: [build, android]
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
@@ -134,6 +288,7 @@ jobs:
           files: |
             artifacts/*.zip
             artifacts/*.dmg
+            artifacts/*.apk
           generate_release_notes: true
           body: |
             **Easiest way to install:** https://harsh-0024.github.io/muhurta-pomodoro/
@@ -147,8 +302,12 @@ jobs:
             | `Muhurta-Pomodoro-macos-arm64.dmg` | Mac with Apple Silicon (open it, drag the app to Applications) |
             | `Muhurta-Pomodoro-macos-arm64.zip` | the same Mac app, zipped |
             | `Muhurta-Pomodoro-windows-x64.zip` | Windows, 64-bit |
+            | `Muhurta-Pomodoro-android.apk` | Android phones and tablets (Android 7 and later) |
+            | iPhone and iPad | no file: open https://harsh-0024.github.io/muhurta-pomodoro/app/ in Safari, then Share → Add to Home Screen |
 
-            Both are unsigned, so your computer shows a warning the first time —
+            On Android, allow installing from your browser once when asked.
+
+            The computer apps are unsigned, so your computer shows a warning the first time —
             **Windows:** More info → Run anyway. **Mac:** System Settings → Privacy &
             Security → Open Anyway (the website shows where).
 

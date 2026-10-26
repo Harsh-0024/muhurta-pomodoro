@@ -237,13 +237,16 @@
       banner.className = "timer-alarm";
       banner.setAttribute("role", "alert");
       banner.innerHTML =
-        '<span class="timer-alarm-text"></span>' +
-        '<a class="btn btn-quiet btn-small" href="/timer">Open Timer</a>' +
-        '<button type="button" class="btn btn-primary btn-small">Dismiss</button>';
+        '<div class="update-bar-copy"><p class="update-bar-title">Time\'s up</p>' +
+        '<p class="update-bar-sub timer-alarm-text"></p></div>' +
+        '<span class="update-bar-actions">' +
+        '<a class="btn btn-ghost btn-small" href="/timer">Open Timer</a>' +
+        '<button type="button" class="btn btn-primary btn-small">Dismiss</button>' +
+        "</span>";
       banner.querySelector("button").addEventListener("click", () => stop());
       document.body.appendChild(banner);
     }
-    banner.querySelector(".timer-alarm-text").textContent = `Time's up · ${setLabel(Number(data.durationSec || 0))} timer`;
+    banner.querySelector(".timer-alarm-text").textContent = `Your ${setLabel(Number(data.durationSec || 0))} timer is done.`;
     banner.classList.remove("hidden");
   }
 

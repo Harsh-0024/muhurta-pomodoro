@@ -25,6 +25,17 @@ share. It downloads the right file and shows each step.
   PC*: click **More info → Run anyway** (first time only). On Windows the timer
   still opens in an Edge or Chrome window.
 
+- **iPhone and iPad:** open
+  **https://harsh-0024.github.io/muhurta-pomodoro/app/** in Safari, tap
+  **Share → Add to Home Screen**, then open Muhurta from the Home Screen and sign
+  in. It's a web app, not an App Store app (so it costs nothing to publish): it
+  opens full screen like an app, works fully offline after the first visit, and
+  uses the network only to sign in, sync and update. With notifications allowed
+  (Settings → Notifications, iOS 16.4+), the end of a block arrives as a
+  notification even with the phone locked; without them, the screen stays on
+  while a timer runs. The notifications need a one-time server setup:
+  [`supabase/PUSH.md`](supabase/PUSH.md).
+
 **Updates:** when a new version is out, the app shows a notice. On a Mac,
 **Update now** downloads it, swaps it in and reopens; on Windows, **Download**
 opens the download page. Either way your history is kept, and afterwards a
@@ -86,6 +97,14 @@ git clone https://github.com/Harsh-0024/muhurta-pomodoro.git && cd muhurta-pomod
 python3 -m venv .venv && .venv/bin/python -m pip install -r requirements.txt
 .venv/bin/python run.py --no-update      # or: python app.py (debug server on :8000)
 ```
+
+**Phones** — `mobile/` holds the Android app (Capacitor) and the iPhone web
+app. Both are the same screens with the Python side rewritten in JavaScript
+(`mobile/web/local-api.js`, `account.js`), keeping the data in the phone's
+IndexedDB and syncing with the account. `python mobile/build_web.py` builds the
+Android pages into `mobile/www`; `python mobile/build_web.py --iphone` builds the
+iPhone app into `docs/app` (service worker, manifest and icons included). The
+release workflow rebuilds `docs/app` for each tag and commits it to `main`.
 
 `run.py` is the launcher for every kind of copy: it migrates the database,
 starts the local server and opens the window (the app's own window in the Mac

@@ -27,7 +27,8 @@
       const AC = window.AudioContext || window.webkitAudioContext;
       if (AC) audioCtx = new AC();
     }
-    if (audioCtx && audioCtx.state === "suspended") return audioCtx.resume();
+    // "interrupted": iOS, after the app was in the background or a call came in.
+    if (audioCtx && (audioCtx.state === "suspended" || audioCtx.state === "interrupted")) return audioCtx.resume();
     return Promise.resolve();
   }
 

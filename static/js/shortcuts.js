@@ -3,7 +3,7 @@
 
   const SHORTCUTS = [
     { keys: "S", action: "Start or resume" },
-    { keys: "Space", action: "Pause or resume (release)" },
+    { keys: "Space", action: "Pause or resume (or rest, if waiting)" },
     { keys: "Shift + /", action: "Open this guide" },
     { keys: "R", action: "Reset" },
     { keys: "T", action: "Take rest from pool" },

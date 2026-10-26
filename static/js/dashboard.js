@@ -272,6 +272,7 @@
       const cell = document.createElement("span");
       const level = levelFor(day, goal);
       cell.className = `heat-cell heat-level-${level} ${level > 0 ? "heat-active" : "heat-inactive"}`;
+      cell.dataset.day = day.day;
       if (level > 0) {
         cell.style.background = heatColor(Number(day.focus_minutes || 0) / maxFocus);
         const details = tooltipText(day, date);

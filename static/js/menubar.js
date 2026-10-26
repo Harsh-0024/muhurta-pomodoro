@@ -35,11 +35,13 @@
       return { kind: "timer", up: true, sec, since: null, until: null, paused: true };
     }
     if (!["work", "rest", "cumulative"].includes(d.mode)) return null;
+    // Rest (and rest taken from the pool) gets its own icon.
+    const kind = d.mode === "work" ? "timer" : "rest";
     if (d.running && d.phaseEndsAt) {
       if (d.phaseEndsAt <= Date.now()) return null;
-      return { kind: "timer", up: false, sec: 0, since: null, until: d.phaseEndsAt, paused: false };
+      return { kind, up: false, sec: 0, since: null, until: d.phaseEndsAt, paused: false };
     }
-    return { kind: "timer", up: false, sec: Number(d.remainingSec || 0), since: null, until: null, paused: true };
+    return { kind, up: false, sec: Number(d.remainingSec || 0), since: null, until: null, paused: true };
   }
 
   function flowState(d) {

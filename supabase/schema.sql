@@ -228,3 +228,227 @@ join auth.users u on u.id = d.user_id
 left join public.profiles p on p.user_id = d.user_id
 order by d.last_seen desc;
 revoke all on public.devices_overview from anon, authenticated;
+
+-- --------------------------------------------------------------------------
+-- admin: the owner's view inside the app (added with the Admin tab)
+-- --------------------------------------------------------------------------
+-- Who is an admin. Not reachable through the API at all (no policies); only
+-- the functions below read it. Add yourself once (change the email if your
+-- app account uses another):
+--   insert into public.admins (user_id)
+--   select id from auth.users where email = 'harsh242042004@gmail.com'
+--   on conflict do nothing;
+create table if not exists public.admins (
+    user_id  uuid primary key references auth.users (id) on delete cascade,
+    added_at timestamptz not null default now()
+);
+alter table public.admins enable row level security;
+revoke all on public.admins from anon, authenticated;
+
+insert into public.admins (user_id)
+select id from auth.users where email = 'harsh242042004@gmail.com'
+on conflict do nothing;
+
+-- Is the person asking an admin? The app asks this to show the Admin tab.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+    select exists (select 1 from public.admins where user_id = (select auth.uid()));
+$$;
+revoke all on function public.is_admin() from public;
+grant execute on function public.is_admin() to authenticated;
+
+-- Update rules, editable from the Admin tab. Every copy of the app reads
+-- this (signed in or not); only admins can change it.
+create table if not exists public.app_config (
+    id               integer primary key default 1 check (id = 1),
+    minimum_version  text not null default '' check (minimum_version ~ '^(\d+\.\d+\.\d+)?$'),
+    blocked_versions text[] not null default '{}',
+    message          text not null default '' check (char_length(message) <= 500),
+    updated_at       timestamptz not null default now()
+);
+insert into public.app_config (id) values (1) on conflict do nothing;
+alter table public.app_config enable row level security;
+revoke all on public.app_config from anon, authenticated;
+grant select on public.app_config to anon, authenticated;
+grant update (minimum_version, blocked_versions, message, updated_at) on public.app_config to authenticated;
+drop policy if exists read_all on public.app_config;
+create policy read_all on public.app_config for select to anon, authenticated using (true);
+drop policy if exists admins_edit on public.app_config;
+create policy admins_edit on public.app_config for update to authenticated
+    using ((select public.is_admin())) with check ((select public.is_admin()));
+
+-- Everything the Admin tab shows, in one call, for admins only.
+create or replace function public.admin_overview()
+returns json
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+    if not public.is_admin() then
+        raise exception 'admins only' using errcode = '42501';
+    end if;
+    return json_build_object(
+        'people', (
+            select coalesce(json_agg(t order by t.last_seen desc nulls last, t.created_at desc), '[]'::json)
+            from (
+                select u.id,
+                       u.email,
+                       u.created_at,
+                       u.last_sign_in_at,
+                       coalesce(p.first_name, '') as first_name,
+                       coalesce(p.last_name, '')  as last_name,
+                       coalesce(p.username, '')   as username,
+                       exists (select 1 from public.admins a where a.user_id = u.id) as is_admin,
+                       (select max(d.last_seen) from public.app_devices d where d.user_id = u.id) as last_seen,
+                       (select count(*) from public.app_devices d where d.user_id = u.id) as computers,
+                       (select coalesce(sum(f.minutes), 0) from public.focus_by_device f
+                         where f.user_id = u.id and f.deleted_at is null) as focus_minutes,
+                       (select count(*) from public.activity_segments s
+                         where s.user_id = u.id and s.deleted_at is null and s.kind = 'work') as sessions,
+                       (select max(s.started_at) from public.activity_segments s
+                         where s.user_id = u.id and s.deleted_at is null) as last_session
+                from auth.users u
+                left join public.profiles p on p.user_id = u.id
+            ) t
+        ),
+        'devices', (
+            select coalesce(json_agg(t order by t.last_seen desc), '[]'::json)
+            from (
+                select d.user_id,
+                       coalesce(nullif(trim(coalesce(p.first_name, '') || ' ' || coalesce(p.last_name, '')), ''), u.email) as person,
+                       d.device_id, d.app_version, d.platform, d.last_seen
+                from public.app_devices d
+                join auth.users u on u.id = d.user_id
+                left join public.profiles p on p.user_id = d.user_id
+            ) t
+        ),
+        'policy', (select row_to_json(c) from public.app_config c where c.id = 1)
+    );
+end;
+$$;
+revoke all on function public.admin_overview() from public;
+grant execute on function public.admin_overview() to authenticated;
+
+-- --------------------------------------------------------------------------
+-- feedback: what people like, dislike, would improve or want next
+-- --------------------------------------------------------------------------
+-- Sent from Settings -> Feedback. People can add feedback and read their own
+-- (to see whether it was read); they can't change or delete it. Admins read
+-- everyone's, mark it done and delete it through the functions below.
+create table if not exists public.feedback (
+    id          bigint generated always as identity primary key,
+    user_id     uuid not null default auth.uid() references auth.users (id) on delete cascade,
+    kind        text not null check (kind in ('like', 'dislike', 'improve', 'idea')),
+    message     text not null check (char_length(btrim(message)) between 1 and 2000),
+    app_version text not null default '' check (char_length(app_version) <= 20),
+    platform    text not null default '' check (char_length(platform) <= 20),
+    status      text not null default 'new' check (status in ('new', 'seen', 'done')),
+    created_at  timestamptz not null default now()
+);
+create index if not exists feedback_user on public.feedback (user_id, created_at desc);
+create index if not exists feedback_newest on public.feedback (created_at desc);
+
+alter table public.feedback enable row level security;
+revoke all on public.feedback from anon, authenticated;
+grant select on public.feedback to authenticated;
+-- Only these columns: nobody can send feedback that is already "done".
+grant insert (kind, message, app_version, platform) on public.feedback to authenticated;
+drop policy if exists own_read on public.feedback;
+create policy own_read on public.feedback for select to authenticated
+    using (user_id = (select auth.uid()));
+drop policy if exists own_insert on public.feedback;
+create policy own_insert on public.feedback for insert to authenticated
+    with check (user_id = (select auth.uid()));
+
+-- Everyone's feedback with who sent it, newest first, for admins only.
+create or replace function public.admin_feedback()
+returns json
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+    if not public.is_admin() then
+        raise exception 'admins only' using errcode = '42501';
+    end if;
+    return (
+        select coalesce(json_agg(t order by t.created_at desc), '[]'::json)
+        from (
+            select f.id, f.kind, f.message, f.app_version, f.platform, f.status, f.created_at,
+                   f.user_id,
+                   u.email,
+                   coalesce(p.first_name, '') as first_name,
+                   coalesce(p.last_name, '')  as last_name,
+                   coalesce(p.username, '')   as username
+            from public.feedback f
+            join auth.users u on u.id = f.user_id
+            left join public.profiles p on p.user_id = f.user_id
+        ) t
+    );
+end;
+$$;
+revoke all on function public.admin_feedback() from public;
+grant execute on function public.admin_feedback() to authenticated;
+
+-- Mark feedback seen, done or open again. Returns false if it no longer exists.
+create or replace function public.admin_set_feedback_status(feedback_id bigint, new_status text)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+    if not public.is_admin() then
+        raise exception 'admins only' using errcode = '42501';
+    end if;
+    if new_status not in ('new', 'seen', 'done') then
+        raise exception 'unknown status' using errcode = '22023';
+    end if;
+    update public.feedback set status = new_status where id = feedback_id;
+    return found;
+end;
+$$;
+revoke all on function public.admin_set_feedback_status(bigint, text) from public;
+grant execute on function public.admin_set_feedback_status(bigint, text) to authenticated;
+
+-- What was new when the admin opened it is now seen, so the sender knows it was read.
+create or replace function public.admin_mark_feedback_seen(feedback_ids bigint[])
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+    if not public.is_admin() then
+        raise exception 'admins only' using errcode = '42501';
+    end if;
+    update public.feedback set status = 'seen' where id = any(feedback_ids) and status = 'new';
+end;
+$$;
+revoke all on function public.admin_mark_feedback_seen(bigint[]) from public;
+grant execute on function public.admin_mark_feedback_seen(bigint[]) to authenticated;
+
+create or replace function public.admin_delete_feedback(feedback_id bigint)
+returns boolean
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+    if not public.is_admin() then
+        raise exception 'admins only' using errcode = '42501';
+    end if;
+    delete from public.feedback where id = feedback_id;
+    return found;
+end;
+$$;
+revoke all on function public.admin_delete_feedback(bigint) from public;
+grant execute on function public.admin_delete_feedback(bigint) to authenticated;

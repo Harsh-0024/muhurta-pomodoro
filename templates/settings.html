@@ -19,6 +19,7 @@
     <a href="#history" class="settings-nav-link">History</a>
     <a href="#sync" class="settings-nav-link">Account</a>
     <a href="#keyboard" class="settings-nav-link">Keyboard</a>
+    <a href="#feedback" class="settings-nav-link">Feedback</a>
     <a href="#about" class="settings-nav-link">About</a>
   </nav>
 
@@ -138,7 +139,7 @@
         <div class="pref-row">
           <div class="pref-text">
             <span class="pref-name" id="setThemeLabel">Theme</span>
-            <span class="pref-desc">System follows your computer's light or dark mode.</span>
+            <span class="pref-desc">System follows your device's light or dark mode.</span>
           </div>
           <div class="segmented segmented-theme" id="setTheme" role="radiogroup" aria-labelledby="setThemeLabel">
             <button type="button" class="segment" data-value="dark" role="radio" aria-checked="false"><span class="theme-swatch theme-swatch-dark" aria-hidden="true"></span>Dark</button>
@@ -223,7 +224,7 @@
     <section class="pref-section" id="sync" aria-labelledby="syncTitle">
       <header class="pref-head">
         <h2 class="card-title" id="syncTitle">Account</h2>
-        <p class="card-lede">Your sessions, combinations and settings are kept in your account and appear on every computer you sign in on. The timer keeps working without internet; changes sync when you're back online.</p>
+        <p class="card-lede">Your sessions, combinations and settings are kept in your account and appear on every device you sign in on. The timer keeps working without internet; changes sync when you're back online.</p>
       </header>
       <div class="pref-group" id="syncGroup">
         <div class="pref-row" id="syncSignedIn">
@@ -285,6 +286,37 @@
       </div>
     </section>
 
+    <section class="pref-section" id="feedback" aria-labelledby="feedbackTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="feedbackTitle">Feedback</h2>
+        <p class="card-lede">Tell the maker what works for you, what doesn't, and what you'd like next. Every note is read.</p>
+      </header>
+      <form class="pref-group feedback-form" id="feedbackForm" novalidate>
+        <div class="field">
+          <span class="signin-label" id="feedbackKindLabel">What is it about?</span>
+          <div class="segmented feedback-kinds" id="feedbackKind" role="radiogroup" aria-labelledby="feedbackKindLabel">
+            <button type="button" class="segment" data-value="like" role="radio" aria-checked="false">I like</button>
+            <button type="button" class="segment" data-value="dislike" role="radio" aria-checked="false">I don't like</button>
+            <button type="button" class="segment" data-value="improve" role="radio" aria-checked="false">Could be better</button>
+            <button type="button" class="segment is-active" data-value="idea" role="radio" aria-checked="true">Feature idea</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="signin-label" for="feedbackMessage">Your words</label>
+          <textarea id="feedbackMessage" class="input feedback-message" rows="4" maxlength="2000" placeholder="What would you like Muhurta Pomodoro to do?"></textarea>
+        </div>
+        <div class="feedback-actions">
+          <p class="field-note" id="feedbackStatus" aria-live="polite">Sent with your name and email, so you can be answered.</p>
+          <button type="submit" class="btn btn-primary btn-small" id="btnSendFeedback" disabled>Send</button>
+        </div>
+      </form>
+
+      <div id="feedbackSentWrap" hidden>
+        <h3 class="pref-subhead">What you've sent</h3>
+        <div class="pref-group" id="feedbackSent"></div>
+      </div>
+    </section>
+
     <section class="pref-section" id="about" aria-labelledby="aboutTitle">
       <header class="pref-head">
         <h2 class="card-title" id="aboutTitle">About</h2>
@@ -318,4 +350,5 @@
 {% endblock %}
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/settings.js') }}?v={{ asset_version }}" defer></script>
+<script src="{{ url_for('static', filename='js/feedback.js') }}?v={{ asset_version }}" defer></script>
 {% endblock %}

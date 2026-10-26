@@ -373,46 +373,185 @@ body[data-theme="light"] .ambient {
   opacity: 0.6;
 }
 
-/* "A new version is available" (static/js/update-check.js) */
-.update-bar {
+/* Notices that float over the page: "a new version is ready"
+   (static/js/update-check.js) and "time's up" (static/js/timer-core.js).
+   One calm card: a short title, a quiet line, small buttons. */
+.update-bar,
+.timer-alarm {
   position: fixed;
   left: 50%;
-  bottom: 1.25rem;
   transform: translateX(-50%);
-  z-index: 60;
-  width: min(36rem, calc(100vw - 2rem));
+  width: min(30rem, calc(100vw - 2rem));
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 0.85rem 0.85rem 0.85rem 1.1rem;
-  border: 1px solid var(--gold);
-  border-radius: var(--radius);
+  gap: 1.25rem;
+  padding: 0.95rem 1rem 0.95rem 1.25rem;
+  border: 1px solid color-mix(in srgb, var(--gold) 35%, var(--line));
+  border-radius: calc(var(--radius) + 2px);
   background: var(--menu-bg-strong);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   box-shadow: var(--menu-shadow);
   color: var(--ink);
-  font-size: 0.92rem;
+  animation: notice-in 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.update-bar {
+  bottom: 1.25rem;
+  z-index: 60;
+}
+
+.update-bar-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.update-bar-title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+.update-bar-sub {
+  margin: 0.2rem 0 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
 }
 
 .update-bar-actions {
   display: flex;
   flex-shrink: 0;
-  gap: 0.5rem;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.update-bar .btn {
+.update-bar .btn,
+.timer-alarm .btn {
+  padding: 0.5rem 1rem;
+  font-size: 0.82rem;
+  white-space: nowrap;
   text-decoration: none;
+  box-shadow: none;
 }
 
-@media (max-width: 520px) {
-  .update-bar {
-    flex-direction: column;
-    align-items: stretch;
+/* While "Update now" runs: the buttons step aside and a thin line shows
+   how far along it is (static/js/update-check.js). It slides when the
+   amount isn't known (starting, installing, restarting). */
+.is-updating [hidden] {
+  display: none !important;
+}
+
+.update-progress {
+  position: relative;
+  height: 3px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--gold) 16%, transparent);
+  overflow: hidden;
+}
+
+.update-bar .update-progress {
+  position: absolute;
+  left: 1.25rem;
+  right: 1.25rem;
+  bottom: 0.6rem;
+}
+
+.update-bar.is-updating {
+  padding-bottom: 1.35rem;
+}
+
+.update-required-card .update-progress {
+  margin: 0.25rem 0 0.5rem;
+}
+
+.update-progress-fill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--gold);
+  transition: width 0.35s ease;
+}
+
+.update-progress.is-indeterminate .update-progress-fill {
+  width: 38%;
+  transition: none;
+  animation: update-slide 1.25s ease-in-out infinite;
+}
+
+@keyframes update-slide {
+  from {
+    transform: translateX(-105%);
   }
-  .update-bar-actions {
-    justify-content: flex-end;
+  to {
+    transform: translateX(270%);
   }
 }
+
+/* The quiet line ticks with the percentage: keep digits even-width. */
+.update-bar.is-updating .update-bar-sub {
+  font-variant-numeric: tabular-nums;
+}
+
+@keyframes notice-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .update-bar,
+  .timer-alarm {
+    animation: none;
+  }
+
+  .update-progress.is-indeterminate .update-progress-fill {
+    animation-duration: 3s;
+  }
+}
+
+/* Narrow windows and phones: one slim row, so it never covers the clock's
+   buttons; "Later" becomes a small cross. */
+@media (max-width: 520px) {
+  .update-bar,
+  .timer-alarm {
+    gap: 0.6rem;
+    padding: 0.7rem 0.55rem 0.7rem 1rem;
+  }
+
+  .update-bar-title {
+    font-size: 1.02rem;
+  }
+
+  .update-bar-sub {
+    margin-top: 0.1rem;
+    font-size: 0.74rem;
+  }
+
+  .update-bar-actions {
+    gap: 0.15rem;
+  }
+
+  .update-bar .update-bar-later {
+    order: 2;
+    width: 2.25rem;
+    height: 2.25rem;
+    padding: 0;
+    font-size: 0;
+    border-radius: 50%;
+  }
+
+  .update-bar .update-bar-later::before {
+    content: "\00d7";
+    font-size: 1.35rem;
+    line-height: 1;
+  }
+}
+
 
 .hero {
   display: flex;
@@ -584,18 +723,62 @@ body[data-theme="light"] .modal-backdrop {
     var(--bg1);
 }
 
+/* "What's new" (static/js/whats-new.js): the title and the button stay put
+   and only the notes scroll, so a long list never runs off the window. */
 .whats-new-sheet {
+  display: flex;
+  flex-direction: column;
   width: min(460px, 100%);
+  max-height: min(560px, calc(100vh - 3rem));
+  /* dvh: the height actually visible, without a phone browser's bars */
+  max-height: min(560px, calc(100dvh - 3rem));
+  padding-bottom: 1rem;
+}
+
+.whats-new-sheet .modal-title {
+  margin-bottom: 0.75rem;
+}
+
+.whats-new-body {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  margin: 0 -1.35rem;
+  padding: 0.25rem 1.35rem 0.5rem;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid transparent;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+
+/* More below: a soft fade and a line above the button say "keep scrolling". */
+.whats-new-body.more {
+  border-bottom-color: var(--line);
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 3rem), transparent);
+}
+
+.whats-new-sheet .modal-actions {
+  flex: 0 0 auto;
+  padding-top: 1rem;
 }
 
 .whats-new-version {
-  margin: 0.25rem 0 0.4rem;
-  font-size: 0.8rem;
+  margin: 1rem 0 0.4rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
   color: var(--muted);
 }
 
+.whats-new-version + .whats-new-list {
+  margin-top: 0;
+}
+
 .whats-new-list {
-  margin: 0 0 1.25rem;
+  margin: 0.75rem 0 0.5rem;
   padding-left: 1.1rem;
   line-height: 1.55;
 }
@@ -605,7 +788,7 @@ body[data-theme="light"] .modal-backdrop {
 }
 
 .whats-new-switch {
-  margin: 0 0 1.25rem;
+  margin: 0.75rem 0 0.5rem;
 }
 
 .modal-actions a.btn {
@@ -655,7 +838,14 @@ body.modal-open {
   overflow: hidden;
 }
 
-.choice-actions .btn:disabled {
+.choice-actions /* Keyboard focus: the app's own soft gold ring, not the browser's default. */
+.btn:focus-visible,
+.modal-close:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
+  outline-offset: 2px;
+}
+
+.btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
@@ -2928,7 +3118,9 @@ body[data-theme="light"] .rhythm-track {
   }
 }
 
-@media (max-width: 720px) {
+/* The heatmap's year buttons and legend stop fitting beside its title well
+   before the rest of the dashboard needs one column. */
+@media (max-width: 840px) {
   .panel-head {
     align-items: stretch;
     display: flex;
@@ -2953,7 +3145,9 @@ body[data-theme="light"] .rhythm-track {
     padding-bottom: 0.15rem;
     -webkit-overflow-scrolling: touch;
   }
+}
 
+@media (max-width: 720px) {
   .dashboard-stats,
   .dashboard-lower {
     grid-template-columns: 1fr;
@@ -3920,8 +4114,8 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
 
 /* sign-in: password strength */
 .strength {
-  height: 4px;
-  margin-top: 0.25rem;
+  height: 3px;
+  margin-top: 0.15rem;
   border-radius: 4px;
   background: var(--faint);
   overflow: hidden;
@@ -3940,56 +4134,6 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
 .strength-bar[data-level="3"] { background: #b9a24a; }
 .strength-bar[data-level="4"],
 .strength-bar[data-level="5"] { background: #5f9e66; }
-
-.strength-label {
-  margin: 0;
-  min-height: 1em;
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
-.rules {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.2rem 0.75rem;
-  margin: 0.15rem 0 0;
-  padding: 0;
-  list-style: none;
-  color: var(--muted);
-  font-size: 0.78rem;
-}
-
-.rules li {
-  position: relative;
-  padding-left: 1.1rem;
-}
-
-.rules li::before {
-  content: "";
-  position: absolute;
-  left: 0.15rem;
-  top: 0.42em;
-  width: 0.45rem;
-  height: 0.45rem;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  opacity: 0.6;
-}
-
-.rules li.is-met {
-  color: var(--ink);
-}
-
-.rules li.is-met::before {
-  content: "✓";
-  top: 0;
-  width: auto;
-  height: auto;
-  border: 0;
-  color: #5f9e66;
-  opacity: 1;
-  font-size: 0.8rem;
-}
 
 /* sign-in: steps */
 .signin-progress {
@@ -4027,8 +4171,7 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
 }
 
 @media (max-width: 520px) {
-  .field-row,
-  .rules {
+  .field-row {
     grid-template-columns: 1fr;
   }
 }
@@ -4114,38 +4257,80 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
   display: none;
 }
 
-/* sign-in: where to save the password */
+/* sign-in: where to save the password (folded until needed) */
 .save-hint {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 0.85rem;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface-strong);
   color: var(--muted);
-  font-size: 0.8rem;
-  line-height: 1.45;
+  font-size: 0.82rem;
 }
 
-.save-hint strong {
-  display: block;
+.save-hint summary {
+  width: fit-content;
+  cursor: pointer;
+  list-style: none;
+  color: var(--muted);
+}
+
+.save-hint summary::-webkit-details-marker {
+  display: none;
+}
+
+.save-hint summary::after {
+  content: "›";
+  display: inline-block;
+  margin-left: 0.4em;
+  transition: transform 0.2s ease;
+}
+
+.save-hint[open] summary::after {
+  transform: rotate(90deg);
+}
+
+.save-hint summary:hover {
   color: var(--ink);
-  font-weight: 500;
+}
+
+.save-hint-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.75rem 0 0;
 }
 
 .save-hint-text {
-  flex: 1;
+  margin: 0;
 }
 
-.save-hint .btn {
-  flex: none;
+.save-hint .save-site {
+  margin: 0;
+  user-select: all; /* one click selects the whole address */
+}
+
+.save-hint-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.25rem;
 }
 
 .save-site {
   color: var(--ink);
   font-weight: 500;
-  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+.save-hint-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.save-hint-actions .btn {
+  flex: 1 1 8rem;
+}
+
+.save-site {
+  color: var(--ink);
+  font-weight: 500;
+  overflow-wrap: anywhere; /* break only if it truly doesn't fit, not mid-word by default */
 }
 
 /* update required: covers the whole app until it updates */
@@ -4196,136 +4381,588 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
 
 /* ---------- Timer (the simple countdown: templates/timer.html) ---------- */
 
-.countdown-set {
-  display: flex;
-  align-items: baseline;
-  justify-content: center;
-  gap: 0.15rem;
+/* The length: one quiet number, the same as Rhythm's, that you can click
+   to retype. No boxes or lines; only the caret shows it is editable. */
+.countdown-entry {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  caret-color: var(--gold);
   pointer-events: auto;
+  cursor: text;
+  transition: color 0.2s ease;
 }
 
-.countdown-set.hidden,
+.countdown-entry:hover {
+  color: var(--gold2);
+}
+
+.countdown-entry:focus {
+  outline: none;
+}
+
+.countdown-entry::selection {
+  background: rgba(201, 169, 98, 0.22);
+}
+
+.countdown-entry.hidden,
 .countdown-quick.hidden {
   display: none;
 }
 
-.countdown-field {
-  display: inline-flex;
-  align-items: baseline;
-  cursor: text;
-}
-
-.countdown-input {
-  width: 2.2ch;
-  padding: 0;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  background: transparent;
-  color: var(--ink);
-  font-family: var(--font-serif);
-  font-size: clamp(2.3rem, 6vw, 3rem);
-  font-weight: 500;
-  font-variant-numeric: tabular-nums;
-  text-align: center;
-  caret-color: var(--gold);
-  transition: border-color 0.15s ease;
-}
-
-.countdown-input:hover {
-  border-bottom-color: var(--muted);
-}
-
-.countdown-input:focus {
-  outline: none;
-  border-bottom-color: var(--gold);
-}
-
-.countdown-unit {
-  margin: 0 0.35rem 0 0.1rem;
-  font-size: 0.85rem;
-  color: var(--muted);
-}
-
+/* Quick lengths: plain numbers, like a soft scale under the ring. */
 .countdown-quick {
   display: flex;
   flex-wrap: wrap;
+  align-items: baseline;
   justify-content: center;
-  gap: 0.4rem;
-  margin: 0 auto 1rem;
+  gap: 0.15rem;
+  margin: 0 auto 1.1rem;
 }
 
-.countdown-chip {
-  padding: 0.32rem 0.75rem;
-  border: 1px solid var(--line);
+.countdown-pick {
+  min-width: 2.2rem;
+  padding: 0.3rem 0.45rem;
+  border: 0;
   border-radius: 999px;
-  background: var(--surface);
+  background: transparent;
   color: var(--muted);
-  font: inherit;
-  font-size: 0.8rem;
+  font-family: var(--font-serif);
+  font-size: 1.05rem;
+  font-variant-numeric: tabular-nums;
   cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.2s ease;
 }
 
-.countdown-chip:hover {
-  color: var(--ink);
-  border-color: var(--gold);
+.countdown-pick:hover,
+.countdown-pick.is-active {
+  color: var(--gold2);
 }
 
-.countdown-chip:focus-visible {
-  outline: 2px solid var(--gold);
-  outline-offset: 2px;
+.countdown-pick:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 1px;
+}
+
+.countdown-pick-unit {
+  margin-left: 0.15rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 body.timer-ringing .countdown-ring-wrap .ring-progress {
   animation: ring-breathe 1.2s ease-in-out infinite;
 }
 
-/* "Time's up" on pages other than Timer (static/js/timer-core.js) */
+/* "Time's up" on pages other than Timer (static/js/timer-core.js); it looks
+   like the update notice (above), near the top where the clock was. */
 .timer-alarm {
-  position: fixed;
-  left: 50%;
   top: 5rem;
-  transform: translateX(-50%);
   z-index: 70;
-  width: min(30rem, calc(100vw - 2rem));
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 0.75rem 0.75rem 1.1rem;
-  border: 1px solid var(--gold);
-  border-radius: var(--radius);
-  background: var(--menu-bg-strong);
-  box-shadow: var(--menu-shadow);
-  color: var(--ink);
-  font-size: 0.92rem;
 }
 
 .timer-alarm.hidden {
   display: none;
 }
 
-.timer-alarm-text {
-  flex: 1 1 10rem;
+
+/* ---------- window sizes ----------
+   The app lives in a window people resize (its own window on Mac and
+   Windows, a browser app window otherwise), so every size from 420x560 up
+   has to look intended, not just full screen. */
+
+/* The clock ring follows the window's height as well as its width, so Start
+   stays on screen in a short window. --ring-room is what the page needs
+   above and below the ring; the type inside scales with the ring. */
+:root {
+  --ring-room: 330px;
 }
 
-/* Narrow windows: five nav buttons don't fit beside the name, so they
-   wrap onto their own row under it. */
-@media (max-width: 760px) {
-  .topbar {
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    padding: 1rem;
-  }
+.timer-ring-wrap {
+  --ring: min(320px, 88vw, max(176px, 100vh - var(--ring-room)));
+  width: var(--ring);
+}
 
+.timer-ring-wrap .time-display {
+  font-size: clamp(2.1rem, calc(var(--ring) * 0.18), 3.6rem);
+}
+
+.page-timer {
+  --ring-room: 370px; /* the quick lengths under the ring */
+}
+
+/* Below the width the name and all the tabs need on one line (about
+   990px with the level picker), the tabs slim down to their text. */
+@media (max-width: 1040px) {
   .topnav {
-    width: 100%;
+    flex-wrap: nowrap;
     gap: 0.4rem;
   }
 
-  .topnav .nav-link {
+  .nav-link,
+  .nav-level-button {
     min-width: 0;
-    padding: 0 0.8rem;
+    padding: 0 0.85rem;
+  }
+}
+
+/* Still too narrow: the tabs go on their own centred row under the name,
+   on every page alike so the bar doesn't jump when switching tabs. */
+@media (max-width: 880px) {
+  .topbar {
+    flex-direction: column;
+    gap: 0.7rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .topnav {
+    justify-content: center;
+  }
+
+  /* The level menu drops centred under the whole bar, close to its button. */
+  .nav-level {
+    position: static;
+  }
+
+  .page-home .nav-level-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    transform-origin: top center;
+  }
+}
+
+@media (max-width: 520px) {
+  .topnav {
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .nav-link,
+  .nav-level-button {
+    min-height: 2rem;
+    padding: 0 0.7rem;
+    font-size: 0.8rem;
+  }
+
+  .brand-text {
+    font-size: 1.15rem;
+  }
+
+  /* Rhythm's six buttons (level picker + tabs) as two even rows of three. */
+  .page-home .topnav {
+    display: grid;
+    grid-template-columns: repeat(3, auto);
+    justify-content: center;
+  }
+
+  .page-home .topnav .nav-link,
+  .page-home .topnav .nav-level-button {
+    width: 100%;
+  }
+
+  .session-live {
+    gap: 0.5rem;
+    padding: 0.55rem 0.75rem;
+  }
+
+  .live-stat {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  .live-val {
+    font-size: 1.15rem;
+    white-space: nowrap;
+  }
+
+  .live-key {
+    letter-spacing: 0.14em;
+  }
+}
+
+/* Short windows: tighter spacing, so the ring has room to stay large. */
+@media (max-height: 760px) {
+  .topbar {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .main {
+    padding-top: 1.1rem;
+  }
+
+  .hero {
+    gap: 0.85rem;
+  }
+
+  .timer-panel {
+    padding: 1.25rem 1.25rem 1.2rem;
+  }
+
+  .timer-ring-wrap {
+    margin-bottom: 1.1rem;
+  }
+
+  .countdown-quick {
+    margin-bottom: 0.75rem;
+  }
+}
+
+/* sign-in: room to breathe */
+.signin-card {
+  padding: 2.5rem 2.25rem 2.25rem;
+}
+
+.signin-lede {
+  margin-bottom: 2rem;
+}
+
+.signin-step {
+  gap: 1.35rem;
+}
+
+.signin-step .field {
+  gap: 0.45rem;
+}
+
+/* The name fields shown on the password step sit in a wrapper of their own:
+   give it the step's spacing, and keep stacked names (phones) as far apart
+   as every other field. */
+#lateDetails:not([hidden]) {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+}
+
+.signin-step .field-row {
+  gap: 1.35rem 0.75rem;
+}
+
+.signin-submit {
+  margin-top: 0.5rem;
+}
+
+.pw-guide {
+  transition: color 0.2s ease;
+}
+
+@media (max-width: 520px) {
+  .signin-card {
+    padding: 2rem 1.35rem 1.75rem;
+  }
+}
+
+/* label + link (e.g. "New password" / "Suggest a strong password"): each
+   stays on one line; on a narrow phone the link drops under the label. */
+.signin-label-row {
+  flex-wrap: wrap;
+  row-gap: 0.25rem;
+}
+
+.signin-label-row > * {
+  white-space: nowrap;
+}
+
+/* ---------- Admin tab ---------- */
+.admin {
+  display: flex;
+  flex-direction: column;
+  gap: 2.5rem;
+  max-width: 52rem;
+}
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.admin-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 1.1rem 1.2rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.admin-stat-value {
+  font-family: var(--font-serif);
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.admin-stat-label {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+
+.admin-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.admin-person,
+.admin-computer {
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.admin-person .pref-text,
+.admin-computer .pref-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.admin-facts {
+  margin-top: 0.3rem;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.admin-badge {
+  display: inline-block;
+  padding: 0.05rem 0.45rem;
+  border: 1px solid var(--gold);
+  border-radius: 999px;
+  color: var(--gold);
+  font-size: 0.7rem;
+  vertical-align: middle;
+}
+
+.admin-version {
+  flex: none;
+  padding: 0.25rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.admin-version[data-tone="ok"] { color: #5f9e66; border-color: rgba(95, 158, 102, 0.4); }
+.admin-version[data-tone="warn"] { color: #c08a3e; border-color: rgba(192, 138, 62, 0.4); }
+.admin-version[data-tone="error"] { color: var(--danger-ink); border-color: var(--danger-line); }
+body[data-theme="light"] .admin-version[data-tone="error"] { color: #a33a3a; }
+
+.admin-empty {
+  margin: 0;
+  padding: 1rem 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.admin-error {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--danger-line);
+  border-radius: 12px;
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+  font-size: 0.9rem;
+}
+
+body[data-theme="light"] .admin-error { color: #a33a3a; }
+
+.admin-rules {
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  padding: 1.35rem 1.25rem 1.25rem;
+}
+
+.admin-message {
+  resize: vertical;
+  min-height: 3.2rem;
+}
+
+.admin-rules-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+@media (max-width: 720px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .admin-computer {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .admin-head {
+    flex-direction: column;
+  }
+
+  .admin-rules-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* ---------- Feedback (Settings) ---------- */
+.feedback-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  padding: 1.35rem 1.25rem 1.25rem;
+}
+
+.feedback-kinds {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.feedback-kinds .segment {
+  padding: 0 0.6rem;
+  white-space: nowrap;
+}
+
+.feedback-message {
+  resize: vertical;
+  min-height: 7rem;
+  line-height: 1.5;
+}
+
+.feedback-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.feedback-item {
+  align-items: flex-start;
+}
+
+.feedback-item-msg {
+  color: var(--ink);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.feedback-state {
+  flex: none;
+  padding: 0.2rem 0.6rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.feedback-state[data-state="seen"] { color: var(--gold); border-color: var(--gold); }
+.feedback-state[data-state="done"] { color: #5f9e66; border-color: rgba(95, 158, 102, 0.4); }
+body[data-theme="light"] .feedback-state[data-state="done"] { color: #3f7d47; }
+
+/* ---------- Feedback (Admin tab) ---------- */
+.admin-new {
+  margin-left: 0.35rem;
+  border-color: transparent;
+  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  color: #1a1208;
+  font-family: var(--font-sans);
+  letter-spacing: 0;
+}
+
+.admin-new[hidden] {
+  display: none;
+}
+
+.admin-feedback-filter {
+  flex: none;
+  min-width: 15rem;
+}
+
+.admin-feedback-counts {
+  margin: -0.4rem 0 0.75rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.admin-feedback-counts:empty {
+  display: none;
+}
+
+.admin-feedback {
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.admin-feedback-kind {
+  margin-top: 0.7rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.admin-feedback-kind[data-kind="like"] { color: #5f9e66; }
+.admin-feedback-kind[data-kind="dislike"] { color: var(--danger-ink); }
+.admin-feedback-kind[data-kind="improve"] { color: #c08a3e; }
+body[data-theme="light"] .admin-feedback-kind[data-kind="like"] { color: #3f7d47; }
+body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33a3a; }
+
+.admin-feedback-msg {
+  margin: 0.3rem 0 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.admin-feedback[data-status="done"] .admin-feedback-msg {
+  color: var(--muted);
+}
+
+.admin-feedback-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.admin-feedback-delete:hover:not(:disabled) {
+  color: var(--danger-ink);
+}
+
+@media (max-width: 720px) {
+  .feedback-kinds {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 520px) {
+  .feedback-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .admin-feedback-filter {
+    min-width: 0;
+    width: 100%;
   }
 }
 

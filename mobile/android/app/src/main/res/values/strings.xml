@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Muhurta</string>
+    <string name="title_activity_main">Muhurta Pomodoro</string>
+    <string name="package_name">com.muhurata.timer</string>
+    <string name="custom_url_scheme">com.muhurata.timer</string>
+</resources>

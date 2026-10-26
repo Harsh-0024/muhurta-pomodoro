@@ -1,0 +1,19 @@
+{
+  "name": "muhurta-pomodoro-mobile",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Muhurta Pomodoro for Android: the desktop app's screens, with the Python side rewritten in JavaScript.",
+  "scripts": {
+    "build:web": "../.venv/bin/python build_web.py",
+    "sync": "npm run build:web && npx cap sync android",
+    "apk": "npm run sync && cd android && ./gradlew assembleDebug"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/core": "^8.5.3",
+    "@capacitor/local-notifications": "^8.3.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.3"
+  }
+}

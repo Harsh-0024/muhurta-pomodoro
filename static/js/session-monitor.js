@@ -133,6 +133,10 @@
   }
 
   function syncTitle(data) {
+    // On the Timer page a running Timer owns the title (timer.js); writing
+    // ours too made the two take turns and the window title blink.
+    const timer = window.__PAGE__ === "timer" && window.MuhurtaTimer?.read();
+    if (timer && timer.mode !== "idle") return;
     if (!data?.session?.active || data.mode === "idle") {
       document.title = baseTitle;
       return;

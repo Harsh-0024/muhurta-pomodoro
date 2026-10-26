@@ -211,6 +211,9 @@ def status() -> dict:
         "email": session.get("email") if session else None,
         "profile": (session.get("profile") if session else None) or None,
         "suggested_name": (session.get("suggested_name") if session else "") or "",
+        # Only decides whether the Admin tab is shown; the data behind it is
+        # checked by the server on every request (admin_overview()).
+        "is_admin": bool(session and session.get("is_admin") and not pending),
     }
 
 
@@ -501,3 +504,150 @@ def oauth_finish(code: str) -> dict:
     with _lock:
         _save(payload)
     return status()
+
+
+# --------------------------------------------------------------------------- #
+# admin (the Admin tab; see the admin section of supabase/schema.sql)
+# --------------------------------------------------------------------------- #
+VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
+
+
+def refresh_admin() -> bool:
+    """Ask the server whether this account is an admin, and remember it.
+    Called by the background sync, so it never slows a page down."""
+    token = access_token()
+    if token is None:
+        return False
+    code, payload = _request("POST", "/rest/v1/rpc/is_admin", {}, token=token)
+    admin = code == 200 and payload is True  # 404: not set up yet -> not an admin
+    with _lock:
+        session = _load()
+        if session and session.get("is_admin") != admin:
+            session["is_admin"] = admin
+            _write(session)
+    return admin
+
+
+def _admin_call(method: str, path: str, body=None, prefer: str | None = None):
+    token = access_token()
+    if token is None:
+        raise CloudError("Please sign in first.", 401)
+    code, payload = _request(method, path, body, token=token, headers={"Prefer": prefer} if prefer else None)
+    if code in (401, 403) or "42501" in _error_text(payload) or "admins only" in _error_text(payload):
+        raise CloudError("This is for the app's admin only.", 403)
+    if code == 404:
+        raise CloudError("The admin part isn't set up on the server yet (run the admin section of "
+                         "supabase/schema.sql).", 404)
+    if code >= 400:
+        raise CloudError("The server couldn't answer just now. Try again.", 502)
+    return payload
+
+
+def admin_overview() -> dict:
+    data = _admin_call("POST", "/rest/v1/rpc/admin_overview", {})
+    return data if isinstance(data, dict) else {}
+
+
+def save_update_rules(minimum_version: str, blocked_versions, message: str) -> dict:
+    minimum = (minimum_version or "").strip().lstrip("v")
+    if minimum and not VERSION_RE.match(minimum):
+        raise CloudError("Write versions like 1.7.2.")
+    if isinstance(blocked_versions, str):
+        blocked_versions = blocked_versions.replace(",", " ").split()
+    blocked = []
+    for v in blocked_versions or []:
+        v = str(v).strip().lstrip("v")
+        if not VERSION_RE.match(v):
+            raise CloudError(f"\"{v}\" isn't a version. Write versions like 1.7.2.")
+        if v not in blocked:
+            blocked.append(v)
+    message = " ".join((message or "").split())
+    if len(message) > 500:
+        raise CloudError("Keep the message under 500 characters.")
+    rows = _admin_call("PATCH", "/rest/v1/app_config?id=eq.1",
+                       {"minimum_version": minimum, "blocked_versions": blocked, "message": message,
+                        "updated_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())},
+                       prefer="return=representation")
+    if not rows:  # the update rule let nothing through: not an admin
+        raise CloudError("This is for the app's admin only.", 403)
+    return rows[0]
+
+
+def public_update_rules() -> dict | None:
+    """The update rules every copy follows (app_config), read without signing
+    in. None when unreachable or not set up; the caller falls back to the
+    website's update-policy.json."""
+    code, payload = _request("GET", "/rest/v1/app_config?id=eq.1&select=minimum_version,blocked_versions,message")
+    if code == 200 and isinstance(payload, list) and payload:
+        return payload[0]
+    return None
+
+
+# --------------------------------------------------------------------------- #
+# feedback (Settings -> Feedback, and the Admin tab; see the feedback
+# section of supabase/schema.sql)
+# --------------------------------------------------------------------------- #
+FEEDBACK_KINDS = ("like", "dislike", "improve", "idea")
+FEEDBACK_STATUSES = ("new", "seen", "done")
+FEEDBACK_MAX = 2000
+_FEEDBACK_COLS = "id,kind,message,status,created_at"
+
+
+def _feedback_call(method: str, path: str, body=None, prefer: str | None = None):
+    token = access_token()
+    if token is None:
+        raise CloudError("Please sign in first.", 401)
+    code, payload = _request(method, path, body, token=token, headers={"Prefer": prefer} if prefer else None)
+    if code == 404 or "42p01" in _error_text(payload):
+        raise CloudError("Feedback isn't set up on the server yet (run the feedback section of "
+                         "supabase/schema.sql).", 404)
+    if code >= 400:
+        raise CloudError("The server couldn't take that just now. Try again.", 502)
+    return payload
+
+
+def send_feedback(kind: str, message: str, app_version: str, platform: str) -> dict:
+    kind = (kind or "").strip().lower()
+    message = (message or "").strip()
+    if kind not in FEEDBACK_KINDS:
+        raise CloudError("Choose what kind of feedback this is.")
+    if not message:
+        raise CloudError("Write a few words first.")
+    if len(message) > FEEDBACK_MAX:
+        raise CloudError(f"Keep it under {FEEDBACK_MAX} characters.")
+    rows = _feedback_call("POST", f"/rest/v1/feedback?select={_FEEDBACK_COLS}",
+                          {"kind": kind, "message": message, "app_version": app_version[:20],
+                           "platform": platform[:20]},
+                          prefer="return=representation")
+    return rows[0] if isinstance(rows, list) and rows else {}
+
+
+def my_feedback(limit: int = 20) -> list:
+    rows = _feedback_call("GET", f"/rest/v1/feedback?select={_FEEDBACK_COLS}&order=created_at.desc&limit={int(limit)}")
+    return rows if isinstance(rows, list) else []
+
+
+def admin_feedback() -> list:
+    rows = _admin_call("POST", "/rest/v1/rpc/admin_feedback", {})
+    return rows if isinstance(rows, list) else []
+
+
+def admin_mark_feedback_seen(ids) -> None:
+    ids = [int(i) for i in ids or []]
+    if ids:
+        _admin_call("POST", "/rest/v1/rpc/admin_mark_feedback_seen", {"feedback_ids": ids})
+
+
+def admin_set_feedback_status(feedback_id: int, status: str) -> None:
+    if status not in FEEDBACK_STATUSES:
+        raise CloudError("Unknown status.")
+    found = _admin_call("POST", "/rest/v1/rpc/admin_set_feedback_status",
+                        {"feedback_id": int(feedback_id), "new_status": status})
+    if found is False:
+        raise CloudError("That feedback no longer exists.", 404)
+
+
+def admin_delete_feedback(feedback_id: int) -> None:
+    found = _admin_call("POST", "/rest/v1/rpc/admin_delete_feedback", {"feedback_id": int(feedback_id)})
+    if found is False:
+        raise CloudError("That feedback no longer exists.", 404)

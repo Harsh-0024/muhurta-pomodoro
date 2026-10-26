@@ -47,10 +47,13 @@ FIRST_PORT = 8000
 HOST = "127.0.0.1"
 # Started from a Terminal (developer, installer) rather than double-clicked.
 INTERACTIVE = bool(sys.stdin and sys.stdin.isatty())
-# The downloaded Mac app draws its own window (macOS's web view, through
-# pywebview), so it has its own Dock icon. Everything else opens the timer
-# in a browser's app window.
-NATIVE_WINDOW = FROZEN and sys.platform == "darwin"
+# The downloaded Mac and Windows apps draw their own window (macOS's web view
+# or Windows' WebView2, through pywebview), so they have their own Dock or
+# taskbar icon. Everything else opens the timer in a browser's app window.
+NATIVE_WINDOW = FROZEN and sys.platform in ("darwin", "win32")
+# Windows groups windows and notifications under this name (the app's own,
+# rather than "Python" or the browser that showed the timer before).
+WINDOWS_APP_ID = "Muhurta.Pomodoro"
 # Programs run from a no-console app on Windows would each flash a black
 # console window; this keeps them hidden.
 NO_WINDOW = {"creationflags": subprocess.CREATE_NO_WINDOW} if sys.platform == "win32" else {}
@@ -470,6 +473,50 @@ def _already_running(data_dir: Path) -> str | None:
     return None
 
 
+_INSTANCE_LOCK = None
+
+
+def _first_copy(data_dir: Path) -> bool:
+    """Whether this is the only copy starting for this data folder (Windows).
+
+    running.json is written only once a copy is ready, which takes a few
+    seconds, so a quick second double-click used to start a second copy
+    beside the first. A named lock that Windows frees when the process ends
+    closes that gap.
+    """
+    global _INSTANCE_LOCK
+    if sys.platform != "win32":
+        return True
+    import ctypes
+
+    name = "Local\\MuhurtaPomodoro-" + hashlib.sha1(str(data_dir).lower().encode()).hexdigest()[:16]
+    kernel32 = ctypes.windll.kernel32
+    kernel32.CreateMutexW.restype = ctypes.c_void_p
+    _INSTANCE_LOCK = kernel32.CreateMutexW(None, False, name)
+    return not (_INSTANCE_LOCK and kernel32.GetLastError() == 183)  # ERROR_ALREADY_EXISTS
+
+
+def _release_first_copy():
+    """Before restarting in place (os.exec*), so the new process can take the lock."""
+    global _INSTANCE_LOCK
+    if _INSTANCE_LOCK:
+        import ctypes
+
+        ctypes.windll.kernel32.CloseHandle(ctypes.c_void_p(_INSTANCE_LOCK))
+        _INSTANCE_LOCK = None
+
+
+def _wait_for_other_copy(data_dir: Path, seconds: float = 45) -> str | None:
+    """The address of the copy that is starting at the same moment, once it is ready."""
+    deadline = time.monotonic() + seconds
+    while time.monotonic() < deadline:
+        running = _already_running(data_dir)
+        if running:
+            return running
+        time.sleep(0.5)
+    return None
+
+
 def _final_sync():
     """One last sync so a session finished just before closing is not left
     waiting for the next start. Bounded: closing must never hang."""
@@ -520,7 +567,7 @@ def _old_app(app: Path) -> Path:
     return app.with_name(f".{app.name}.old")
 
 
-def _install_app_update(app: Path, data_dir: Path):
+def _install_app_update(app: Path, data_dir: Path, progress=lambda stage, percent=None: None):
     """Download the newest .dmg and swap its app in for this one.
 
     The running copy keeps working after the swap (its files stay open), so
@@ -537,8 +584,16 @@ def _install_app_update(app: Path, data_dir: Path):
     work.mkdir(parents=True)
     dmg, mount = work / "update.dmg", work / "disk"
     context = ssl.create_default_context(cafile=certifi.where())
+    progress("download", 0)
     with urllib.request.urlopen(UPDATE_DMG_URL, timeout=60, context=context) as res, open(dmg, "wb") as out:
-        shutil.copyfileobj(res, out)
+        # In pieces, so the window can show how far along it is.
+        total = int(res.headers.get("Content-Length") or 0)
+        done = 0
+        while chunk := res.read(256 * 1024):
+            out.write(chunk)
+            done += len(chunk)
+            progress("download", min(99, done * 100 // total) if total else None)
+    progress("install")
     mount.mkdir()
     attach = _run(["hdiutil", "attach", "-nobrowse", "-readonly", "-noautoopen", "-mountpoint", str(mount), str(dmg)])
     if attach.returncode != 0:
@@ -574,6 +629,9 @@ class _WindowApi:
 
     def notify(self, title: str, body: str = ""):
         # The web view has no web notifications of its own.
+        if sys.platform == "win32":
+            _windows_notification(str(title), str(body))
+            return
         script = f"display notification {json.dumps(str(body))} with title {json.dumps(str(title))}"
         subprocess.Popen(["osascript", "-e", script], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
@@ -582,16 +640,142 @@ class _WindowApi:
         if _MENU_BAR is not None:
             _MENU_BAR.update(state if isinstance(state, dict) else None)
 
+    def title(self, text: str = ""):
+        # Windows: the page's title (the time left) on the window and in the
+        # taskbar, as a browser's window showed it.
+        if _WINDOW is not None:
+            _WINDOW.set_title(str(text)[:200] or APP_NAME)
+
 
 _MENU_BAR = None
+_WINDOW = None
 
 
-def _native_window(url: str, data_dir: Path):
+def _native_window_works() -> bool:
+    """Whether this computer can draw the app's own window.
+
+    Windows draws it with Edge's WebView2 (part of Windows 11, and of Windows
+    10 once Edge has updated). Without it pywebview would quietly fall back to
+    Internet Explorer's engine, which cannot run the timer, so a browser's app
+    window is the better home then.
+    """
+    if sys.platform != "win32":
+        return True
+    try:
+        from webview.platforms import winforms
+    except Exception:
+        log.warning("Could not load the app's window - opening the timer in a browser instead.", exc_info=True)
+        return False
+    if not winforms.is_chromium:
+        log.warning("WebView2 is missing - opening the timer in a browser instead.")
+    return bool(winforms.is_chromium)
+
+
+def _register_windows_app():
+    """Tell Windows the app's name and icon, for its notifications and taskbar button."""
+    import ctypes
+    import winreg
+
+    try:
+        ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(WINDOWS_APP_ID)
+        # Notifications from a program without an installer need this entry
+        # to show its name and icon (otherwise Windows drops them).
+        with winreg.CreateKey(winreg.HKEY_CURRENT_USER, rf"Software\Classes\AppUserModelId\{WINDOWS_APP_ID}") as key:
+            winreg.SetValueEx(key, "DisplayName", 0, winreg.REG_SZ, APP_NAME)
+            icon = PROJECT_ROOT / "packaging" / "icon.png"
+            if icon.exists():
+                winreg.SetValueEx(key, "IconUri", 0, winreg.REG_SZ, str(icon))
+    except OSError:
+        log.debug("could not register the app with Windows", exc_info=True)
+
+
+# Windows' own notification, through PowerShell's access to the Windows API,
+# so no extra component has to ship with the app. The text arrives in
+# environment variables, never inside the script.
+_TOAST_SCRIPT = (
+    "$null = [Windows.UI.Notifications.ToastNotificationManager, Windows.UI.Notifications, ContentType = WindowsRuntime];"
+    "$null = [Windows.Data.Xml.Dom.XmlDocument, Windows.Data.Xml.Dom.XmlDocument, ContentType = WindowsRuntime];"
+    "$x = New-Object Windows.Data.Xml.Dom.XmlDocument; $x.LoadXml($env:MUHURTA_TOAST);"
+    "[Windows.UI.Notifications.ToastNotificationManager]::CreateToastNotifier($env:MUHURTA_APP_ID)"
+    ".Show([Windows.UI.Notifications.ToastNotification]::new($x))"
+)
+
+
+def _windows_notification(title: str, body: str):
+    from xml.sax.saxutils import escape
+
+    # Silent: the timer rings its own bell.
+    xml = ('<toast><visual><binding template="ToastGeneric">'
+           f"<text>{escape(title)}</text>" + (f"<text>{escape(body)}</text>" if body else "")
+           + '</binding></visual><audio silent="true"/></toast>')
+    try:
+        subprocess.Popen(["powershell", "-NoProfile", "-NonInteractive", "-Command", _TOAST_SCRIPT],
+                         env={**os.environ, "MUHURTA_TOAST": xml, "MUHURTA_APP_ID": WINDOWS_APP_ID},
+                         stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, **NO_WINDOW)
+    except OSError:
+        log.debug("could not show a notification", exc_info=True)
+
+
+def _show_running_window(url: str, data_dir: Path) -> bool:
+    """Ask the copy that is already running to bring its own window forward.
+
+    False when it can't (it shows the timer in a browser instead), and the
+    caller then opens a browser window as before.
+    """
+    if not NATIVE_WINDOW:
+        return False
+    if sys.platform == "win32":
+        try:
+            import ctypes
+
+            # Windows lets only the program the person just started come to
+            # the front; this hands that on to the copy already running.
+            pid = int(json.loads(_running_file(data_dir).read_text())["pid"])
+            ctypes.windll.user32.AllowSetForegroundWindow(pid)
+        except Exception:
+            log.debug("could not pass the foreground on", exc_info=True)
+    req = urllib.request.Request(url + "api/window/show", data=b"", method="POST", headers={"X-Muhurta": "1"})
+    try:
+        with urllib.request.urlopen(req, timeout=5) as resp:
+            return resp.status == 204
+    except Exception:
+        return False
+
+
+def _fit_on_screen(width: int, height: int) -> dict:
+    """Where the window opens: centred in the screen's free area and made
+    smaller where the screen is (a 1440x900 laptop, say), so no part of it
+    starts behind the taskbar. Windows' own centring missed that."""
+    import ctypes
+    from ctypes import wintypes
+
+    try:
+        area = wintypes.RECT()
+        ctypes.windll.user32.SystemParametersInfoW(0x0030, 0, ctypes.byref(area), 0)  # SPI_GETWORKAREA
+        # In the same units as the window's size (96 per inch), whatever the scaling.
+        scale = ctypes.windll.user32.GetDpiForSystem() / 96 or 1
+        left, top = area.left / scale, area.top / scale
+        room_w, room_h = (area.right - area.left) / scale, (area.bottom - area.top) / scale
+    except Exception:
+        return {"width": width, "height": height}
+    margin = 48
+    width = max(420, min(width, int(room_w - margin)))
+    height = max(560, min(height, int(room_h - margin)))
+    return {"width": width, "height": height,
+            "x": int(left + max(0, room_w - width) / 2), "y": int(top + max(0, room_h - height) / 2)}
+
+
+def _native_window(url: str, data_dir: Path, flask_app):
     """Show the timer in the app's own window; returns once it is closed."""
     import webview
 
-    window = webview.create_window(APP_NAME, url, width=1180, height=820, min_size=(420, 560),
-                                   background_color="#070605", js_api=_WindowApi())
+    global _WINDOW
+    place = {"width": 1180, "height": 820}
+    if sys.platform == "win32":
+        _register_windows_app()  # before the window exists, so its taskbar button is ours
+        place = _fit_on_screen(place["width"], place["height"])
+    window = _WINDOW = webview.create_window(APP_NAME, url, **place, min_size=(420, 560),
+                                             background_color="#070605", js_api=_WindowApi())
 
     def closing():
         # Runs before the window closes, for the close button and for ⌘Q
@@ -602,20 +786,50 @@ def _native_window(url: str, data_dir: Path):
 
     window.events.closing += closing
 
+    def loaded():
+        if not loaded.seen:  # every page loads; once is enough to say it works
+            loaded.seen = True
+            log.info("The app's window has opened the timer.")
+
+    loaded.seen = False
+    window.events.loaded += loaded
+
     def bring_to_front():
+        if sys.platform == "win32":
+            from webview.platforms.winforms import Func, Type, WinForms
+
+            form = window.native
+            if form is None:
+                return
+
+            def show():
+                # Un-minimize, but leave a maximized window maximized
+                # (window.restore() would shrink it).
+                if form.WindowState == WinForms.FormWindowState.Minimized:
+                    form.WindowState = WinForms.FormWindowState.Normal
+                form.Show()
+                form.Activate()
+
+            form.Invoke(Func[Type](show))
+            return
         import AppKit
 
         AppKit.NSApp.activateIgnoringOtherApps_(True)
         window.restore()
         window.show()
 
-    global _MENU_BAR
-    try:
-        from menubar import MenuBar
+    if sys.platform == "win32":
+        # Starting the app again while it runs shows this window (main()).
+        flask_app.config["MUHURATA_SHOW_WINDOW"] = bring_to_front
 
-        _MENU_BAR = MenuBar(on_click=bring_to_front)
-    except Exception:
-        log.exception("No menu bar timer this time")
+    global _MENU_BAR
+    if sys.platform == "darwin":
+        try:
+            from menubar import MenuBar
+
+            _MENU_BAR = MenuBar(on_click=bring_to_front)
+        except Exception:
+            log.exception("No menu bar timer this time")
     # Not private: the page keeps a running session in localStorage, which
     # has to survive closing the window.
     webview.start(private_mode=False, storage_path=str(data_dir / "window"))
@@ -773,9 +987,12 @@ def main(argv: list[str]) -> int:
     log.info("---- Muhurta Pomodoro %s start (python %s%s) ----", __version__, sys.version.split()[0], ", bundled" if FROZEN else "")
 
     running = _already_running(data_dir)
+    if not running and not _first_copy(data_dir):
+        log.info("Another copy is starting - waiting for it.")
+        running = _wait_for_other_copy(data_dir)
     if running:
         log.info("Muhurta Pomodoro is already running at %s - opening its window.", running)
-        if open_browser:
+        if open_browser and not _show_running_window(running, data_dir):
             open_app_window(running)
         return 0
 
@@ -791,10 +1008,12 @@ def main(argv: list[str]) -> int:
 
     if not no_update and self_update():
         # Re-exec so the freshly pulled launcher/app code is what actually runs.
+        _release_first_copy()
         os.execv(sys.executable, [sys.executable, str(PROJECT_ROOT / "run.py"), "--no-update", *argv[1:]])
 
     if ensure_python_version():
         new_python = _venv_python(PROJECT_ROOT / ".venv")
+        _release_first_copy()
         os.execv(str(new_python), [str(new_python), str(PROJECT_ROOT / "run.py"), "--no-update", *argv[1:]])
 
     install_requirements(data_dir)
@@ -813,6 +1032,7 @@ def main(argv: list[str]) -> int:
         install_requirements(data_dir, force=True)
         # Restart rather than re-import: this interpreter built its view of the
         # installed packages at startup and will not see the new ones.
+        _release_first_copy()
         os.execve(
             sys.executable,
             [sys.executable, str(PROJECT_ROOT / "run.py"), "--no-update", *argv[1:]],
@@ -834,7 +1054,7 @@ def main(argv: list[str]) -> int:
     _skip_host_lookup()
     server = make_server(HOST, port, app, threaded=True)
     _running_file(data_dir).write_text(json.dumps({"url": url, "pid": os.getpid()}))
-    if NATIVE_WINDOW and open_browser:
+    if NATIVE_WINDOW and open_browser and _native_window_works():
         # The window needs this (main) thread, so the server runs beside it.
         threading.Thread(target=server.serve_forever, daemon=True).start()
         log.info("Muhurta Pomodoro is running at %s  (close the timer window to stop it)", url)
@@ -849,17 +1069,24 @@ def main(argv: list[str]) -> int:
                 updating.set()
                 app.config.pop("MUHURATA_UPDATE_ERROR", None)
 
+                def progress(stage, percent=None):
+                    # Read by /api/update/progress: the notice shows it as it goes.
+                    app.config["MUHURATA_UPDATE_PROGRESS"] = {"stage": stage, "percent": percent}
+
                 def work():
                     import webview
 
                     log.info("Updating the app...")
                     try:
-                        _install_app_update(this_app, data_dir)
+                        _install_app_update(this_app, data_dir, progress)
                     except Exception as exc:
                         log.warning("Update failed: %s", exc, exc_info=True)
+                        app.config.pop("MUHURATA_UPDATE_PROGRESS", None)
                         app.config["MUHURATA_UPDATE_ERROR"] = "Could not download the update just now. Try again later."
                         updating.clear()
                         return
+                    progress("reopen")
+                    time.sleep(1.2)  # long enough to read "Reopening" before the window closes
                     _final_sync()
                     # Reopen once this copy has quit (open would only bring
                     # a still-running copy to the front). A test copy keeps
@@ -880,7 +1107,7 @@ def main(argv: list[str]) -> int:
 
             app.config["MUHURATA_RESTART"] = update_and_reopen
         try:
-            _native_window(url, data_dir)
+            _native_window(url, data_dir, app)
         finally:
             server.shutdown()
             server.server_close()
@@ -898,6 +1125,7 @@ def main(argv: list[str]) -> int:
         if restarting.is_set():
             return
         restarting.set()
+        app.config["MUHURATA_UPDATE_PROGRESS"] = {"stage": "restart", "percent": None}
 
         def stop():
             time.sleep(0.5)  # let the answer reach the page first
@@ -919,6 +1147,7 @@ def main(argv: list[str]) -> int:
         # Start from the top: that is where the update happens.
         logging.shutdown()
         args = [a for a in argv[1:] if a not in ("--no-update", "--restarted") and not a.startswith("--port=")]
+        _release_first_copy()
         os.execv(sys.executable, [sys.executable, str(PROJECT_ROOT / "run.py"), *args,
                                   "--restarted", f"--port={port}"])
     log.info("Stopped.")

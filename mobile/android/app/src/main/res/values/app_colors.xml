@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Behind the status and navigation bars: the app's own page colour (static/css/app.css bg0). -->
+    <color name="app_bg">#F4F2EC</color>
+</resources>

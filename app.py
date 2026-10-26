@@ -40,6 +40,8 @@ ASSET_VERSION_PATHS = (
     BASE_DIR / "static" / "js" / "shortcuts.js",
     BASE_DIR / "static" / "js" / "alive.js",
     BASE_DIR / "static" / "js" / "sign-in.js",
+    BASE_DIR / "static" / "js" / "admin.js",
+    BASE_DIR / "static" / "js" / "feedback.js",
     BASE_DIR / "static" / "css" / "app.css",
 )
 BUILTIN_QUOTES = [
@@ -128,7 +130,7 @@ def _ensure_db():
 OPEN_ENDPOINTS = {
     "static", "sign_in_page", "api_cloud_status", "api_cloud_sign_in", "api_cloud_send_code",
     "api_cloud_verify", "api_cloud_set_password", "api_cloud_cancel", "api_cloud_username_available",
-    "api_alive", "api_version", "api_update_restart",
+    "api_alive", "api_version", "api_update_restart", "api_update_progress", "api_window_show",
     "api_cloud_providers", "api_cloud_oauth_start", "auth_callback",
 }
 
@@ -150,8 +152,15 @@ def _inject_account():
         return {"account": None}
     profile = st["profile"] or {}
     name = profile.get("first_name") or (st["email"] or "").split("@")[0]
-    return {"account": {"name": name, "initial": (name or "?")[0].upper(),
+    return {"account": {"name": name, "initial": (name or "?")[0].upper(), "is_admin": st["is_admin"],
                         "title": f"@{profile['username']} · {st['email']}" if profile else st["email"]}}
+
+
+@app.context_processor
+def _inject_mobile():
+    # The Android app's pages are built from these templates with mobile=True
+    # (mobile/build_web.py); this lets the dev server show that layout too.
+    return {"mobile": os.environ.get("MUHURATA_MOBILE_PREVIEW") == "1"}
 
 
 @app.context_processor
@@ -236,6 +245,111 @@ def sign_in_page():
 @app.route("/timer")
 def timer_page():
     return render_template("timer.html", initial_quote=INITIAL_QUOTE)
+
+
+def _admin_only():
+    """The Admin tab exists only for admins. The server checks again on every
+    data request, so this only hides the page from everyone else."""
+    if not cloud.status()["is_admin"]:
+        return jsonify({"error": "Not found"}), 404
+    return None
+
+
+@app.route("/admin")
+def admin_page():
+    if not cloud.status()["is_admin"]:
+        return redirect(url_for("index"))
+    return render_template("admin.html", app_latest=_update_info().get("latest"))
+
+
+@app.get("/api/admin/overview")
+def api_admin_overview():
+    blocked = _admin_only()
+    if blocked:
+        return blocked
+    try:
+        data = cloud.admin_overview()
+    except cloud.CloudError as exc:
+        return jsonify({"error": str(exc)}), exc.status
+    data["latest"] = _update_info().get("latest")
+    data["this_version"] = __version__
+    return jsonify(data)
+
+
+@app.put("/api/admin/rules")
+def api_admin_rules():
+    blocked = _admin_only()
+    if blocked:
+        return blocked
+    body = request.get_json(silent=True) or {}
+    try:
+        rules = cloud.save_update_rules(str(body.get("minimum_version") or ""), body.get("blocked_versions") or [],
+                                        str(body.get("message") or ""))
+    except cloud.CloudError as exc:
+        return jsonify({"error": str(exc)}), exc.status
+    _update_info(force=True)  # this copy follows the new rules straight away
+    return jsonify(rules)
+
+
+@app.get("/api/feedback")
+def api_feedback_mine():
+    try:
+        return jsonify({"items": cloud.my_feedback()})
+    except cloud.CloudError as exc:
+        return jsonify({"error": str(exc)}), exc.status
+
+
+@app.post("/api/feedback")
+def api_feedback_send():
+    body = request.get_json(silent=True) or {}
+    try:
+        item = cloud.send_feedback(str(body.get("kind") or ""), str(body.get("message") or ""),
+                                   __version__, sys.platform)
+    except cloud.CloudError as exc:
+        return jsonify({"error": str(exc)}), exc.status
+    return jsonify(item), 201
+
+
+@app.get("/api/admin/feedback")
+def api_admin_feedback():
+    blocked = _admin_only()
+    if blocked:
+        return blocked
+    try:
+        items = cloud.admin_feedback()
+    except cloud.CloudError as exc:
+        return jsonify({"error": str(exc)}), exc.status
+    # Shown once as new; from now on the sender sees it was read.
+    try:
+        cloud.admin_mark_feedback_seen([i["id"] for i in items if i.get("status") == "new"])
+    except cloud.CloudError:
+        pass
+    return jsonify({"items": items})
+
+
+@app.patch("/api/admin/feedback/<int:feedback_id>")
+def api_admin_feedback_status(feedback_id: int):
+    blocked = _admin_only()
+    if blocked:
+        return blocked
+    body = request.get_json(silent=True) or {}
+    try:
+        cloud.admin_set_feedback_status(feedback_id, str(body.get("status") or ""))
+    except cloud.CloudError as exc:
+        return jsonify({"error": str(exc)}), exc.status
+    return jsonify({"id": feedback_id, "status": body.get("status")})
+
+
+@app.delete("/api/admin/feedback/<int:feedback_id>")
+def api_admin_feedback_delete(feedback_id: int):
+    blocked = _admin_only()
+    if blocked:
+        return blocked
+    try:
+        cloud.admin_delete_feedback(feedback_id)
+    except cloud.CloudError as exc:
+        return jsonify({"error": str(exc)}), exc.status
+    return "", 204
 
 
 @app.route("/flow")
@@ -353,6 +467,18 @@ def api_alive():
     return "", 204
 
 
+@app.post("/api/window/show")
+def api_window_show():
+    """Starting the app again while it runs brings its own window forward (run.py)."""
+    show = app.config.get("MUHURATA_SHOW_WINDOW")
+    # A web page elsewhere can't send this header without asking first (a CORS
+    # preflight this server never grants), so only the app itself gets here.
+    if not show or request.headers.get("X-Muhurta") != "1":
+        return "", 404
+    show()
+    return "", 204
+
+
 def _cloud_status() -> dict:
     st = cloud.status()
     st["sync"] = sync.status() if st["signed_in"] else None
@@ -400,7 +526,10 @@ def api_cloud_oauth_start():
     except cloud.CloudError as exc:
         return jsonify({"error": str(exc)}), exc.status
     opened = False
-    if not os.environ.get("MUHURATA_NO_BROWSER_OPEN"):  # tests
+    # Opening a browser only makes sense on this computer. From a phone on
+    # the same Wi-Fi the page carries on in its own tab instead.
+    on_this_computer = request.remote_addr in ("127.0.0.1", "::1")
+    if on_this_computer and not os.environ.get("MUHURATA_NO_BROWSER_OPEN"):  # tests
         try:
             opened = webbrowser.open(url)
         except Exception:
@@ -591,12 +720,22 @@ def _update_info(force: bool = False) -> dict:
             data["latest"] = str(release.get("tag_name") or "").lstrip("v") or data.get("latest")
         except Exception as exc:
             error = _describe_failure(exc)
+        # The rules set in the Admin tab (Supabase app_config) come first; the
+        # website's update-policy.json is the fallback when that can't be read.
+        rules = None
         try:
-            data["policy"] = _clean_policy(_fetch_json(UPDATE_POLICY_URL))
-        except Exception as exc:
-            # A missing policy file just means no rules; anything else is a failure.
-            if not (isinstance(exc, urllib.error.HTTPError) and exc.code == 404):
-                error = error or _describe_failure(exc)
+            rules = cloud.public_update_rules()
+        except cloud.CloudError:
+            pass
+        if rules is not None:
+            data["policy"] = _clean_policy(rules)
+        else:
+            try:
+                data["policy"] = _clean_policy(_fetch_json(UPDATE_POLICY_URL))
+            except Exception as exc:
+                # A missing policy file just means no rules; anything else is a failure.
+                if not (isinstance(exc, urllib.error.HTTPError) and exc.code == 404):
+                    error = error or _describe_failure(exc)
         now = time.time()
         # When checks started failing, so a check that keeps failing (a
         # network that blocks GitHub, say) is eventually said out loud.
@@ -671,6 +810,15 @@ def _mark_seen():
 def api_whats_new_seen():
     _mark_seen()
     return "", 204
+
+
+@app.get("/api/update/progress")
+def api_update_progress():
+    """How far an update has got, for the notice while it runs. Cheap: no
+    network, so the page can ask a few times a second."""
+    return jsonify({"current": __version__,
+                     "progress": app.config.get("MUHURATA_UPDATE_PROGRESS"),
+                     "error": app.config.get("MUHURATA_UPDATE_ERROR")})
 
 
 @app.post("/api/update/restart")

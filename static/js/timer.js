@@ -6,7 +6,6 @@
   const LAST_KEY = "muhurat_countdown_last_v1";
   const RING_LEN = 2 * Math.PI * 96;
   const MAX_SEC = 24 * 60 * 60 - 1;
-  const baseTitle = "Muhurta Pomodoro";
   const T = () => window.MuhurtaTimer;
   let tickTimer = null;
   let noticeTimer = null;
@@ -57,22 +56,38 @@
 
   /* ---------- the length fields ---------- */
 
-  function fieldValue(id, max) {
-    const n = parseInt(($(id)?.value || "").replace(/\D/g, ""), 10);
-    return Number.isFinite(n) ? Math.min(max, Math.max(0, n)) : 0;
+  // The length lives in one field showing "25:00". Typing a plain number
+  // means minutes; "m:ss" and "h:mm:ss" work too.
+  let entrySec = 25 * 60;
+
+  function parseEntry(text) {
+    const s = String(text || "").trim();
+    let sec = null;
+    if (/^\d{1,4}$/.test(s)) sec = Number(s) * 60;
+    else if (/^\d{1,3}:\d{1,2}$/.test(s)) {
+      const [m, ss] = s.split(":").map(Number);
+      sec = ss < 60 ? m * 60 + ss : null;
+    } else if (/^\d{1,2}:\d{1,2}:\d{1,2}$/.test(s)) {
+      const [h, m, ss] = s.split(":").map(Number);
+      sec = m < 60 && ss < 60 ? h * 3600 + m * 60 + ss : null;
+    }
+    return sec && sec >= 1 && sec <= MAX_SEC ? sec : null;
   }
 
   function enteredSec() {
-    const sec = fieldValue("timerHours", 23) * 3600 + fieldValue("timerMinutes", 59) * 60 + fieldValue("timerSeconds", 59);
-    return Math.min(MAX_SEC, sec);
+    return parseEntry($("timerEntry").value) ?? (document.activeElement === $("timerEntry") ? 0 : entrySec);
   }
 
   function fillFields(sec) {
-    sec = Math.max(0, Math.min(MAX_SEC, Math.round(sec)));
-    $("timerHours").value = String(Math.floor(sec / 3600));
-    $("timerMinutes").value = String(Math.floor((sec % 3600) / 60)).padStart(2, "0");
-    $("timerSeconds").value = String(sec % 60).padStart(2, "0");
+    entrySec = Math.max(1, Math.min(MAX_SEC, Math.round(sec)));
+    $("timerEntry").value = formatClock(entrySec);
     renderIdle();
+  }
+
+  function markPick() {
+    document.querySelectorAll("#timerQuick [data-min]").forEach((btn) => {
+      btn.classList.toggle("is-active", Number(btn.dataset.min) * 60 === enteredSec());
+    });
   }
 
   function readLast() {
@@ -135,7 +150,10 @@
 
   function setRing(frac) {
     const el = $("timerRingProgress");
-    if (el) el.style.strokeDashoffset = String(RING_LEN * (1 - Math.min(1, Math.max(0, frac))));
+    if (!el) return;
+    el.style.strokeDashoffset = String(RING_LEN * (1 - Math.min(1, Math.max(0, frac))));
+    // At zero length the rounded end still draws a dot; hide it until it moves.
+    el.style.opacity = frac > 0.001 ? "" : "0";
   }
 
   function show(id, visible) {
@@ -149,6 +167,7 @@
     $("btnTimerStart").disabled = sec < 1;
     $("timerSetDisplay").textContent = sec ? formatSet(sec) : "—";
     $("timerEndsDisplay").textContent = sec ? formatTimeOfDay(Date.now() + sec * 1000) : "—";
+    markPick();
   }
 
   function render() {
@@ -163,7 +182,7 @@
     document.body.classList.toggle("timer-running", mode === "running");
     document.body.classList.toggle("timer-ringing", mode === "ringing");
     document.body.classList.toggle("timer-overtime", mode === "overtime");
-    show("timerSet", idle);
+    show("timerEntry", idle);
     show("timerQuick", idle);
     show("timerTimeDisplay", !idle);
 
@@ -179,10 +198,11 @@
 
     if (idle) {
       setRing(0);
-      $("timerHint").textContent = "Set a time and start";
+      $("timerHint").textContent =
+        document.activeElement === $("timerEntry") ? "Minutes, or h:mm:ss" : "Tap the time to change it";
       $("timerEndsKey").textContent = "ends at";
       $("timerFocusedDisplay").textContent = "0:00";
-      document.title = baseTitle;
+      // Idle: the title is session-monitor.js's (a Rhythm session may be running).
       renderIdle();
       return;
     }
@@ -281,26 +301,28 @@
       if (btn) fillFields(Number(btn.dataset.min) * 60);
     });
 
-    ["timerHours", "timerMinutes", "timerSeconds"].forEach((id) => {
-      const input = $(id);
-      input.addEventListener("focus", () => input.select());
-      input.addEventListener("input", () => {
-        input.value = input.value.replace(/\D/g, "").slice(0, 2);
-        renderIdle();
-      });
-      input.addEventListener("blur", () => {
-        const max = id === "timerHours" ? 23 : 59;
-        const n = fieldValue(id, max);
-        input.value = id === "timerHours" ? String(n) : String(n).padStart(2, "0");
-        renderIdle();
-      });
-      input.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          input.blur();
-          start();
-        }
-      });
+    const entry = $("timerEntry");
+    entry.addEventListener("focus", () => {
+      entry.select();
+      render();
+    });
+    entry.addEventListener("input", () => {
+      entry.value = entry.value.replace(/[^\d:]/g, "").slice(0, 8);
+      renderIdle();
+    });
+    entry.addEventListener("blur", () => {
+      fillFields(parseEntry(entry.value) ?? entrySec);
+      render();
+    });
+    entry.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        entry.blur();
+        start();
+      } else if (e.key === "Escape") {
+        entry.value = formatClock(entrySec);
+        entry.blur();
+      }
     });
 
     window.addEventListener("muhurta-timer-done", (e) => {

@@ -412,6 +412,10 @@ def run_once() -> dict:
                 state.update(last_sync=_now_iso(), last_error=None)
                 if up or down:
                     log.info("sync: %d up, %d down", up, down)
+                try:
+                    cloud.refresh_admin()  # whether to show the Admin tab
+                except cloud.CloudError:
+                    pass
         except cloud.Offline:
             state["last_error"] = "offline"
         except cloud.CloudError as exc:

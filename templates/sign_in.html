@@ -10,7 +10,7 @@
     </div>
     <p class="signin-kicker" id="signinKicker">Free · your own account</p>
     <h1 class="signin-title" id="signinTitle">Welcome back</h1>
-    <p class="signin-lede" id="signinLede">Sign in to pick up where you left off. Your sessions, combinations and settings follow you to every computer.</p>
+    <p class="signin-lede" id="signinLede">Sign in to pick up where you left off. Your sessions, combinations and settings follow you to every device you sign in on.</p>
 
     <!-- sign in -->
     <form class="signin-step" id="stepSignin" novalidate>
@@ -129,15 +129,7 @@
         </div>
         <p class="field-note caps-note" data-caps-for="newPassword" hidden>Caps Lock is on.</p>
         <div class="strength" aria-hidden="true"><span class="strength-bar" id="strengthBar"></span></div>
-        <p class="strength-label" id="strengthLabel" aria-live="polite"></p>
-        <ul class="rules" id="passwordRules">
-          <li data-rule="length">At least 8 characters</li>
-          <li data-rule="lower">A lowercase letter</li>
-          <li data-rule="upper">A capital letter</li>
-          <li data-rule="number">A number</li>
-          <li data-rule="symbol">A symbol, like ! ? # or @</li>
-          <li data-rule="personal">Not your username or email</li>
-        </ul>
+        <p class="field-note pw-guide" id="passwordRules" aria-live="polite">8 or more characters, with a capital letter, a number and a symbol.</p>
       </div>
       <div class="field">
         <label class="signin-label" for="newPassword2">Confirm password</label>
@@ -147,13 +139,17 @@
         </div>
         <p class="field-note" id="matchNote" aria-live="polite"></p>
       </div>
-      <div class="save-hint" id="saveHint">
-        <div class="save-hint-text">
-          <strong>Saving it in Passwords or another password manager?</strong>
-          Use the website <span class="save-site">{{ password_site }}</span> and your email.
+      <details class="save-hint" id="saveHint">
+        <summary>Saving it in a password manager?</summary>
+        <div class="save-hint-body">
+          <p class="save-hint-text">Use this website and your email:</p>
+          <p class="save-site" id="saveSite">{{ password_site }}</p>
+          <div class="save-hint-actions">
+            <button type="button" class="signin-link" id="btnCopySite" data-site="{{ password_site }}">Copy website</button>
+            <button type="button" class="signin-link" id="btnCopyPassword" hidden>Copy password</button>
+          </div>
         </div>
-        <button type="button" class="btn btn-quiet btn-small" id="btnCopyPassword" hidden>Copy password</button>
-      </div>
+      </details>
       <button type="submit" class="btn btn-primary signin-submit" id="btnSavePassword">Create account</button>
       <p class="signin-switch"><button type="button" class="signin-link" id="btnCancelPending">Start over with a different email</button></p>
     </form>

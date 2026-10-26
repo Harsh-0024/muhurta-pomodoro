@@ -101,7 +101,7 @@
         return ["Almost done", "Finish your profile", `Signed in as ${email}. Choose how you appear in the app.`, 0];
       default:
         return ["Free · your own account", "Welcome back",
-          "Sign in to pick up where you left off. Your sessions, combinations and settings follow you to every computer.", 0];
+          "Sign in to pick up where you left off. Your sessions, combinations and settings follow you to every device you sign in on.", 0];
     }
   }
 
@@ -235,34 +235,57 @@
     };
   }
 
+  // One quiet line under the password: the rules before typing, then only
+  // what is still missing, then how strong it is. The same rules as before,
+  // without a checklist to read.
+  const GUIDE_IDLE = "8 or more characters, with a capital letter, a number and a symbol.";
+  const MISSING = {
+    length: "more characters",
+    lower: "a lowercase letter",
+    upper: "a capital letter",
+    number: "a number",
+    symbol: "a symbol",
+  };
+
+  function listWords(items) {
+    return items.length < 2 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
+  }
+
   function renderPassword() {
     const pw = $("newPassword").value;
     const checks = passwordChecks(pw);
-    document.querySelectorAll("#passwordRules li").forEach((li) => {
-      li.classList.toggle("is-met", Boolean(checks[li.dataset.rule]));
-    });
-    const met = Object.values(checks).filter(Boolean).length;
-    const allMet = met === 6;
+    const allMet = Object.values(checks).every(Boolean);
+    const missing = Object.keys(MISSING).filter((k) => !checks[k]).map((k) => MISSING[k]);
+    const guide = $("passwordRules");
     let level = 0;
-    let label = "";
+    let text = GUIDE_IDLE;
+    let tone = "";
     if (pw) {
-      if (!allMet) {
-        level = met <= 3 ? 1 : 2;
-        label = met <= 3 ? "Too weak" : "Almost there";
+      if (missing.length) {
+        level = missing.length >= 3 ? 1 : 2;
+        text = `Add ${listWords(missing)}.`;
+      } else if (!checks.personal) {
+        level = 2;
+        text = "Don't use your username or email in it.";
+        tone = "error";
       } else if (pw.length >= 16) {
         level = 5;
-        label = "Very strong";
+        text = "Very strong.";
+        tone = "ok";
       } else if (pw.length >= 12) {
         level = 4;
-        label = "Strong";
+        text = "Strong.";
+        tone = "ok";
       } else {
         level = 3;
-        label = "Good — longer is even better";
+        text = "Good. Longer is even better.";
+        tone = "ok";
       }
     }
     $("strengthBar").style.width = `${level * 20}%`;
     $("strengthBar").dataset.level = String(level);
-    $("strengthLabel").textContent = label;
+    guide.textContent = text;
+    guide.dataset.tone = tone;
     renderMatch();
     return allMet;
   }
@@ -351,6 +374,7 @@
     setVisible($("newPassword2"), true);
     renderPassword();
     $("btnCopyPassword").hidden = false;
+    $("saveHint").open = true; // the moment it's needed: right after a suggestion
     say("Strong password filled in. Copy it into your password manager before you continue.", "ok");
   });
 
@@ -359,6 +383,12 @@
     if (!pw) return;
     say((await copyText(pw)) ? "Password copied." : "Couldn't copy. Select it and copy it by hand.",
       undefined);
+  });
+
+  $("btnCopySite").addEventListener("click", async (ev) => {
+    const site = ev.currentTarget.dataset.site;
+    say((await copyText(site)) ? "Website copied. Paste it into your password manager." :
+      `Couldn't copy. The website is ${site}`, undefined);
   });
 
   // Typing your own: the Copy button is still handy once there is something to copy.

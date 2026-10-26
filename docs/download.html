@@ -94,15 +94,48 @@
         ["Why does Windows warn me?", "The app has no paid publisher certificate. Nothing is wrong with it, and you only allow it once."],
       ],
     },
+    android: {
+      file: "Muhurta-Pomodoro-android.apk",
+      eyebrow: "Android · phones and tablets",
+      steps: [
+        ["Open it", "When the download finishes, tap it (or find it in Files → Downloads)."],
+        ["Allow it once", "Android asks about installing from your browser: Settings → Allow from this source, then go back."],
+        ["Install", "Tap Install, then open Muhurta and sign in. Your history comes with you."],
+      ],
+      after: "That's it. A notice in the app tells you when there's a new version.",
+      folds: [
+        ["\u201cApp not installed\u201d?", "You have an early test copy. Uninstall Muhurta first (your history is in your account), then install this one."],
+        ["Play Protect warns about it?", "Tap <b>More details</b> → <b>Install anyway</b>. The app isn't on the Play Store, so Google doesn't know it yet. Nothing is wrong with it."],
+      ],
+    },
+    // Not a file: a web app that installs from Safari and then works offline.
+    iphone: {
+      web: "app/",
+      eyebrow: "iPhone and iPad · in Safari",
+      steps: [
+        ["Open it", "Tap Open Muhurta above, in Safari."],
+        ["Add it", "Tap Share, then Add to Home Screen, then Add."],
+        ["Sign in", "Open Muhurta from your Home Screen and sign in. Your history comes with you."],
+      ],
+      after: "That's it. It opens like an app, works offline, and updates itself.",
+      folds: [
+        ["Does it work with no internet?", "Yes. After the first time, everything works offline; sessions sync to your account the next time you're online."],
+        ["Will it ring with the screen locked?", "Yes, once you allow notifications: in Muhurta, Settings → Notifications → Allow (iOS 16.4 or later). The end of each block then arrives as a notification, even with the phone locked."],
+        ["No \u201cAdd to Home Screen\u201d?", "Open the page in <b>Safari</b> (not inside another app). On iOS 16.4 and later it also works from Chrome's Share menu."],
+      ],
+    },
   };
+  const NAMES = { mac: "Mac", win: "Windows", android: "Android", iphone: "iPhone" };
 
   const params = new URLSearchParams(location.search);
   let os = (params.get("os") || "").toLowerCase();
-  if (!BUILDS[os]) os = /Win/i.test(navigator.userAgent) ? "win" : "mac";
+  // iPadOS says it is a Mac; a touch screen gives it away.
+  const onIphone = /iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (!BUILDS[os]) os = onIphone ? "iphone" : /Android/i.test(navigator.userAgent) ? "android" : /Win/i.test(navigator.userAgent) ? "win" : "mac";
   const build = BUILDS[os];
-  const url = `${REPO}/releases/latest/download/${build.file}`;
+  const url = build.web || `${REPO}/releases/latest/download/${build.file}`;
 
-  document.title = `Download Muhurta Pomodoro for ${os === "win" ? "Windows" : "Mac"}`;
+  document.title = `Download Muhurta Pomodoro for ${NAMES[os]}`;
   document.getElementById("eyebrow").textContent = build.eyebrow;
   document.getElementById("manual").href = url;
   document.getElementById("walk").innerHTML = build.steps
@@ -114,10 +147,24 @@
   const status = document.getElementById("status");
   const statusText = document.getElementById("statusText");
 
-  // Phones can't run it; don't fire a download they can't use.
-  if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+  // Don't fire a download the device can't use: a phone can't run the
+  // computer versions, nor a computer or an iPhone the Android one.
+  const onAndroid = /Android/i.test(navigator.userAgent);
+  const wrongDevice = os !== "iphone" && (onIphone || (onAndroid ? os !== "android" : os === "android"));
+  if (build.web) {
+    // Nothing to download: the app opens in Safari and is added from there.
     status.classList.add("done");
-    statusText.textContent = "Open this page on your computer to download.";
+    status.querySelector(".spin").remove();
+    statusText.innerHTML = `<a class="btn-download" href="${build.web}">Open Muhurta</a>`;
+    if (!onIphone) statusText.innerHTML += ' <span class="quiet small">Open this page on your iPhone to install it.</span>';
+    document.getElementById("retry").hidden = true;
+  } else if (wrongDevice) {
+    status.classList.add("done");
+    statusText.textContent = onIphone ? "This is for another kind of device. Get the iPhone app instead."
+      : onAndroid ? "This is the computer version. Get the Android app instead."
+      : "This is the Android app. Open this page on your Android phone to download it.";
+    if (onAndroid) statusText.innerHTML += ' <a href="download.html?os=android">Android app</a>';
+    if (onIphone) statusText.innerHTML += ' <a href="download.html?os=iphone">iPhone app</a>';
     document.getElementById("retry").hidden = true;
   } else {
     const go = () => { location.href = url; };

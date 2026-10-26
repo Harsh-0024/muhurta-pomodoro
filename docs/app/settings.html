@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="manifest" href="/muhurta-pomodoro/app/manifest.webmanifest" />
+  <meta name="theme-color" content="#0d0b08" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Muhurta" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <link rel="apple-touch-icon" href="/muhurta-pomodoro/app/icons/apple-touch-icon.png" />
+  <script src="/muhurta-pomodoro/app/pwa.js"></script>
+  <script src="/muhurta-pomodoro/app/mobile-data.js"></script>
+  <script src="/muhurta-pomodoro/app/local-api.js"></script>
+  <script src="/muhurta-pomodoro/app/account.js"></script>
+  <script src="/muhurta-pomodoro/app/web-alerts.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Muhurta Pomodoro</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23040302'/%3E%3Cg fill='none' stroke='%23d8bd79' stroke-width='4' stroke-linecap='round'%3E%3Ccircle cx='32' cy='32' r='22'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M32 6v14M32 44v14M6 32h14M44 32h14M13.6 13.6l10 10M40.4 40.4l10 10M50.4 13.6l-10 10M23.6 40.4l-10 10'/%3E%3C/g%3E%3C/svg%3E" />
+  <link href="/muhurta-pomodoro/app/fonts/fonts.css" rel="stylesheet" />
+  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/app.css?v=1.12.1" />
+  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/mobile.css?v=1.12.1" />
+</head>
+<body class="page-settings is-mobile" data-theme="system">
+  <div class="ambient" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="/muhurta-pomodoro/app/">
+      <span class="brand-mark" aria-hidden="true">
+        <svg class="chakra-mark" viewBox="0 0 32 32" focusable="false">
+          <circle class="chakra-outer" cx="16" cy="16" r="12.5" />
+          <circle class="chakra-inner" cx="16" cy="16" r="3.2" />
+          <path class="chakra-spokes" d="M16 3.5v7M16 21.5v7M3.5 16h7M21.5 16h7M7.2 7.2l5 5M19.8 19.8l5 5M24.8 7.2l-5 5M12.2 19.8l-5 5" />
+        </svg>
+      </span>
+      <span class="brand-text">Muhurta<span class="brand-dot">·</span>Pomodoro</span>
+    </a>
+    
+    <nav class="topnav">
+      
+      <a href="/muhurta-pomodoro/app/" class="nav-link">Rhythm</a>
+      <a href="/muhurta-pomodoro/app/timer.html" class="nav-link">Timer</a>
+      <a href="/muhurta-pomodoro/app/flow.html" class="nav-link">Flow</a>
+      <a href="/muhurta-pomodoro/app/dashboard.html" class="nav-link">Dashboard</a>
+      <a href="/muhurta-pomodoro/app/settings.html" class="nav-link is-active">Settings</a>
+      
+      
+    </nav>
+    
+  </header>
+  <main class="main">
+<section class="settings-hero">
+  <h1 class="title title-settings">Refine the ritual.</h1>
+  <p class="lede lede-narrow">Every preference saves itself to your account the moment you change it.</p>
+</section>
+
+<div class="settings-layout">
+  <nav class="settings-nav" aria-label="Settings sections">
+    <a href="#rhythm" class="settings-nav-link is-active">Rhythm</a>
+    <a href="#timer" class="settings-nav-link">Timer</a>
+    <a href="#sound" class="settings-nav-link">Sound</a>
+    <a href="#appearance" class="settings-nav-link">Appearance</a>
+    <a href="#notifications" class="settings-nav-link">Notifications</a>
+    <a href="#combinations" class="settings-nav-link">Combinations</a>
+    <a href="#history" class="settings-nav-link">History</a>
+    <a href="#sync" class="settings-nav-link">Account</a>
+    <a href="#keyboard" class="settings-nav-link">Keyboard</a>
+    <a href="#feedback" class="settings-nav-link">Feedback</a>
+    <a href="#about" class="settings-nav-link">About</a>
+  </nav>
+
+  <div class="settings-sections">
+    <section class="pref-section" id="rhythm" aria-labelledby="rhythmTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="rhythmTitle">Rhythm</h2>
+        <p class="card-lede">How a session starts, and what a good day looks like.</p>
+      </header>
+      <div class="pref-group">
+        <div class="pref-row pref-row-stack settings-level-picker" id="setDefaultPresetPicker">
+          <div class="pref-text">
+            <span class="pref-name" id="setDefaultPresetLabel">Default level</span>
+            <span class="pref-desc">Ready on Rhythm each time you open it.</span>
+          </div>
+          <button type="button" class="select-button" id="setDefaultPresetButton" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="setDefaultPresetLabel setDefaultPresetText">
+            <span class="select-button-main">
+              <span class="select-button-name" id="setDefaultPresetText">Loading…</span>
+              <span class="select-button-sub" id="setDefaultPresetSub"></span>
+            </span>
+            <span class="select-caret" aria-hidden="true"></span>
+          </button>
+          <div class="settings-level-menu hidden" id="setDefaultPresetMenu" role="listbox" aria-labelledby="setDefaultPresetLabel"></div>
+        </div>
+        <div class="pref-row">
+          <div class="pref-text">
+            <span class="pref-name" id="setGoalLabel">Daily focus goal</span>
+            <span class="pref-desc" id="setGoalHint">Days that reach it glow brightest on the dashboard.</span>
+          </div>
+          <div class="stepper" role="group" aria-labelledby="setGoalLabel">
+            <button type="button" class="stepper-btn" id="setGoalDown" aria-label="Lower daily goal">&minus;</button>
+            <output class="stepper-value" id="setGoalValue" aria-live="polite">2h</output>
+            <button type="button" class="stepper-btn" id="setGoalUp" aria-label="Raise daily goal">+</button>
+          </div>
+        </div>
+        <label class="pref-row toggle">
+          <span class="pref-text">
+            <span class="pref-name">Auto-start rest</span>
+            <span class="pref-desc">Roll into rest the moment a focus block ends.</span>
+          </span>
+          <input type="checkbox" id="setAutoBreak" />
+          <span class="toggle-ui" aria-hidden="true"></span>
+        </label>
+        <label class="pref-row toggle">
+          <span class="pref-text">
+            <span class="pref-name">Auto-start focus</span>
+            <span class="pref-desc">Begin the next focus block when rest ends.</span>
+          </span>
+          <input type="checkbox" id="setAutoWork" />
+          <span class="toggle-ui" aria-hidden="true"></span>
+        </label>
+      </div>
+    </section>
+
+    <section class="pref-section" id="timer" aria-labelledby="timerTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="timerTitle">Timer</h2>
+        <p class="card-lede">The simple timer: set a time, and it counts down.</p>
+      </header>
+      <div class="pref-group">
+        <div class="pref-row pref-row-stack">
+          <div class="pref-text">
+            <span class="pref-name" id="setTimerEndLabel">When it reaches zero</span>
+            <span class="pref-desc" id="setTimerEndHint">Chime once and finish.</span>
+          </div>
+          <div class="segmented" id="setTimerEnd" role="radiogroup" aria-labelledby="setTimerEndLabel" aria-describedby="setTimerEndHint">
+            <button type="button" class="segment" data-value="stop" role="radio" aria-checked="false">Stop</button>
+            <button type="button" class="segment" data-value="ring" role="radio" aria-checked="false">Keep ringing</button>
+            <button type="button" class="segment" data-value="overtime" role="radio" aria-checked="false">Count overtime</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pref-section" id="sound" aria-labelledby="soundTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="soundTitle">Sound</h2>
+        <p class="card-lede">Bells mark the edges of each block. Press ▶ to hear one.</p>
+      </header>
+      <div class="pref-group">
+        <label class="pref-row toggle">
+          <span class="pref-text">
+            <span class="pref-name">Sound</span>
+            <span class="pref-desc">Master switch for every cue below.</span>
+          </span>
+          <input type="checkbox" id="setSound" />
+          <span class="toggle-ui" aria-hidden="true"></span>
+        </label>
+        <div class="pref-row" data-needs-sound>
+          <div class="pref-text">
+            <label class="pref-name" for="setVolume">Volume</label>
+          </div>
+          <div class="volume-control">
+            <input type="range" id="setVolume" class="range" min="0" max="100" step="1" />
+            <output class="range-val" id="setVolumeVal" for="setVolume">70%</output>
+          </div>
+        </div>
+        <label class="pref-row toggle" data-needs-sound>
+          <span class="pref-text">
+            <span class="pref-name">Minute pulse</span>
+            <span class="pref-desc">A soft tick as each minute passes.</span>
+          </span>
+          <input type="checkbox" id="setTick" />
+          <span class="toggle-ui" aria-hidden="true"></span>
+        </label>
+      </div>
+
+      <h3 class="pref-subhead">Cues</h3>
+      <div class="pref-group cue-list" id="cueList" data-needs-sound></div>
+    </section>
+
+    <section class="pref-section" id="appearance" aria-labelledby="appearanceTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="appearanceTitle">Appearance</h2>
+      </header>
+      <div class="pref-group">
+        <div class="pref-row">
+          <div class="pref-text">
+            <span class="pref-name" id="setThemeLabel">Theme</span>
+            <span class="pref-desc">System follows your device's light or dark mode.</span>
+          </div>
+          <div class="segmented segmented-theme" id="setTheme" role="radiogroup" aria-labelledby="setThemeLabel">
+            <button type="button" class="segment" data-value="dark" role="radio" aria-checked="false"><span class="theme-swatch theme-swatch-dark" aria-hidden="true"></span>Dark</button>
+            <button type="button" class="segment" data-value="light" role="radio" aria-checked="false"><span class="theme-swatch theme-swatch-light" aria-hidden="true"></span>Light</button>
+            <button type="button" class="segment" data-value="system" role="radio" aria-checked="false"><span class="theme-swatch theme-swatch-system" aria-hidden="true"></span>System</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pref-section" id="notifications" aria-labelledby="notifyTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="notifyTitle">Notifications</h2>
+      </header>
+      <div class="pref-group">
+        <label class="pref-row toggle">
+          <span class="pref-text">
+            <span class="pref-name">Desktop notifications</span>
+            <span class="pref-desc">A quiet alert when a block ends while this tab is out of view.</span>
+          </span>
+          <input type="checkbox" id="setNotify" />
+          <span class="toggle-ui" aria-hidden="true"></span>
+        </label>
+        <div class="pref-row pref-status" id="notifyStatusRow">
+          <p class="pref-status-text" id="notifyStatus"></p>
+          <button type="button" class="btn btn-quiet btn-small hidden" id="btnNotifyAction"></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="pref-section" id="combinations" aria-labelledby="combosTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="combosTitle">Your combinations</h2>
+        <p class="card-lede">Name your own rhythm. A cycle is always four focus blocks, three short rests and one long rest.</p>
+      </header>
+      <div class="pref-group">
+        <form class="preset-form" id="customForm" novalidate>
+          <div class="preset-field preset-field-name">
+            <label class="field-label" for="presetName">Name</label>
+            <input type="text" id="presetName" name="name" class="input" placeholder="Morning deep work" maxlength="80" required autocomplete="off" />
+          </div>
+          <div class="preset-field">
+            <label class="field-label" for="presetWork">Focus</label>
+            <div class="input-unit"><input type="number" id="presetWork" name="work_min" class="input" inputmode="numeric" min="1" max="180" placeholder="25" required /><span>min</span></div>
+          </div>
+          <div class="preset-field">
+            <label class="field-label" for="presetShort">Short rest</label>
+            <div class="input-unit"><input type="number" id="presetShort" name="short_rest_min" class="input" inputmode="numeric" min="1" max="60" placeholder="5" required /><span>min</span></div>
+          </div>
+          <div class="preset-field">
+            <label class="field-label" for="presetLong">Long rest</label>
+            <div class="input-unit"><input type="number" id="presetLong" name="long_rest_min" class="input" inputmode="numeric" min="1" max="120" placeholder="15" required /><span>min</span></div>
+          </div>
+          <div class="preset-form-foot">
+            <p class="preset-preview" id="presetPreview" aria-live="polite">Fill in the durations to see the full cycle.</p>
+            <div class="preset-form-actions">
+              <button type="button" class="btn btn-ghost hidden" id="btnCancelEdit">Cancel</button>
+              <button type="submit" class="btn btn-primary" id="btnSavePreset">Save combination</button>
+            </div>
+          </div>
+        </form>
+        <ul class="custom-list" id="customList"></ul>
+      </div>
+    </section>
+
+    <section class="pref-section" id="history" aria-labelledby="historyTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="historyTitle">History</h2>
+        <p class="card-lede">Fix a session that kept running while you were away, or add one the timer missed.</p>
+      </header>
+      <div class="pref-group">
+        <div class="pref-row">
+          <div class="pref-text">
+            <span class="pref-name">Edit past sessions</span>
+            <span class="pref-desc" id="historyHint">Change when a session started and ended, or how long it lasted. The dashboard updates straight away.</span>
+          </div>
+          <a class="btn btn-quiet btn-small" id="historyLink" href="/muhurta-pomodoro/app/history.html">Open history</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="pref-section" id="sync" aria-labelledby="syncTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="syncTitle">Account</h2>
+        <p class="card-lede">Your sessions, combinations and settings are kept in your account and appear on every device you sign in on. The timer keeps working without internet; changes sync when you're back online.</p>
+      </header>
+      <div class="pref-group" id="syncGroup">
+        <div class="pref-row" id="syncSignedIn">
+          <span class="account-avatar" id="accountAvatar" aria-hidden="true"></span>
+          <div class="pref-text">
+            <span class="pref-name" id="accountName">Signed in</span>
+            <span class="pref-desc" id="syncSignedInAs"></span>
+          </div>
+          <div class="account-actions">
+            <button type="button" class="btn btn-quiet btn-small" id="btnEditProfile">Edit profile</button>
+            <button type="button" class="btn btn-quiet btn-small" id="btnSignOut">Sign out</button>
+          </div>
+        </div>
+        <form class="pref-row profile-form" id="profileForm" novalidate hidden>
+          <div class="field-row">
+            <div class="field">
+              <label class="signin-label" for="profileFirst">First name</label>
+              <input type="text" id="profileFirst" class="input" autocomplete="given-name" maxlength="50" required />
+            </div>
+            <div class="field">
+              <label class="signin-label" for="profileLast">Last name <span class="optional">optional</span></label>
+              <input type="text" id="profileLast" class="input" autocomplete="family-name" maxlength="50" />
+            </div>
+          </div>
+          <div class="field">
+            <label class="signin-label" for="profileUsername">Username</label>
+            <div class="username-wrap">
+              <span class="username-at" aria-hidden="true">@</span>
+              <input type="text" id="profileUsername" class="input" autocapitalize="none" spellcheck="false" maxlength="20" required />
+            </div>
+            <p class="field-note">3–20 letters, numbers, _ or . — starting with a letter.</p>
+          </div>
+          <div class="profile-actions">
+            <button type="button" class="btn btn-quiet btn-small" id="btnProfileCancel">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-small" id="btnProfileSave">Save</button>
+          </div>
+        </form>
+        <div class="pref-row">
+          <div class="pref-text">
+            <span class="pref-name">Saving your password</span>
+            <span class="pref-desc">In Passwords or another password manager, file it under the website <span class="save-site">harsh-0024.github.io/muhurta-pomodoro</span> with your email.</span>
+          </div>
+          <button type="button" class="btn btn-quiet btn-small" id="btnCopySite" data-site="harsh-0024.github.io/muhurta-pomodoro">Copy website</button>
+        </div>
+        <div class="pref-row pref-status" id="syncStatusRow">
+          <p class="pref-status-text" id="syncStatus" aria-live="polite"></p>
+          <button type="button" class="btn btn-quiet btn-small" id="btnSyncNow">Sync now</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="pref-section" id="keyboard" aria-labelledby="keyboardTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="keyboardTitle">Keyboard</h2>
+        <p class="card-lede">On the timer page. Press <kbd>Shift</kbd> + <kbd>/</kbd> anywhere to bring this list up.</p>
+      </header>
+      <div class="pref-group">
+        <ul class="shortcut-grid" id="shortcutGrid"></ul>
+      </div>
+    </section>
+
+    <section class="pref-section" id="feedback" aria-labelledby="feedbackTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="feedbackTitle">Feedback</h2>
+        <p class="card-lede">Tell the maker what works for you, what doesn't, and what you'd like next. Every note is read.</p>
+      </header>
+      <form class="pref-group feedback-form" id="feedbackForm" novalidate>
+        <div class="field">
+          <span class="signin-label" id="feedbackKindLabel">What is it about?</span>
+          <div class="segmented feedback-kinds" id="feedbackKind" role="radiogroup" aria-labelledby="feedbackKindLabel">
+            <button type="button" class="segment" data-value="like" role="radio" aria-checked="false">I like</button>
+            <button type="button" class="segment" data-value="dislike" role="radio" aria-checked="false">I don't like</button>
+            <button type="button" class="segment" data-value="improve" role="radio" aria-checked="false">Could be better</button>
+            <button type="button" class="segment is-active" data-value="idea" role="radio" aria-checked="true">Feature idea</button>
+          </div>
+        </div>
+        <div class="field">
+          <label class="signin-label" for="feedbackMessage">Your words</label>
+          <textarea id="feedbackMessage" class="input feedback-message" rows="4" maxlength="2000" placeholder="What would you like Muhurta Pomodoro to do?"></textarea>
+        </div>
+        <div class="feedback-actions">
+          <p class="field-note" id="feedbackStatus" aria-live="polite">Sent with your name and email, so you can be answered.</p>
+          <button type="submit" class="btn btn-primary btn-small" id="btnSendFeedback" disabled>Send</button>
+        </div>
+      </form>
+
+      <div id="feedbackSentWrap" hidden>
+        <h3 class="pref-subhead">What you've sent</h3>
+        <div class="pref-group" id="feedbackSent"></div>
+      </div>
+    </section>
+
+    <section class="pref-section" id="about" aria-labelledby="aboutTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="aboutTitle">About</h2>
+      </header>
+      <div class="pref-group">
+        <div class="pref-row">
+          <div class="pref-text">
+            <span class="pref-name">Muhurta Pomodoro</span>
+            <span class="pref-desc">Version 1.12.1 · 1 Muhurat = 48 min · 1 Ghadi = 24 min</span>
+          </div>
+        </div>
+        <div class="pref-row pref-status" id="updateRow">
+          <div class="pref-text">
+            <span class="pref-name">Updates</span>
+            <span class="pref-desc" id="updateStatus" aria-live="polite">Checking…</span>
+          </div>
+          <button type="button" class="btn btn-quiet btn-small" id="btnCheckUpdates">Check now</button>
+        </div>
+        <div class="pref-row">
+          <div class="pref-text">
+            <span class="pref-name">Restore defaults</span>
+            <span class="pref-desc">Resets timer, sound, theme and notification preferences. Your combinations and focus history stay.</span>
+          </div>
+          <button type="button" class="btn btn-danger" id="btnResetSettings">Restore</button>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+<p class="settings-toast" id="settingsToast" role="status" aria-live="polite"></p>
+</main>
+  
+  <footer class="foot">
+    <span>1 Muhurat = 48 min · 1 Ghadi = 24 min</span>
+    <span class="foot-version">v1.12.1</span>
+  </footer>
+  
+  
+  <nav class="tabbar" aria-label="Main">
+    <a href="/muhurta-pomodoro/app/" class="tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h12M6 21.5h12M7 2.5v3.2c0 2.4 5 4.6 5 6.3 0-1.7 5-3.9 5-6.3V2.5M7 21.5v-3.2c0-2.4 5-4.6 5-6.3 0 1.7 5 3.9 5 6.3v3.2M9.5 19.5h5"/></svg>
+      <span>Rhythm</span>
+    </a>
+    <a href="/muhurta-pomodoro/app/timer.html" class="tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg>
+      <span>Timer</span>
+    </a>
+    <a href="/muhurta-pomodoro/app/flow.html" class="tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c-2-2.6-3.6-4-5.5-4a4 4 0 0 0 0 8c1.9 0 3.5-1.4 5.5-4zm0 0c2 2.6 3.6 4 5.5 4a4 4 0 0 0 0-8c-1.9 0-3.5 1.4-5.5 4z"/></svg>
+      <span>Flow</span>
+    </a>
+    <a href="/muhurta-pomodoro/app/dashboard.html" class="tab">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-6M22 20H2"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="/muhurta-pomodoro/app/settings.html" class="tab is-active">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </a>
+  </nav>
+  
+  <div id="shortcutsModal" class="modal hidden" role="dialog" aria-labelledby="shortcutsTitle" aria-hidden="true">
+    <div class="modal-backdrop" tabindex="-1" aria-hidden="true"></div>
+    <div class="modal-sheet">
+      <button type="button" class="modal-close" aria-label="Close">×</button>
+      <h2 id="shortcutsTitle" class="modal-title">Keyboard shortcuts</h2>
+      <ul class="shortcut-list" id="shortcutsList"></ul>
+    </div>
+  </div>
+  <div id="confirmModal" class="modal confirm-modal hidden" role="dialog" aria-labelledby="confirmTitle" aria-describedby="confirmMessage" aria-hidden="true">
+    <div class="modal-backdrop" tabindex="-1" aria-hidden="true"></div>
+    <div class="modal-sheet confirm-sheet">
+      <p class="modal-kicker">Confirm</p>
+      <h2 id="confirmTitle" class="modal-title">Are you sure?</h2>
+      <p id="confirmMessage" class="modal-copy"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-quiet" id="confirmCancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="confirmAccept">Continue</button>
+      </div>
+    </div>
+  </div>
+  <script>window.__PAGE__ = "settings";</script>
+  
+  <script>
+    // Signed out while a page was open (from another window, or the account
+    // ended its sign-in): go to the sign-in page instead of failing quietly.
+    (function () {
+      const plain = window.fetch.bind(window);
+      window.fetch = async function (...args) {
+        const r = await plain(...args);
+        if (r.status === 401 && r.headers.get("X-Signed-Out")) window.location.replace("/muhurta-pomodoro/app/sign-in.html");
+        return r;
+      };
+    })();
+  </script>
+  
+  <script src="/muhurta-pomodoro/app/static/js/native.js?v=1.12.1"></script>
+  <script src="/muhurta-pomodoro/app/static/js/menubar.js?v=1.12.1" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/update-check.js?v=1.12.1" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/alive.js?v=1.12.1" defer></script>
+  
+  <script src="/muhurta-pomodoro/app/static/js/whats-new.js?v=1.12.1" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/sounds.js?v=1.12.1" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/session-monitor.js?v=1.12.1" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/one-clock.js?v=1.12.1" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/timer-core.js?v=1.12.1" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/dialog.js?v=1.12.1" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/shortcuts.js?v=1.12.1" defer></script>
+  
+  <script src="/muhurta-pomodoro/app/static/js/mobile.js?v=1.12.1" defer></script>
+  
+<script src="/muhurta-pomodoro/app/static/js/settings.js?v=1.12.1" defer></script>
+<script src="/muhurta-pomodoro/app/static/js/feedback.js?v=1.12.1" defer></script>
+
+</body>
+</html>

@@ -1042,7 +1042,7 @@
       const button = ev.currentTarget; // gone once the dialog's await returns
       const ok = await askConfirm({
         title: "Sign out?",
-        message: "Everything is saved to your account first, then removed from this computer. " +
+        message: "Everything is saved to your account first, then removed from this device. " +
           "Sign in again to get it all back. A session in progress is ended without saving.",
         accept: "Sign out",
       });

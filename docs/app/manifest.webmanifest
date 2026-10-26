@@ -1,0 +1,30 @@
+{
+  "name": "Muhurta Pomodoro",
+  "short_name": "Muhurta",
+  "description": "A calm focus timer built on the old Indian units of time.",
+  "id": "/muhurta-pomodoro/app/",
+  "start_url": "/muhurta-pomodoro/app/",
+  "scope": "/muhurta-pomodoro/app/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d0b08",
+  "theme_color": "#0d0b08",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

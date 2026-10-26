@@ -27,31 +27,82 @@
     return node;
   }
 
-  function waitForNewVersion(from, msg, onError) {
+  // While an update runs, the notice shows what it is doing and how far it
+  // has got (/api/update/progress), so the app never looks frozen. A git
+  // install restarts instead: the server is briefly gone, then the page
+  // reloads on the new version.
+  const STAGES = {
+    download: "Downloading the update",
+    install: "Installing it",
+    reopen: "Reopening. The app closes and opens again in a moment.",
+    restart: "Restarting. Back in a moment.",
+  };
+
+  function followUpdate(from, view, onError) {
     const started = Date.now();
     const poll = () => {
-      fetch("/api/version", { cache: "no-store" })
+      fetch("/api/update/progress", { cache: "no-store" })
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
-          if (d && d.update_error) onError(d.update_error);
-          else if (d && d.current !== from) location.reload();
-          else retry();
+          if (!d) return retry();
+          if (d.error) return onError(d.error);
+          if (d.current !== from) return location.reload();
+          if (d.progress) view.show(d.progress.stage, d.progress.percent);
+          retry();
         })
-        .catch(retry);
+        // The server is restarting (git install) or the window is closing.
+        .catch(() => {
+          view.show("restart", null);
+          retry();
+        });
     };
     const retry = () => {
       // An update that also installs components can take a minute or two.
-      if (Date.now() - started < 4 * 60 * 1000) setTimeout(poll, 2000);
-      else msg.textContent = "The update is taking long. Close this window and open Muhurta Pomodoro again.";
+      if (Date.now() - started < 4 * 60 * 1000) setTimeout(poll, 400);
+      else view.slow();
     };
-    setTimeout(poll, 2000);
+    poll();
+  }
+
+  // The moving line and the words under the title, put inside `host`.
+  function progressView(host, msg) {
+    const bar = el("div", "update-progress is-indeterminate");
+    bar.setAttribute("role", "progressbar");
+    bar.setAttribute("aria-label", "Update progress");
+    const fill = el("span", "update-progress-fill");
+    bar.append(fill);
+    host.append(bar);
+    return {
+      bar,
+      show(stage, percent) {
+        const known = typeof percent === "number";
+        bar.classList.toggle("is-indeterminate", !known);
+        if (known) {
+          fill.style.width = `${Math.max(3, percent)}%`;
+          bar.setAttribute("aria-valuenow", String(percent));
+        } else {
+          fill.style.width = "";
+          bar.removeAttribute("aria-valuenow");
+        }
+        const words = STAGES[stage] || "Updating";
+        msg.textContent = stage === "download" && known ? `${words}… ${percent}%` : words.endsWith(".") ? words : `${words}…`;
+      },
+      slow() {
+        bar.classList.add("is-indeterminate");
+        msg.textContent = "The update is taking long. Close this window and open Muhurta Pomodoro again.";
+      },
+      remove() {
+        bar.remove();
+      },
+    };
   }
 
   // The "Update now" (or "Download") button, shared by the notice and the
-  // required screen. `others` are disabled while updating.
-  function updateButton(d, msg, others) {
+  // required screen. While updating, `host` shows the progress line and
+  // `hide` (the buttons) step aside.
+  function updateButton(d, msg, host, hide) {
     if (d.how !== "restart") {
-      const link = el("a", "btn btn-primary", "Download the new version");
+      const link = el("a", "btn btn-primary", "Download");
       link.href = d.url;
       link.target = "_blank";
       link.rel = "noopener";
@@ -60,22 +111,42 @@
     const button = el("button", "btn btn-primary", "Update now");
     button.type = "button";
     button.addEventListener("click", () => {
-      const all = [button, ...others];
-      all.forEach((b) => (b.disabled = true));
       const before = msg.textContent;
-      msg.textContent = "Updating… the app is back by itself in a few seconds.";
+      const title = host.querySelector(".update-bar-title, .update-required-title");
+      const titleBefore = title && title.textContent;
+      if (title) title.textContent = `Updating to ${d.latest}`;
+      const hidden = [button, ...hide];
+      hidden.forEach((b) => (b.hidden = true));
+      host.classList.add("is-updating");
+      const view = progressView(host, msg);
+      view.show("download", null);
       const failed = (text) => {
+        view.remove();
+        host.classList.remove("is-updating");
+        if (title) title.textContent = titleBefore;
         msg.textContent = text || before;
-        all.forEach((b) => (b.disabled = false));
+        hidden.forEach((b) => (b.hidden = false));
       };
       fetch("/api/update/restart", { method: "POST" })
         .then((r) => {
           if (!r.ok) throw new Error();
-          waitForNewVersion(d.current, msg, failed);
+          followUpdate(d.current, view, failed);
         })
         .catch(() => failed("Could not update just now. Close this window and open Muhurta Pomodoro again."));
     });
     return button;
+  }
+
+  // A notice: a short title and one quiet line, with its buttons.
+  function notice(title, sub) {
+    const bar = el("div", "update-bar");
+    bar.setAttribute("role", "status");
+    const copy = el("div", "update-bar-copy");
+    const msg = el("p", "update-bar-sub", sub);
+    copy.append(el("p", "update-bar-title", title), msg);
+    const actions = el("div", "update-bar-actions");
+    bar.append(copy, actions);
+    return { bar, msg, actions };
   }
 
   function showBar(d) {
@@ -83,14 +154,10 @@
     document.querySelector(".update-bar")?.remove();
     shown = `bar:${d.latest}`;
 
-    const bar = el("div", "update-bar");
-    bar.setAttribute("role", "status");
-    const text = d.message
-      ? `Version ${d.latest} is available. ${d.message}`
-      : `Version ${d.latest} is available. You have ${d.current}.`;
-    const msg = el("span", "update-bar-text", text);
-    const actions = el("span", "update-bar-actions");
-    const later = el("button", "btn btn-quiet", "Later");
+    const { bar, msg, actions } = notice(`Version ${d.latest} is ready`,
+      d.message || `You're on ${d.current}.`);
+    const later = el("button", "btn btn-ghost update-bar-later", "Later");
+    later.setAttribute("aria-label", "Later");
     later.type = "button";
     later.addEventListener("click", () => {
       try {
@@ -98,8 +165,7 @@
       } catch (_) {}
       bar.remove();
     });
-    actions.append(later, updateButton(d, msg, [later]));
-    bar.append(msg, actions);
+    actions.append(later, updateButton(d, msg, bar, [actions]));
     document.body.appendChild(bar);
   }
 
@@ -127,13 +193,13 @@
     screen.setAttribute("aria-labelledby", "updateRequiredTitle");
     const card = el("div", "update-required-card");
     const kicker = el("p", "signin-kicker", "Update required");
-    const title = el("h2", "update-required-title", `Please update to version ${d.latest}`);
+    const title = el("h2", "update-required-title", "Please update");
     title.id = "updateRequiredTitle";
     const body = el("p", "update-required-text",
-      d.message || `Version ${d.current} is no longer supported. Update to keep using Muhurta Pomodoro.`);
+      d.message || `Version ${d.current} is no longer supported. Version ${d.latest} is ready.`);
     const note = el("p", "update-required-note",
       "Your sessions and settings are safe in your account and come back after the update.");
-    const button = updateButton(d, body, []);
+    const button = updateButton(d, body, card, []);
     card.append(kicker, title, body, button, note);
     screen.append(card);
     document.body.appendChild(screen);
@@ -152,13 +218,10 @@
     } catch (_) {}
     if (shown || document.querySelector(".update-bar")) return;
     shown = "stale";
-    const bar = el("div", "update-bar");
-    bar.setAttribute("role", "status");
-    const msg = el("span", "update-bar-text",
-      `Couldn't check for updates for ${d.check_failing_days} days (${d.check_error}). ` +
-      "Check your internet connection, or get the latest version from the website.");
-    const actions = el("span", "update-bar-actions");
-    const later = el("button", "btn btn-quiet", "OK");
+    const { bar, actions } = notice("Can't check for updates",
+      `Not for ${d.check_failing_days} days (${d.check_error}). Check your connection, or get the latest version from the website.`);
+    const later = el("button", "btn btn-ghost update-bar-later", "OK");
+    later.setAttribute("aria-label", "OK");
     later.type = "button";
     later.addEventListener("click", () => {
       try {
@@ -166,12 +229,11 @@
       } catch (_) {}
       bar.remove();
     });
-    const link = el("a", "btn btn-primary", "Open website");
+    const link = el("a", "btn btn-primary", "Website");
     link.href = d.url;
     link.target = "_blank";
     link.rel = "noopener";
     actions.append(later, link);
-    bar.append(msg, actions);
     document.body.appendChild(bar);
   }
 

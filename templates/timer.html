@@ -37,31 +37,19 @@
         </svg>
         <div class="timer-core">
           <p class="phase-label" id="timerPhaseLabel">Timer</p>
-          <div class="countdown-set" id="timerSet" role="group" aria-label="Timer length">
-            <label class="countdown-field">
-              <input type="text" class="countdown-input" id="timerHours" inputmode="numeric" maxlength="2" value="0" aria-label="Hours" autocomplete="off" />
-              <span class="countdown-unit">h</span>
-            </label>
-            <label class="countdown-field">
-              <input type="text" class="countdown-input" id="timerMinutes" inputmode="numeric" maxlength="2" value="25" aria-label="Minutes" autocomplete="off" />
-              <span class="countdown-unit">m</span>
-            </label>
-            <label class="countdown-field">
-              <input type="text" class="countdown-input" id="timerSeconds" inputmode="numeric" maxlength="2" value="00" aria-label="Seconds" autocomplete="off" />
-              <span class="countdown-unit">s</span>
-            </label>
-          </div>
+          <input type="text" class="time-display countdown-entry" id="timerEntry" value="25:00" aria-label="Timer length: minutes, or h:mm:ss" autocomplete="off" spellcheck="false" enterkeyhint="go" />
           <p class="time-display hidden" id="timerTimeDisplay">25:00</p>
-          <p class="cycle-hint" id="timerHint">Set a time and start</p>
+          <p class="cycle-hint" id="timerHint">Tap the time to change it</p>
         </div>
       </div>
-      <div class="countdown-quick" id="timerQuick" role="group" aria-label="Quick lengths">
-        <button type="button" class="countdown-chip" data-min="5">5m</button>
-        <button type="button" class="countdown-chip" data-min="10">10m</button>
-        <button type="button" class="countdown-chip" data-min="15">15m</button>
-        <button type="button" class="countdown-chip" data-min="25">25m</button>
-        <button type="button" class="countdown-chip" data-min="45">45m</button>
-        <button type="button" class="countdown-chip" data-min="60">1h</button>
+      <div class="countdown-quick" id="timerQuick" role="group" aria-label="Quick lengths in minutes">
+        <button type="button" class="countdown-pick" data-min="5">5</button>
+        <button type="button" class="countdown-pick" data-min="10">10</button>
+        <button type="button" class="countdown-pick" data-min="15">15</button>
+        <button type="button" class="countdown-pick" data-min="25">25</button>
+        <button type="button" class="countdown-pick" data-min="45">45</button>
+        <button type="button" class="countdown-pick" data-min="60">60</button>
+        <span class="countdown-pick-unit" aria-hidden="true">min</span>
       </div>
       <div class="controls" id="timerControls">
         <button type="button" class="btn btn-primary" id="btnTimerStart">Start</button>

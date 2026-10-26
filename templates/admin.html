@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block body_class %}page-settings page-admin{% endblock %}
+{% block page_id %}admin{% endblock %}
+{% block content %}
+<section class="settings-hero">
+  <h1 class="title title-settings">Admin</h1>
+  <p class="lede lede-narrow">Everyone using Muhurta Pomodoro, what they tell you, which version they run, and the rules for updates. Only you can see this.</p>
+</section>
+
+<div class="admin">
+  <p class="admin-error" id="adminError" role="alert" hidden></p>
+
+  <div class="admin-stats" id="adminStats" aria-live="polite">
+    <div class="admin-stat"><span class="admin-stat-value" id="statPeople">–</span><span class="admin-stat-label">people</span></div>
+    <div class="admin-stat"><span class="admin-stat-value" id="statComputers">–</span><span class="admin-stat-label">computers</span></div>
+    <div class="admin-stat"><span class="admin-stat-value" id="statWeek">–</span><span class="admin-stat-label">online this week</span></div>
+    <div class="admin-stat"><span class="admin-stat-value" id="statLatest">–</span><span class="admin-stat-label" id="statLatestLabel">on the latest version</span></div>
+  </div>
+
+  <section class="pref-section" aria-labelledby="peopleTitle">
+    <header class="pref-head admin-head">
+      <div>
+        <h2 class="card-title" id="peopleTitle">People</h2>
+        <p class="card-lede">Everyone with an account, most recently online first.</p>
+      </div>
+      <button type="button" class="btn btn-quiet btn-small" id="btnRefresh">Refresh</button>
+    </header>
+    <div class="pref-group" id="peopleList"><p class="admin-empty">Loading…</p></div>
+  </section>
+
+  <section class="pref-section" aria-labelledby="feedbackTitle">
+    <header class="pref-head admin-head">
+      <div>
+        <h2 class="card-title" id="feedbackTitle">Feedback <span class="admin-badge admin-new" id="feedbackNew" hidden></span></h2>
+        <p class="card-lede">What people like, dislike, would improve and want next, newest first.</p>
+      </div>
+      <div class="segmented admin-feedback-filter" id="feedbackFilter" role="radiogroup" aria-label="Show">
+        <button type="button" class="segment is-active" data-value="open" role="radio" aria-checked="true">Open</button>
+        <button type="button" class="segment" data-value="done" role="radio" aria-checked="false">Done</button>
+        <button type="button" class="segment" data-value="all" role="radio" aria-checked="false">All</button>
+      </div>
+    </header>
+    <p class="admin-feedback-counts" id="feedbackCounts" aria-live="polite"></p>
+    <div class="pref-group" id="feedbackList"><p class="admin-empty">Loading…</p></div>
+  </section>
+
+  <section class="pref-section" aria-labelledby="computersTitle">
+    <header class="pref-head">
+      <h2 class="card-title" id="computersTitle">Computers</h2>
+      <p class="card-lede">Each signed-in computer reports its version when it syncs (at most every few hours).</p>
+    </header>
+    <div class="pref-group" id="computerList"><p class="admin-empty">Loading…</p></div>
+  </section>
+
+  <section class="pref-section" aria-labelledby="rulesTitle">
+    <header class="pref-head">
+      <h2 class="card-title" id="rulesTitle">Update rules</h2>
+      <p class="card-lede">Every copy reads these about once an hour. New versions are always offered; these decide when updating is required.</p>
+    </header>
+    <form class="pref-group admin-rules" id="rulesForm" novalidate>
+      <div class="field">
+        <label class="signin-label" for="ruleMinimum">Minimum version</label>
+        <input type="text" id="ruleMinimum" class="input" placeholder="e.g. 1.7.2" inputmode="decimal" autocomplete="off" />
+        <p class="field-note">Older copies must update before they can be used. Leave empty to keep updates optional.</p>
+      </div>
+      <div class="field">
+        <label class="signin-label" for="ruleBlocked">Blocked versions</label>
+        <input type="text" id="ruleBlocked" class="input" placeholder="e.g. 1.7.0, 1.7.1" autocomplete="off" />
+        <p class="field-note">These exact versions must update, whatever the minimum. Separate with commas.</p>
+      </div>
+      <div class="field">
+        <label class="signin-label" for="ruleMessage">Message <span class="optional">optional</span></label>
+        <textarea id="ruleMessage" class="input admin-message" rows="2" maxlength="500" placeholder="Shown on the update notice"></textarea>
+      </div>
+      <div class="admin-rules-actions">
+        <p class="field-note" id="rulesStatus" aria-live="polite"></p>
+        <button type="submit" class="btn btn-primary btn-small" id="btnSaveRules">Save rules</button>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/admin.js') }}?v={{ asset_version }}" defer></script>
+{% endblock %}

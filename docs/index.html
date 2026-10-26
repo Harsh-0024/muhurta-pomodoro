@@ -71,7 +71,7 @@
         <svg aria-hidden="true"><use href="#down" /></svg>
         <span id="heroLabel">Download for Mac</span>
       </a>
-      <p class="cta-meta" id="heroMeta">Free · Apple Silicon Macs · <a href="download.html?os=win">Windows version</a></p>
+      <p class="cta-meta" id="heroMeta">Free · Apple Silicon Macs · <a href="download.html?os=win">Windows</a> · <a href="download.html?os=android">Android</a> · <a href="download.html?os=iphone">iPhone</a></p>
     </div>
 
     <!-- One window, two screens: the timer and the dashboard, each in dark or light. -->
@@ -168,7 +168,7 @@
       </details>
       <details>
         <summary>What happens to my data?</summary>
-        <p>Your sessions and settings go to your own account, with a copy on each computer you're signed in on. Otherwise the app only sends its version number, so updates reach everyone. Nothing is sold or shared.</p>
+        <p>Your sessions and settings go to your own account, with a copy on each device you're signed in on. Otherwise the app only sends its version number, so updates reach everyone. Nothing is sold or shared.</p>
       </details>
       <details>
         <summary>Which Macs?</summary>
@@ -179,8 +179,8 @@
         <p>A notice appears in the app. Click <b>Update now</b>; it reopens on the new version and shows what changed.</p>
       </details>
       <details>
-        <summary>Windows? Android?</summary>
-        <p>A <a href="download.html?os=win">Windows version</a> is available. Android is planned.</p>
+        <summary>Windows? Android? iPhone?</summary>
+        <p>All three. There's a <a href="download.html?os=win">Windows version</a>, an <a href="download.html?os=android">Android app</a>, and an <a href="download.html?os=iphone">iPhone app</a> you add from Safari (it works offline too). Sign in on each with the same account and your history follows you.</p>
       </details>
     </div>
   </div>
@@ -285,26 +285,37 @@
   // Offer the right download for this computer. An iPhone's user agent says
   // "like Mac OS X", so look for phones first.
   const ua = navigator.userAgent;
-  const phone = /Android|iPhone|iPad|iPod/i.test(ua);
-  const windows = /Win/i.test(ua);
-  if (windows) {
+  const android = /Android/i.test(ua);
+  // iPadOS says it is a Mac; a touch screen gives it away.
+  const phone = /iPhone|iPad|iPod/i.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const windows = !android && /Win/i.test(ua);
+  if (android) {
+    document.querySelectorAll(".dl-link").forEach((a) => (a.href = "download.html?os=android"));
+    document.getElementById("heroLabel").textContent = "Download for Android";
+    document.querySelectorAll(".dl-label").forEach((s) => (s.textContent = "Download for Android"));
+    document.getElementById("heroMeta").innerHTML = 'Free · Android 7 and later · <a href="download.html?os=mac">Mac</a> · <a href="download.html?os=win">Windows</a> · <a href="download.html?os=iphone">iPhone</a>';
+  } else if (windows) {
     document.querySelectorAll(".dl-link").forEach((a) => (a.href = "download.html?os=win"));
     document.getElementById("heroLabel").textContent = "Download for Windows";
     document.querySelectorAll(".dl-label").forEach((s) => (s.textContent = "Download for Windows"));
-    document.getElementById("heroMeta").innerHTML = 'Free · 64-bit Windows · <a href="download.html?os=mac">Mac version</a>';
+    document.getElementById("heroMeta").innerHTML = 'Free · 64-bit Windows · <a href="download.html?os=mac">Mac</a> · <a href="download.html?os=android">Android</a> · <a href="download.html?os=iphone">iPhone</a>';
   } else if (phone) {
-    document.getElementById("heroMeta").textContent = "Runs on a computer. Open this page on your Mac to download it.";
+    // The iPhone app is a web app: added to the Home Screen from Safari.
+    document.querySelectorAll(".dl-link").forEach((a) => (a.href = "download.html?os=iphone"));
+    document.getElementById("heroLabel").textContent = "Get it for iPhone";
+    document.querySelectorAll(".dl-label").forEach((s) => (s.textContent = "Get it for iPhone"));
+    document.getElementById("heroMeta").innerHTML = 'Free · Add to Home Screen from Safari · Works offline · <a href="download.html?os=mac">Mac</a> · <a href="download.html?os=win">Windows</a> · <a href="download.html?os=android">Android</a>';
   }
 
   // Show the current version, quietly; the page works the same without it.
   fetch("https://api.github.com/repos/Harsh-0024/muhurta-pomodoro/releases/latest")
     .then((r) => (r.ok ? r.json() : null))
     .then((rel) => {
-      if (!rel || !rel.tag_name || windows || phone) return;
+      if (!rel || !rel.tag_name || windows || phone || android) return;
       const dmg = (rel.assets || []).find((a) => /macos.*\.dmg$/.test(a.name));
       const size = dmg ? ` · ${Math.round(dmg.size / 1e6)} MB` : "";
       document.getElementById("heroMeta").innerHTML =
-        `Free · Version ${rel.tag_name.replace(/^v/, "")} · Apple Silicon${size} · <a href="download.html?os=win">Windows</a>`;
+        `Free · Version ${rel.tag_name.replace(/^v/, "")} · Apple Silicon${size} · <a href="download.html?os=win">Windows</a> · <a href="download.html?os=android">Android</a> · <a href="download.html?os=iphone">iPhone</a>`;
     })
     .catch(() => {});
 </script>

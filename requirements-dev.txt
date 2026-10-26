@@ -1,4 +1,4 @@
 pyinstaller>=6.16
-# The downloaded Mac app's own window (run.py NATIVE_WINDOW). Only the
-# bundle uses it, so it is not in requirements.txt for git installs.
-pywebview==6.2.1; sys_platform == "darwin"
+# The downloaded Mac and Windows apps' own window (run.py NATIVE_WINDOW).
+# Only the bundles use it, so it is not in requirements.txt for git installs.
+pywebview==6.2.1; sys_platform == "darwin" or sys_platform == "win32"

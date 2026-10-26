@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1{% if mobile %}, viewport-fit=cover{% endif %}" />
   <title>Muhurta Pomodoro</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23040302'/%3E%3Cg fill='none' stroke='%23d8bd79' stroke-width='4' stroke-linecap='round'%3E%3Ccircle cx='32' cy='32' r='22'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M32 6v14M32 44v14M6 32h14M44 32h14M13.6 13.6l10 10M40.4 40.4l10 10M50.4 13.6l-10 10M23.6 40.4l-10 10'/%3E%3C/g%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v={{ asset_version }}" />
+  {% if mobile %}<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}?v={{ asset_version }}" />{% endif %}
 </head>
-<body class="{% block body_class %}{% endblock %}" data-theme="{{ theme }}">
+<body class="{% block body_class %}{% endblock %}{% if mobile %} is-mobile{% endif %}" data-theme="{{ theme }}">
   <div class="ambient" aria-hidden="true"></div>
   <header class="topbar">
     <a class="brand" href="{{ url_for('index') }}">
@@ -31,6 +32,9 @@
       <a href="{{ url_for('flow_page') }}" class="nav-link{% if request.endpoint == 'flow_page' %} is-active{% endif %}">Flow</a>
       <a href="{{ url_for('dashboard_page') }}" class="nav-link{% if request.endpoint == 'dashboard_page' %} is-active{% endif %}">Dashboard</a>
       <a href="{{ url_for('settings_page') }}" class="nav-link{% if request.endpoint in ('settings_page', 'history_page') %} is-active{% endif %}">Settings</a>
+      {% if account and account.is_admin %}
+      <a href="{{ url_for('admin_page') }}" class="nav-link{% if request.endpoint == 'admin_page' %} is-active{% endif %}">Admin</a>
+      {% endif %}
       {% if account %}
       <a href="{{ url_for('settings_page') }}#sync" class="account-chip" id="accountChip" title="{{ account.title }}">
         <span class="account-chip-initial" aria-hidden="true">{{ account.initial }}</span>
@@ -46,6 +50,31 @@
     <span>1 Muhurat = 48 min · 1 Ghadi = 24 min</span>
     <span class="foot-version">v{{ app_version }}</span>
   </footer>
+  {% if mobile and not bare %}
+  {# Phones: the places live in a tab bar at the bottom, like other Android apps. #}
+  <nav class="tabbar" aria-label="Main">
+    <a href="{{ url_for('index') }}" class="tab{% if request.endpoint == 'index' %} is-active{% endif %}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 2.5h12M6 21.5h12M7 2.5v3.2c0 2.4 5 4.6 5 6.3 0-1.7 5-3.9 5-6.3V2.5M7 21.5v-3.2c0-2.4 5-4.6 5-6.3 0 1.7 5 3.9 5 6.3v3.2M9.5 19.5h5"/></svg>
+      <span>Rhythm</span>
+    </a>
+    <a href="{{ url_for('timer_page') }}" class="tab{% if request.endpoint == 'timer_page' %} is-active{% endif %}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2.5h5"/></svg>
+      <span>Timer</span>
+    </a>
+    <a href="{{ url_for('flow_page') }}" class="tab{% if request.endpoint == 'flow_page' %} is-active{% endif %}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12c-2-2.6-3.6-4-5.5-4a4 4 0 0 0 0 8c1.9 0 3.5-1.4 5.5-4zm0 0c2 2.6 3.6 4 5.5 4a4 4 0 0 0 0-8c-1.9 0-3.5 1.4-5.5 4z"/></svg>
+      <span>Flow</span>
+    </a>
+    <a href="{{ url_for('dashboard_page') }}" class="tab{% if request.endpoint == 'dashboard_page' %} is-active{% endif %}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V11M10 20V4M16 20v-6M22 20H2"/></svg>
+      <span>Dashboard</span>
+    </a>
+    <a href="{{ url_for('settings_page') }}" class="tab{% if request.endpoint in ('settings_page', 'history_page') %} is-active{% endif %}">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span>Settings</span>
+    </a>
+  </nav>
+  {% endif %}
   <div id="shortcutsModal" class="modal hidden" role="dialog" aria-labelledby="shortcutsTitle" aria-hidden="true">
     <div class="modal-backdrop" tabindex="-1" aria-hidden="true"></div>
     <div class="modal-sheet">
@@ -94,6 +123,7 @@
   <script src="{{ url_for('static', filename='js/dialog.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/shortcuts.js') }}?v={{ asset_version }}" defer></script>
   {% endif %}
+  {% if mobile %}<script src="{{ url_for('static', filename='js/mobile.js') }}?v={{ asset_version }}" defer></script>{% endif %}
   {% block scripts %}{% endblock %}
 </body>
 </html>

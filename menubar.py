@@ -5,12 +5,13 @@ us what is running (static/js/menubar.js); from then on the time is worked out
 here, once a second, from clock times, so it keeps going while the window is
 hidden or showing another page.
 
-Rhythm gets a metronome icon and Timer a timer icon, and both count down
-(then up, with a "+", past zero); Flow gets a stopwatch icon and counts up.
-Nothing is shown while none of them is running or paused.
+Rhythm shows a flame while focusing and a tea cup while resting; Timer
+shows a timer. Both count down (then up, with a "+", past zero). Flow shows
+an infinity sign and counts up. Nothing is shown while none of them is
+running or paused.
 
-The page's kinds are older than the names: "timer" is Rhythm, "countdown"
-is the simple Timer.
+The page's kinds are older than the names: "timer" is Rhythm's focus,
+"rest" its rest, "countdown" the simple Timer.
 """
 from __future__ import annotations
 
@@ -20,9 +21,10 @@ import time
 
 log = logging.getLogger("muhurata.menubar")
 
-# SF Symbols (macOS 11+), the same ones Apple's Clock uses.
-ICONS = {"timer": "metronome", "countdown": "timer", "flow": "stopwatch"}
-NAMES = {"timer": "Rhythm", "countdown": "Timer", "flow": "Flow"}
+# SF Symbols, all in macOS 11. Chosen to look nothing like system status
+# icons (no warning triangle, no Do Not Disturb moon).
+ICONS = {"timer": "flame", "rest": "cup.and.saucer", "countdown": "timer", "flow": "infinity"}
+NAMES = {"timer": "Rhythm", "rest": "Rest", "countdown": "Timer", "flow": "Flow"}
 
 
 def _clock(sec: float) -> str:
@@ -35,7 +37,7 @@ def _clock(sec: float) -> str:
 def text_for(state: dict | None, now_ms: float) -> str | None:
     """What the menu bar should say for the page's state, or None to hide it.
 
-    state = {kind: "timer"|"countdown"|"flow", up: bool, sec: float, since: ms|None,
+    state = {kind: "timer"|"rest"|"countdown"|"flow", up: bool, sec: float, since: ms|None,
              until: ms|None, paused: bool}. A running countdown ends at
     `until`; a running count-up is sec plus the time since `since`. Paused,
     it is just sec.

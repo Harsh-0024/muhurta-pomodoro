@@ -22,7 +22,26 @@ function Warn($msg) { Write-Host "==> $msg" -ForegroundColor Yellow }
 # throw (not exit): under "irm | iex" an exit would close the whole console window.
 function Fail($msg) { throw "Error: $msg" }
 
+# Run a program with its error output thrown away and return what it printed.
+# Windows PowerShell 5.1 treats any line a program writes there (uv's
+# download progress, for one) as a fatal error under "Stop", even with
+# 2>$null, which ended every first install; callers check results instead.
+function Invoke-Native([scriptblock]$Block) {
+    $saved = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"
+    try { & $Block 2>$null } finally { $ErrorActionPreference = $saved }
+}
+
+function Update-Path {
+    $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+}
+
 # ---------------------------------------------------------------- prerequisites
+if (-not (Get-Command git -ErrorAction SilentlyContinue) -and (Get-Command winget -ErrorAction SilentlyContinue)) {
+    Say "Installing git, which keeps the app up to date (one-time; Windows may ask you to allow it)..."
+    winget install --id Git.Git -e --source winget --accept-package-agreements --accept-source-agreements --disable-interactivity
+    Update-Path
+}
 if (-not (Get-Command git -ErrorAction SilentlyContinue)) {
     Fail "git is not installed. Install it from https://git-scm.com/download/win (or run: winget install Git.Git), then paste the install command again."
 }
@@ -74,7 +93,7 @@ if (Test-Path $localUv) {
 $VenvPy = Join-Path $InstallDir ".venv\Scripts\python.exe"
 $needVenv = $true
 if (Test-Path $VenvPy) {
-    $have = & $VenvPy -c "import sys; print('%d.%d' % sys.version_info[:2])" 2>$null
+    $have = Invoke-Native { & $VenvPy -c "import sys; print('%d.%d' % sys.version_info[:2])" }
     if ($have -eq $WantPy) { $needVenv = $false }
 }
 
@@ -82,9 +101,10 @@ if ($needVenv) {
     Remove-Item -Recurse -Force (Join-Path $InstallDir ".venv") -ErrorAction SilentlyContinue
     $built = $false
     if ($Uv) {
-        & $Uv python install $WantPy 2>$null | Out-Null
+        Say "Getting Python $WantPy (one-time)..."
+        Invoke-Native { & $Uv python install $WantPy } | Out-Null
         # --seed: run.py needs pip inside the environment
-        & $Uv venv --clear --seed --python $WantPy .venv 2>$null | Out-Null
+        Invoke-Native { & $Uv venv --clear --seed --python $WantPy .venv } | Out-Null
         $built = Test-Path $VenvPy
     }
     if (-not $built) {
@@ -96,7 +116,7 @@ if ($needVenv) {
             $exe = $parts[0]; $extra = @($parts | Select-Object -Skip 1)
             if (-not (Get-Command $exe -ErrorAction SilentlyContinue)) { continue }
             try {
-                $out = & $exe @extra -c "import sys; print('%d.%d' % sys.version_info[:2])" 2>$null
+                $out = Invoke-Native { & $exe @extra -c "import sys; print('%d.%d' % sys.version_info[:2])" }
                 if ($LASTEXITCODE -eq 0 -and $out -and ([version]$out -ge $FallbackMinPy)) {
                     $PyExe = $exe; $PyArgs = $extra; $verStr = $out; break
                 }
