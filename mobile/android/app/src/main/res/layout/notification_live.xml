@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The running clock in the notification shade (LiveTimerPlugin): what is
+     running on one line, the time large under it. Android ticks the clock. -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center_vertical">
+
+    <TextView
+        android:id="@+id/live_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Compat.Notification.Info"
+        android:singleLine="true" />
+
+    <Chronometer
+        android:id="@+id/live_clock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Compat.Notification.Title"
+        android:textSize="26sp"
+        android:fontFeatureSettings="tnum"
+        android:singleLine="true" />
+</LinearLayout>
