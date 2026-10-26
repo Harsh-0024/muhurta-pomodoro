@@ -28,6 +28,7 @@
   // Rhythm's saved session is still called "timer"; the simple Timer's is "countdown".
   const TIMER_KEY = "muhurat_timer_session_v1";
   const COUNTDOWN_KEY = "muhurat_countdown_session_v1";
+  const FLOW_KEY = "muhurat_flow_session_v1";
   // The push function's public key, once seen: also says the function is there.
   const KEY_KEY = "muhurta-push-key";
   const SUB_KEY_KEY = "muhurta-push-subscribed-key";
@@ -163,9 +164,78 @@
   }
 
   function onVisibility() {
-    if (document.visibilityState === "hidden") book();
-    else cancel();
+    if (document.visibilityState === "hidden") {
+      book();
+      showRunning();
+    } else {
+      cancel();
+      tidyRunning();
+    }
     keepAwake();
+  }
+
+  /* ---------- what is running, in Notification Center ---------- */
+
+  // Like the Mac app's menu bar, as far as an iPhone web app can go: iOS can't
+  // tick a clock in a notification for it, so as the app leaves the screen
+  // with a clock running, it posts one quiet note saying until when ("Rhythm,
+  // until 9:32 AM"). The end-of-block push takes its place (sw.js);
+  // pausing or stopping takes it away. Posted once per block, not every time
+  // the app is left.
+  const RUNNING_TAG = "muhurta-running";
+  const SHOWN_KEY = "muhurta-running-shown";
+  const PHASES = { work: true, rest: true, cumulative: true };
+  const clock = (ms) => new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+
+  function runningNote() {
+    const rhythm = saved(TIMER_KEY);
+    if (rhythm && rhythm.running) {
+      if (PHASES[rhythm.mode] && rhythm.phaseEndsAt > Date.now()) {
+        return { key: `r${rhythm.phaseEndsAt}`, title: "Rhythm", body: `Until ${clock(rhythm.phaseEndsAt)}` };
+      }
+      const s = rhythm.session || {};
+      if (rhythm.mode === "extend" && s.segStartedAt) {
+        return { key: `e${s.segStartedAt}`, title: "Rhythm", body: `Overtime since ${clock(s.segStartedAt)}` };
+      }
+    }
+    const countdown = saved(COUNTDOWN_KEY);
+    if (countdown && countdown.mode === "running" && countdown.endsAt > Date.now()) {
+      return { key: `c${countdown.endsAt}`, title: "Timer", body: `Until ${clock(countdown.endsAt)}` };
+    }
+    if (countdown && countdown.mode === "overtime" && countdown.overtimeStartedAt) {
+      return { key: `o${countdown.overtimeStartedAt}`, title: "Timer", body: `Overtime since ${clock(countdown.overtimeStartedAt)}` };
+    }
+    const flow = saved(FLOW_KEY);
+    if (flow && flow.mode === "running" && flow.runStartedAt) {
+      return { key: `f${flow.runStartedAt}`, title: "Flow", body: `Running since ${clock(flow.runStartedAt)}` };
+    }
+    return null;
+  }
+
+  const notesOn = () =>
+    Boolean(pushDevice && Real.permission === "granted" && L.internals.loadSettings().notifications_enabled);
+
+  async function showRunning() {
+    const note = runningNote();
+    if (!note || !notesOn() || store.get(SHOWN_KEY) === note.key) return;
+    store.set(SHOWN_KEY, note.key);
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      await reg.showNotification(note.title, { body: note.body, tag: RUNNING_TAG, silent: true, icon: "icons/icon-192.png" });
+    } catch (_) {}
+  }
+
+  // In view: a note that no longer fits what runs (paused, stopped, the next
+  // block) is taken away.
+  async function tidyRunning() {
+    const note = runningNote();
+    if (note && store.get(SHOWN_KEY) === note.key) return;
+    if (!store.get(SHOWN_KEY)) return;
+    store.set(SHOWN_KEY, "");
+    try {
+      const reg = await navigator.serviceWorker.ready;
+      (await reg.getNotifications({ tag: RUNNING_TAG })).forEach((n) => n.close());
+    } catch (_) {}
   }
 
   /* ---------- keep the screen on, when push can't ring for us ---------- */
@@ -196,7 +266,10 @@
 
   document.addEventListener("visibilitychange", onVisibility);
   // pagehide covers closing the app straight from this page.
-  window.addEventListener("pagehide", () => book());
+  window.addEventListener("pagehide", () => {
+    book();
+    showRunning();
+  });
   L.ready.then(async () => {
     await subscribe().catch((err) => console.warn("push subscription failed", err));
     // A booking left from before (the app was closed in the background): in
@@ -210,9 +283,15 @@
   const realSetItem = Storage.prototype.setItem;
   Storage.prototype.setItem = function (key, value) {
     realSetItem.call(this, key, value);
-    if (this !== window.localStorage || (key !== TIMER_KEY && key !== COUNTDOWN_KEY)) return;
+    if (this !== window.localStorage || (key !== TIMER_KEY && key !== COUNTDOWN_KEY && key !== FLOW_KEY)) return;
     if (document.visibilityState === "hidden") book();
+    else tidyRunning();
     keepAwake();
+  };
+  const realRemove = Storage.prototype.removeItem;
+  Storage.prototype.removeItem = function (key) {
+    realRemove.call(this, key);
+    if (this === window.localStorage && (key === TIMER_KEY || key === COUNTDOWN_KEY || key === FLOW_KEY)) tidyRunning();
   };
   setInterval(keepAwake, 15000);
 

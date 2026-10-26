@@ -85,7 +85,7 @@ LOCAL_API = """
   <script src="{base}mobile-data.js"></script>
   <script src="{base}local-api.js"></script>
   <script src="{base}account.js"></script>
-  <script src="{base}{alerts}"></script>"""
+  <script src="{base}{alerts}"></script>{more}"""
 
 # The iPhone copy: installable from Safari (Share > Add to Home Screen), opens
 # full screen like an app, and draws under the status bar (the pages already
@@ -154,7 +154,9 @@ def render_pages(target: Target) -> None:
                       f'<link href="{target.base}fonts/fonts.css" rel="stylesheet" />', html)
         # First in <head>: the router, then the phone's own /api (local-api.js).
         alerts = "web-alerts.js" if target.web else "alerts.js"
-        head = LOCAL_API.format(base=target.base, alerts=alerts)
+        # Android only: the running clock in the notification shade (live.js).
+        more = "" if target.web else f'\n  <script src="{target.base}live.js"></script>'
+        head = LOCAL_API.format(base=target.base, alerts=alerts, more=more)
         if target.web:
             html = web_paths(html, target)
             head = WEB_HEAD.format(base=target.base) + head
@@ -207,7 +209,7 @@ def write_data(target: Target) -> None:
         f"window.__MUHURTA__ = {json.dumps(data, ensure_ascii=False)};\n",
         encoding="utf-8",
     )
-    names = ["local-api.js", "account.js"] + (["web-alerts.js", "pwa.js"] if target.web else ["alerts.js"])
+    names = ["local-api.js", "account.js"] + (["web-alerts.js", "pwa.js"] if target.web else ["alerts.js", "live.js"])
     for name in names:
         shutil.copy2(MOBILE / "web" / name, target.out / name)
     shutil.copytree(MOBILE / "web" / "fonts", target.out / "fonts")

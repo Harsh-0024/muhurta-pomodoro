@@ -68,12 +68,18 @@ self.addEventListener("push", (event) => {
   try {
     data = event.data ? event.data.json() : {};
   } catch (_) {}
-  event.waitUntil(self.registration.showNotification(String(data.title || "Muhurta Pomodoro"), {
-    body: String(data.body || ""),
-    tag: String(data.tag || "muhurta"),
-    icon: "icons/icon-192.png",
-    renotify: true,
-  }));
+  event.waitUntil((async () => {
+    // The block has ended: the quiet "until 9:32" note (web-alerts.js) goes.
+    if (data.tag === "muhurta-block-end") {
+      (await self.registration.getNotifications({ tag: "muhurta-running" })).forEach((n) => n.close());
+    }
+    await self.registration.showNotification(String(data.title || "Muhurta Pomodoro"), {
+      body: String(data.body || ""),
+      tag: String(data.tag || "muhurta"),
+      icon: "icons/icon-192.png",
+      renotify: true,
+    });
+  })());
 });
 
 // A tap on a notification brings the app forward.
