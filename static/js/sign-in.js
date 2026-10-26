@@ -707,4 +707,13 @@
   } else {
     show("stepSignin");
   }
+
+  // Phones come back here from Google / Microsoft; if it didn't work, say why.
+  const oauthError = new URLSearchParams(location.search).get("oauth_error");
+  if (oauthError) {
+    say(oauthError, "error");
+    try {
+      history.replaceState(null, "", location.pathname);
+    } catch (_) {}
+  }
 })();
