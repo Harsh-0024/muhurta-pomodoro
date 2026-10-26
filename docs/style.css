@@ -638,3 +638,44 @@ footer a { color: var(--muted); }
   .dl-page main { padding: 72px 0 96px; }
   .dl-page .steps { margin-top: 64px; }
 }
+
+/* ------------------------------------------------------------- privacy */
+/* One calm column of reading text, like a letter. */
+.legal-page { min-height: 100vh; display: flex; flex-direction: column; }
+.legal-page main { flex: 1; padding: 88px 0 112px; }
+.legal { max-width: 640px; }
+.legal h1 {
+  margin: 0;
+  max-width: none;
+  font-size: clamp(2.4rem, 6vw, 3.4rem);
+  font-weight: 400;
+  line-height: 1.05;
+}
+.legal-lede {
+  margin: 22px 0 0;
+  color: var(--muted);
+  font-size: 1.1rem;
+  line-height: 1.65;
+}
+.legal-date { margin: 14px 0 0; color: var(--faint); font-size: 0.86rem; }
+.legal section { padding: 0; margin-top: 52px; }
+.legal h2 {
+  margin: 0 0 14px;
+  font-family: var(--serif);
+  font-weight: 500;
+  font-size: 1.6rem;
+  line-height: 1.2;
+}
+.legal p,
+.legal li { color: var(--muted); line-height: 1.7; }
+.legal p { margin: 0; }
+.legal strong { color: var(--ink); font-weight: 500; }
+.legal ul { margin: 0; padding-left: 1.1rem; display: grid; gap: 10px; }
+.legal li::marker { color: var(--gold); }
+.legal a { color: var(--gold); }
+
+@media (max-width: 600px) {
+  .legal-page main { padding: 56px 0 80px; }
+  .legal section { padding: 0; margin-top: 40px; }
+  .legal-lede { font-size: 1.02rem; }
+}
