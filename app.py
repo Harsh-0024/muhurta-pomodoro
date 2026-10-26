@@ -549,6 +549,10 @@ def auth_callback():
     except cloud.CloudError as exc:
         return render_template("auth_done.html", bare=True, ok=False, message=str(exc))
     sync.enter_account()  # fetch the account's data now, like a password sign-in
+    if request.remote_addr not in ("127.0.0.1", "::1"):
+        # A phone on the same Wi-Fi: this tab is the app, so go straight in
+        # (or to "Finish your profile" for a new account).
+        return redirect(url_for("sign_in_page"))
     return render_template("auth_done.html", bare=True, ok=True, message="")
 
 
