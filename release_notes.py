@@ -5,6 +5,16 @@ a few short lines per version, about what they will notice. Versions with
 nothing worth telling can be left out.
 """
 NOTES = {
+    "1.14.0": [
+        "The Timer's quick lengths now fit you: your usual focus length sits in the middle, with shorter "
+        "and longer steps around it, taken from your own rhythms.",
+        "Phones show what's running in notifications, like the Mac menu bar. On Android a live clock, "
+        "also on the lock screen; on iPhone a quiet note saying until when.",
+        "Rhythm now says \"Overtime\" when you focus past a block, the same as the Timer.",
+        "An update in progress keeps showing its progress when you switch tabs.",
+        "iPhone: Settings shows your notification choice at once, and says if alerts with the app "
+        "closed aren't set up yet.",
+    ],
     "1.13.0": [
         "Sign in with Google or Microsoft: one tap on the sign-in screen, on the Mac, Windows, iPhone and "
         "Android. Use the same email as before and it opens your existing account, with all your history.",
