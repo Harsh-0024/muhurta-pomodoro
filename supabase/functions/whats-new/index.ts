@@ -7,7 +7,7 @@
 // The logic is in core.js. Here: the record (docs/release-notes.json on the
 // website), the saved summaries (table whats_new_summaries, supabase/whats-new.sql)
 // and the AIs, tried in order (WHATS_NEW_PROVIDERS, default
-// "anthropic,openai,gemini,xai"); each is used only when its key is set.
+// "anthropic,openai,gemini,xai,groq"); each is used only when its key is set.
 // With none set, or none answering, the app gets the plain lines.
 // Bodies are text/plain JSON (no CORS preflight); no sign-in needed. Deployed
 // with --no-verify-jwt; setup in supabase/WHATS-NEW.md.
@@ -17,7 +17,7 @@ import { cacheKey, problemWith, whatsNew } from "./core.js";
 const NOTES_URL = Deno.env.get("WHATS_NEW_NOTES_URL") ?? "https://harsh-0024.github.io/muhurta-pomodoro/release-notes.json";
 const DB = `${Deno.env.get("SUPABASE_URL")}/rest/v1/whats_new_summaries`;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
-const ORDER = (Deno.env.get("WHATS_NEW_PROVIDERS") ?? "anthropic,openai,gemini,xai").split(",").map((s) => s.trim());
+const ORDER = (Deno.env.get("WHATS_NEW_PROVIDERS") ?? "anthropic,openai,gemini,xai,groq").split(",").map((s) => s.trim());
 const TIMEOUT_MS = 20_000; // per AI; past this, the next one
 const NOTES_FRESH_MS = 5 * 60 * 1000;
 
@@ -99,8 +99,9 @@ function anthropic() {
   };
 }
 
-// ChatGPT and Grok share the same request shape. Their model names change
-// often, so each is used only when its model is named too (OPENAI_MODEL, XAI_MODEL).
+// ChatGPT, Grok (xAI) and Groq share the same request shape. Their model names
+// change often, so each is used only when its model is named too
+// (OPENAI_MODEL, XAI_MODEL, GROQ_MODEL).
 function chatCompletions(name: string, url: string, keyVar: string, modelVar: string) {
   const key = env(keyVar);
   const model = env(modelVar);
@@ -133,6 +134,7 @@ const MAKERS: Record<string, () => { name: string; ask(p: string): Promise<strin
   openai: () => chatCompletions("openai", "https://api.openai.com/v1/chat/completions", "OPENAI_API_KEY", "OPENAI_MODEL"),
   gemini,
   xai: () => chatCompletions("xai", "https://api.x.ai/v1/chat/completions", "XAI_API_KEY", "XAI_MODEL"),
+  groq: () => chatCompletions("groq", "https://api.groq.com/openai/v1/chat/completions", "GROQ_API_KEY", "GROQ_MODEL"),
 };
 
 const providers = () => ORDER.map((name) => MAKERS[name]?.()).filter((p) => p !== null && p !== undefined);

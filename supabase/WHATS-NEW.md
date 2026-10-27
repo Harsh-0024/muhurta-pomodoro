@@ -36,8 +36,10 @@ when one is busy, down or slow:
 | OpenAI (ChatGPT) | `OPENAI_API_KEY` and `OPENAI_MODEL` |
 | Google (Gemini) | `GEMINI_API_KEY` and `GEMINI_MODEL` |
 | xAI (Grok) | `XAI_API_KEY` and `XAI_MODEL` |
+| Groq (fast open models) | `GROQ_API_KEY` and `GROQ_MODEL` |
 
-To change the order, add `WHATS_NEW_PROVIDERS`, e.g. `gemini,anthropic`.
+To change the order, add `WHATS_NEW_PROVIDERS`, e.g. `groq,anthropic,gemini`.
+(Grok, by xAI, and Groq are different companies.)
 Keys stay on Supabase; they are never in the app.
 
 ## How to see it working
