@@ -21,7 +21,9 @@
   const HISTORY_MIN_SEC = 60;
   const HISTORY_MAX_SEC = 24 * 60 * 60;
   const HISTORY_FUTURE_SLACK_SEC = 5 * 60;
-  const RHYTHM_BOUT_GAP_SEC = 120;
+  // Blocks, as in db.py and static/js/quick-lengths.js: a break under 5
+  // minutes doesn't end one; 5 minutes or a scheduled rest taken in full does.
+  const RHYTHM_BOUT_GAP_SEC = 5 * 60;
   const RHYTHM_NOISE_FLOOR_SEC = 5 * 60;
   const BELL_MIN_BOUTS = 15;
 
@@ -670,10 +672,13 @@
     for (const [row, startMs, endMs] of countSharedTimeOnce(rows)) {
       const productive = Math.max(0, Number(row.productive_sec || 0));
       if (productive > 0) {
-        const joins = boutSec > 0 && boutEnd != null && (startMs - boutEnd) / 1000 <= RHYTHM_BOUT_GAP_SEC;
+        const joins = boutSec > 0 && boutEnd != null && (startMs - boutEnd) / 1000 < RHYTHM_BOUT_GAP_SEC;
         if (boutSec > 0 && !joins) finalize();
         boutSec += productive;
         boutEnd = boutEnd != null && joins ? Math.max(boutEnd, endMs) : endMs;
+      } else if (boutSec > 0 && row.kind === "rest") {
+        const planned = Number((row.details || {}).duration_sec) || 0;
+        if (planned > 0 && Number(row.duration_sec || 0) >= planned - 1) finalize(); // the rhythm's own rest, taken as planned
       }
       creditToDays(activity, row, startMs, endMs, rangeStart, rangeEnd);
     }
