@@ -679,8 +679,23 @@ def _dashboard_years(first_year: int, selected_year: int) -> list[int]:
     return list(range(first_year, end_year + 1))
 
 
-RHYTHM_BOUT_GAP_SEC = 120
+# Focus is counted in blocks, the same rule as the Timer's quick lengths
+# (static/js/quick-lengths.js): a break shorter than this (a pause, a stop and
+# start, or a rest cut short, whatever the button) doesn't end a block; a
+# break this long does, and so does a scheduled rest taken in full.
+RHYTHM_BOUT_GAP_SEC = 5 * 60
 RHYTHM_NOISE_FLOOR_SEC = 5 * 60
+
+
+def _rest_taken_in_full(row) -> bool:
+    """A scheduled Rhythm rest that ran to its planned end (a second of slack)."""
+    if row["kind"] != "rest":
+        return False
+    try:
+        planned = float(json.loads(row.get("details_json") or "{}").get("duration_sec") or 0)
+    except (TypeError, ValueError, AttributeError):
+        return False
+    return planned > 0 and float(row["duration_sec"] or 0) >= planned - 1
 BELL_MIN_BOUTS = 15
 
 
@@ -983,7 +998,7 @@ def dashboard_summary(
         years = _dashboard_years(first_year, selected_year)
         segment_rows = conn.execute(
             """
-            SELECT kind, started_at, ended_at, duration_sec, productive_sec, rest_sec, device_id
+            SELECT kind, started_at, ended_at, duration_sec, productive_sec, rest_sec, device_id, details_json
             FROM activity_segments
             WHERE julianday(started_at) < julianday(?)
               AND julianday(ended_at) > julianday(?)
@@ -1019,13 +1034,15 @@ def dashboard_summary(
             joins_current = False
             if current_bout_sec > 0 and current_bout_end is not None:
                 gap_sec = (started_at - current_bout_end).total_seconds()
-                joins_current = gap_sec <= RHYTHM_BOUT_GAP_SEC
+                joins_current = gap_sec < RHYTHM_BOUT_GAP_SEC
 
             if current_bout_sec > 0 and not joins_current:
                 finalize_bout()
 
             current_bout_sec += rhythm_duration_sec
             current_bout_end = max(current_bout_end, ended_at) if current_bout_end and joins_current else ended_at
+        elif current_bout_sec > 0 and _rest_taken_in_full(row):
+            finalize_bout()  # the rhythm's own rest, taken as planned
 
         _credit_row_to_days(activity, row, started_at, ended_at, start_day, end_day, tz)
 
