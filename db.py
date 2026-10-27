@@ -879,6 +879,72 @@ def _compute_kde(
     return points
 
 
+# A week needs this many sittings before its "usual" is drawn: one or two
+# sittings make a jumpy point that says little about the week.
+TREND_MIN_SITTINGS = 3
+TREND_WINDOW_WEEKS = 4
+# The next step: a little past the usual sitting, never less than a minute.
+NEXT_STEP_RATIO = 1.1
+
+
+def _compute_sitting_trend(bouts: list[tuple[datetime, float]], tz, calc_end_day: date) -> dict:
+    """How long someone usually sits, week by week, and how it is changing.
+
+    "Usually" is the middle sitting (the median): half are shorter, half are
+    longer. It moves a little with every longer sitting, so steady effort
+    shows steadily (the curve's peak, by contrast, stays put and then jumps).
+    """
+    weeks: dict[date, list[float]] = {}
+    recent: list[float] = []
+    before: list[float] = []
+    recent_from = calc_end_day - timedelta(days=29)
+    before_from = calc_end_day - timedelta(days=59)
+    for started_at, sec in bouts:
+        local_day = started_at.astimezone(tz).date() if tz else started_at.date()
+        minutes = sec / 60.0
+        monday = local_day - timedelta(days=local_day.weekday())
+        weeks.setdefault(monday, []).append(minutes)
+        if recent_from <= local_day <= calc_end_day:
+            recent.append(minutes)
+        elif before_from <= local_day < recent_from:
+            before.append(minutes)
+
+    def middle(values):
+        return round(_compute_percentile(sorted(values), 50), 1) if values else None
+
+    # Each week's point is the usual sitting over that week and the three
+    # before it (about a month), so one odd week can't throw the line around.
+    week_list = []
+    if weeks:
+        first, last = min(weeks), max(weeks)
+        monday = first
+        while monday <= last:
+            window = sorted(v for k in range(TREND_WINDOW_WEEKS) for v in weeks.get(monday - timedelta(weeks=k), []))
+            enough = len(window) >= TREND_MIN_SITTINGS
+            week_list.append({
+                "start": monday.isoformat(),
+                "count": len(weeks.get(monday, [])),
+                "window_count": len(window),
+                "usual_min": round(_compute_percentile(window, 50), 1) if enough else None,
+                "p25_min": round(_compute_percentile(window, 25), 1) if enough else None,
+                "p75_min": round(_compute_percentile(window, 75), 1) if enough else None,
+            })
+            monday += timedelta(weeks=1)
+
+    usual = middle(recent) if len(recent) >= TREND_MIN_SITTINGS else None
+    previous = middle(before) if len(before) >= TREND_MIN_SITTINGS else None
+    return {
+        "weeks": week_list,
+        "usual_min": usual,
+        "usual_count": len(recent),
+        "previous_min": previous,
+        "change_min": round(usual - previous, 1) if usual is not None and previous is not None else None,
+        "next_min": max(usual + 1, round(usual * NEXT_STEP_RATIO)) if usual is not None else None,
+        "min_sittings": TREND_MIN_SITTINGS,
+        "window_weeks": TREND_WINDOW_WEEKS,
+    }
+
+
 def _compute_bell_curve(bout_durations_sec: list[float]) -> dict:
     """Session-length distribution for the dashboard's rhythm curve.
 
@@ -1015,14 +1081,19 @@ def dashboard_summary(
 
     current_bout_sec = 0.0
     current_bout_end: datetime | None = None
+    current_bout_start: datetime | None = None
     bout_durations: list[float] = []
+    bouts: list[tuple[datetime, float]] = []  # (start, focused seconds) per sitting
 
     def finalize_bout():
-        nonlocal current_bout_sec, current_bout_end
+        nonlocal current_bout_sec, current_bout_end, current_bout_start
         if current_bout_sec >= RHYTHM_NOISE_FLOOR_SEC:
             bout_durations.append(current_bout_sec)
+            if current_bout_start is not None:
+                bouts.append((current_bout_start, current_bout_sec))
         current_bout_sec = 0.0
         current_bout_end = None
+        current_bout_start = None
 
     for row, started_at, ended_at in _count_shared_time_once(segment_rows):
         productive_sec = max(0.0, float(row["productive_sec"] or 0))
@@ -1039,6 +1110,8 @@ def dashboard_summary(
             if current_bout_sec > 0 and not joins_current:
                 finalize_bout()
 
+            if current_bout_sec == 0:
+                current_bout_start = started_at
             current_bout_sec += rhythm_duration_sec
             current_bout_end = max(current_bout_end, ended_at) if current_bout_end and joins_current else ended_at
         elif current_bout_sec > 0 and _rest_taken_in_full(row):
@@ -1114,6 +1187,7 @@ def dashboard_summary(
         consistency_days_elapsed = max(1, (calc_end_day - start_day).days + 1)
 
     bell_curve = _compute_bell_curve(bout_durations)
+    sitting_trend = _compute_sitting_trend(bouts, tz, calc_end_day)
 
     return {
         "range": {
@@ -1129,6 +1203,7 @@ def dashboard_summary(
         "days": records,
         "recent_days": recent_days,
         "bell_curve": bell_curve,
+        "sitting_trend": sitting_trend,
         "summary": {
             "total_focus_minutes": round(total_focus, 1),
             "total_rest_minutes": round(total_rest, 1),

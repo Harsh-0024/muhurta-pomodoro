@@ -553,6 +553,67 @@
     return out;
   }
 
+  // The usual sitting, week by week: db.py _compute_sitting_trend, line for line.
+  const TREND_MIN_SITTINGS = 3;
+  const TREND_WINDOW_WEEKS = 4;
+  const NEXT_STEP_RATIO = 1.1;
+
+  function sittingTrend(sittings, calcEnd) {
+    const weeks = new Map(); // local Monday (YYYY-MM-DD) -> minutes
+    const recent = [];
+    const before = [];
+    const recentFrom = localDay(addDays(calcEnd, -29));
+    const beforeFrom = localDay(addDays(calcEnd, -59));
+    const calcEndIso = localDay(calcEnd);
+    for (const [startMs, sec] of sittings) {
+      const t = new Date(startMs);
+      const day = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+      const dayIso = localDay(day);
+      const monday = localDay(addDays(day, -((day.getDay() + 6) % 7)));
+      const minutes = sec / 60;
+      if (!weeks.has(monday)) weeks.set(monday, []);
+      weeks.get(monday).push(minutes);
+      if (dayIso >= recentFrom && dayIso <= calcEndIso) recent.push(minutes);
+      else if (dayIso >= beforeFrom && dayIso < recentFrom) before.push(minutes);
+    }
+    const middle = (values) => round(percentile([...values].sort((a, b) => a - b), 50), 1);
+
+    const weekList = [];
+    if (weeks.size) {
+      const keys = [...weeks.keys()].sort();
+      let monday = dayFromIso(keys[0]);
+      const last = dayFromIso(keys[keys.length - 1]);
+      while (monday <= last) {
+        const window = [];
+        for (let k = 0; k < TREND_WINDOW_WEEKS; k++) window.push(...(weeks.get(localDay(addDays(monday, -7 * k))) || []));
+        window.sort((a, b) => a - b);
+        const enough = window.length >= TREND_MIN_SITTINGS;
+        weekList.push({
+          start: localDay(monday),
+          count: (weeks.get(localDay(monday)) || []).length,
+          window_count: window.length,
+          usual_min: enough ? round(percentile(window, 50), 1) : null,
+          p25_min: enough ? round(percentile(window, 25), 1) : null,
+          p75_min: enough ? round(percentile(window, 75), 1) : null,
+        });
+        monday = addDays(monday, 7);
+      }
+    }
+
+    const usual = recent.length >= TREND_MIN_SITTINGS ? middle(recent) : null;
+    const previous = before.length >= TREND_MIN_SITTINGS ? middle(before) : null;
+    return {
+      weeks: weekList,
+      usual_min: usual,
+      usual_count: recent.length,
+      previous_min: previous,
+      change_min: usual != null && previous != null ? round(usual - previous, 1) : null,
+      next_min: usual != null ? Math.max(usual + 1, round(usual * NEXT_STEP_RATIO, 0)) : null,
+      min_sittings: TREND_MIN_SITTINGS,
+      window_weeks: TREND_WINDOW_WEEKS,
+    };
+  }
+
   function bellCurve(boutsSec) {
     const mins = boutsSec.map((s) => s / 60);
     if (mins.length < BELL_MIN_BOUTS) return { ready: false, bout_count: mins.length, min_required: BELL_MIN_BOUTS };
@@ -663,17 +724,24 @@
     const activity = new Map();
     let boutSec = 0;
     let boutEnd = null;
+    let boutStart = null;
     const bouts = [];
+    const sittings = []; // [start ms, focused seconds]
     const finalize = () => {
-      if (boutSec >= RHYTHM_NOISE_FLOOR_SEC) bouts.push(boutSec);
+      if (boutSec >= RHYTHM_NOISE_FLOOR_SEC) {
+        bouts.push(boutSec);
+        if (boutStart != null) sittings.push([boutStart, boutSec]);
+      }
       boutSec = 0;
       boutEnd = null;
+      boutStart = null;
     };
     for (const [row, startMs, endMs] of countSharedTimeOnce(rows)) {
       const productive = Math.max(0, Number(row.productive_sec || 0));
       if (productive > 0) {
         const joins = boutSec > 0 && boutEnd != null && (startMs - boutEnd) / 1000 < RHYTHM_BOUT_GAP_SEC;
         if (boutSec > 0 && !joins) finalize();
+        if (boutSec === 0) boutStart = startMs;
         boutSec += productive;
         boutEnd = boutEnd != null && joins ? Math.max(boutEnd, endMs) : endMs;
       } else if (boutSec > 0 && row.kind === "rest") {
@@ -749,6 +817,7 @@
       days: records,
       recent_days: recent,
       bell_curve: bellCurve(bouts),
+      sitting_trend: sittingTrend(sittings, calcEnd),
       summary: {
         total_focus_minutes: round(totalFocus, 1),
         total_rest_minutes: round(totalRest, 1),
