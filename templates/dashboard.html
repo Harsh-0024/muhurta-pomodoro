@@ -76,9 +76,18 @@
   </section>
 
   <section class="dashboard-panel bell-curve-panel" aria-labelledby="rhythmTitle">
-    <div class="panel-head">
-      <div>
-        <h2 class="card-title" id="rhythmTitle">Rhythm profile</h2>
+    <div class="panel-head trend-head">
+      <h2 class="card-title" id="rhythmTitle">Rhythm profile</h2>
+      <button type="button" class="info-button" id="trendInfoButton" aria-label="What this graph shows" aria-expanded="false" aria-controls="trendInfo">i</button>
+      <div class="info-pop hidden" id="trendInfo" role="dialog" aria-labelledby="trendInfoTitle">
+        <p class="info-pop-title" id="trendInfoTitle">How long you usually focus</p>
+        <ul class="info-pop-keys">
+          <li><span class="info-key info-key-line" aria-hidden="true"></span><span><b>Line</b>: how long you usually sit.</span></li>
+          <li><span class="info-key info-key-band" aria-hidden="true"></span><span><b>Shade</b>: your usual range. Narrow means steady.</span></li>
+          <li><span class="info-key info-key-next" aria-hidden="true"></span><span><b>Next</b>: a small step to aim for.</span></li>
+        </ul>
+        <p class="info-pop-note">A break under 5 minutes doesn't end a sitting.</p>
+        <p class="info-pop-goal">Aim: let the line rise slowly.</p>
       </div>
     </div>
     <div class="bell-curve-container" id="bellCurveContainer"></div>

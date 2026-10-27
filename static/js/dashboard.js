@@ -319,18 +319,8 @@
     });
   }
 
-  // ── Bell curve: session-length distribution ───────────────────────
+  // ── Rhythm profile: the usual sitting, week by week ──────────────
 
-  const PRESET_ZONES = [
-    { name: "Agaman",   start: 0,  end: 18 },
-    { name: "Sparsha",  start: 18, end: 30 },
-    { name: "Sthiti",   start: 30, end: 42 },
-    { name: "Abhyasi",  start: 42, end: 54 },
-    { name: "Tapas",    start: 54, end: 66 },
-    { name: "Samadhan", start: 66, end: 78 },
-    { name: "Tanmaya",  start: 78, end: 90 },
-    { name: "Ekagra",   start: 90, end: Infinity },
-  ];
 
   // Readable step sizes for a time axis, in minutes. Unbounded at the top so a
   // wide range never falls back to cramming 30-minute ticks edge to edge.
@@ -341,11 +331,6 @@
       if (step >= raw) return step;
     }
     return Math.ceil(raw / 720) * 720;
-  }
-
-  function nearestTimeStep(raw) {
-    return TIME_STEPS.reduce((best, step) =>
-      Math.abs(step - raw) < Math.abs(best - raw) ? step : best, TIME_STEPS[0]);
   }
 
   function formatAxisMinutes(value) {
@@ -388,6 +373,217 @@
     }
   }
 
+  // A calm curve through points [[x, y], ...] (monotone cubic, the same idea
+  // as d3's curveMonotoneX): smooth, but it never overshoots, so it can't
+  // invent a peak or dip the data doesn't have. Returns path commands without
+  // the leading "M", so callers can join pieces.
+  function monotoneCurve(pts) {
+    const n = pts.length;
+    if (n < 3) return pts.map(([x, y], i) => `${i ? "L " : ""}${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
+    const dx = [], slope = [];
+    for (let i = 0; i < n - 1; i++) {
+      dx.push(pts[i + 1][0] - pts[i][0]);
+      slope.push((pts[i + 1][1] - pts[i][1]) / dx[i]);
+    }
+    const tangent = [slope[0]];
+    for (let i = 1; i < n - 1; i++) {
+      if (slope[i - 1] * slope[i] <= 0) tangent.push(0);
+      else {
+        const w1 = 2 * dx[i] + dx[i - 1];
+        const w2 = dx[i] + 2 * dx[i - 1];
+        tangent.push((w1 + w2) / (w1 / slope[i - 1] + w2 / slope[i]));
+      }
+    }
+    tangent.push(slope[n - 2]);
+    let d = `${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;
+    for (let i = 0; i < n - 1; i++) {
+      const h = dx[i] / 3;
+      const c1 = [pts[i][0] + h, pts[i][1] + tangent[i] * h];
+      const c2 = [pts[i + 1][0] - h, pts[i + 1][1] - tangent[i + 1] * h];
+      d += ` C ${c1[0].toFixed(1)},${c1[1].toFixed(1)} ${c2[0].toFixed(1)},${c2[1].toFixed(1)} ${pts[i + 1][0].toFixed(1)},${pts[i + 1][1].toFixed(1)}`;
+    }
+    return d;
+  }
+
+  // How long someone usually sits, week by week (db.py _compute_sitting_trend).
+  // Each point is the middle sitting of the four weeks up to it, so the line
+  // moves gradually with effort; the band is the middle half of those sittings.
+  // Returns false when there isn't enough to draw yet.
+  function drawSittingTrend(container, statsEl, bc) {
+    const tr = bellData.sitting_trend;
+    const weeks = (tr && tr.weeks) || [];
+    const points = weeks.map((w, i) => ({ ...w, i })).filter((w) => w.usual_min != null);
+    if (points.length < 2) return false;
+
+    const W = Math.max(300, Math.round(container.clientWidth || 560));
+    const H = Math.max(170, Math.min(Math.round(container.clientHeight || 240), 320));
+    const sizeKey = `trend:${W}x${H}:${weeks.length}:${tr.usual_min}`;
+    if (sizeKey === bellLastSize) return true;
+    bellLastSize = sizeKey;
+    container.innerHTML = "";
+
+    // Scaled to the usual line, not the band: one unusually wide week would
+    // otherwise squeeze the line into the bottom. The band is clipped instead.
+    const top = Math.max(Math.max(...points.map((w) => w.usual_min)) * 1.35, (tr.next_min || 0) * 1.15);
+    const yStep = niceTimeStep(top / 4);
+    const yMax = Math.ceil(top / yStep) * yStep;
+    const pad = { top: 18, right: 54, bottom: 26, left: 40 };
+    const plotW = W - pad.left - pad.right;
+    const plotH = H - pad.top - pad.bottom;
+    const baseY = pad.top + plotH;
+    const n = weeks.length;
+    const sx = (i) => pad.left + (n === 1 ? plotW / 2 : (i / (n - 1)) * plotW);
+    const sy = (m) => baseY - (m / yMax) * plotH;
+
+    const weekLabel = (iso) => parseDay(iso).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+    const svg = svgEl("svg", {
+      viewBox: `0 0 ${W} ${H}`, width: W, height: H, class: "bell-curve-svg", role: "img",
+      "aria-label": `Usual sitting by week: now ${formatMinutes(tr.usual_min)}, from ${weekLabel(weeks[0].start)}`,
+    });
+    svg.innerHTML = `
+      <defs>
+        <clipPath id="trendPlot"><rect x="${pad.left}" y="${pad.top}" width="${plotW}" height="${plotH}" /></clipPath>
+      </defs>`;
+
+    // Recessive grid and minute labels
+    for (let m = yStep; m <= yMax + 1e-6; m += yStep) {
+      svg.appendChild(svgEl("line", { x1: pad.left, y1: sy(m), x2: W - pad.right, y2: sy(m), class: "trend-grid" }));
+      svg.appendChild(svgEl("text", { x: pad.left - 8, y: sy(m) + 3.5, class: "bell-axis-label", "text-anchor": "end" }, formatAxisMinutes(m)));
+    }
+    svg.appendChild(svgEl("line", { x1: pad.left, y1: baseY, x2: W - pad.right, y2: baseY, class: "bell-axis" }));
+
+    // Months along the bottom, at the first week of each
+    let lastMonth = -1;
+    let lastLabelX = -Infinity;
+    weeks.forEach((w, i) => {
+      const d = parseDay(w.start);
+      if (d.getMonth() === lastMonth) return;
+      lastMonth = d.getMonth();
+      const x = sx(i);
+      if (x - lastLabelX < 34) return;
+      lastLabelX = x;
+      svg.appendChild(svgEl("text", { x, y: baseY + 16, class: "bell-axis-label", "text-anchor": "middle" },
+        d.toLocaleDateString(undefined, { month: "short" }).slice(0, 3)));
+    });
+
+    // Typical band and the usual line, broken where a stretch has too few sittings
+    const runs = [];
+    let run = [];
+    weeks.forEach((w, i) => {
+      if (w.usual_min == null) {
+        if (run.length) runs.push(run);
+        run = [];
+      } else run.push({ ...w, i });
+    });
+    if (run.length) runs.push(run);
+    // For the picture only, each week is eased toward its neighbours (a
+    // 1-2-1 average), so a single unusual week reads as a soft swell, not a
+    // spike. Headline numbers and the hover read-out stay exact.
+    const eased = (r, key) => r.map((w, k) => {
+      const prev = r[k - 1] ? r[k - 1][key] : w[key];
+      const next = r[k + 1] ? r[k + 1][key] : w[key];
+      return (prev + 2 * w[key] + next) / 4;
+    });
+    for (const r of runs) {
+      if (r.length > 1) {
+        const hi = eased(r, "p75_min");
+        const lo = eased(r, "p25_min");
+        const mid = eased(r, "usual_min");
+        r.forEach((w, k) => { w.drawn = mid[k]; });
+        const upper = monotoneCurve(r.map((w, k) => [sx(w.i), sy(hi[k])]));
+        const lower = monotoneCurve(r.map((w, k) => [sx(w.i), sy(lo[k])]).reverse());
+        svg.appendChild(svgEl("path", { d: `M ${upper} L ${lower} Z`, class: "trend-band", "clip-path": "url(#trendPlot)" }));
+        svg.appendChild(svgEl("path", { d: `M ${monotoneCurve(r.map((w, k) => [sx(w.i), sy(mid[k])]))}`, class: "trend-line" }));
+      } else {
+        svg.appendChild(svgEl("circle", { cx: sx(r[0].i), cy: sy(r[0].usual_min), r: 2.5, class: "trend-point" }));
+      }
+    }
+
+    // The next small step, faint, labelled on the right
+    if (tr.next_min) {
+      const y = sy(tr.next_min);
+      svg.appendChild(svgEl("line", { x1: pad.left, y1: y, x2: W - pad.right, y2: y, class: "trend-next" }));
+      svg.appendChild(svgEl("text", { x: W - pad.right + 6, y: y + 3.5, class: "bell-p95-label" }, `Next ${formatMinutes(tr.next_min)}`));
+    }
+
+    // Now: the last point, labelled with the headline value
+    const drawnAt = (w) => {
+      for (const r of runs) for (const x of r) if (x.i === w.i) return x.drawn ?? x.usual_min;
+      return w.usual_min;
+    };
+    const last = points[points.length - 1];
+    svg.appendChild(svgEl("circle", { cx: sx(last.i), cy: sy(drawnAt(last)), r: 3.6, class: "trend-now" }));
+    const nowY = sy(drawnAt(last));
+    const nextY = tr.next_min ? sy(tr.next_min) : -100;
+    if (Math.abs(nowY - nextY) > 12) {
+      svg.appendChild(svgEl("text", { x: sx(last.i) + 6, y: nowY + 3.5, class: "bell-peak-label" }, formatMinutes(last.usual_min)));
+    }
+
+    // Hover: the nearest week
+    const crosshair = svgEl("line", { x1: 0, y1: pad.top, x2: 0, y2: baseY, class: "bell-crosshair", style: "display:none" });
+    const dot = svgEl("circle", { cx: 0, cy: 0, r: 3.2, class: "bell-curve-dot", style: "display:none" });
+    svg.appendChild(crosshair);
+    svg.appendChild(dot);
+    container.appendChild(svg);
+
+    const tooltip = document.createElement("div");
+    tooltip.className = "bell-tooltip hidden";
+    tooltip.setAttribute("role", "status");
+    tooltip.setAttribute("aria-live", "polite");
+    container.appendChild(tooltip);
+
+    function readAt(clientX, clientY) {
+      const rect = svg.getBoundingClientRect();
+      const px = ((clientX - rect.left) / rect.width) * W;
+      if (px < pad.left - 6 || px > W - pad.right + 6) return hideRead();
+      const target = points.reduce((best, w) => (Math.abs(sx(w.i) - px) < Math.abs(sx(best.i) - px) ? w : best), points[0]);
+      const cx = sx(target.i);
+      const cy = sy(drawnAt(target));
+      crosshair.setAttribute("x1", cx);
+      crosshair.setAttribute("x2", cx);
+      crosshair.setAttribute("y1", cy);
+      crosshair.style.display = "";
+      dot.setAttribute("cx", cx);
+      dot.setAttribute("cy", cy);
+      dot.style.display = "";
+      tooltip.textContent = `Week of ${weekLabel(target.start)} · usually ${formatMinutes(target.usual_min)} · typical ${formatMinutes(target.p25_min)}–${formatMinutes(target.p75_min)}`;
+      tooltip.classList.remove("hidden");
+      const cRect = container.getBoundingClientRect();
+      const tipW = tooltip.offsetWidth;
+      tooltip.style.left = `${Math.max(4, Math.min(clientX - cRect.left + 12, cRect.width - tipW - 4))}px`;
+      tooltip.style.top = `${Math.max(4, clientY - cRect.top - 34)}px`;
+    }
+    function hideRead() {
+      crosshair.style.display = "none";
+      dot.style.display = "none";
+      tooltip.classList.add("hidden");
+    }
+    svg.addEventListener("mousemove", (e) => readAt(e.clientX, e.clientY));
+    svg.addEventListener("mouseleave", hideRead);
+    svg.addEventListener("touchmove", (e) => {
+      if (e.touches.length === 1) readAt(e.touches[0].clientX, e.touches[0].clientY);
+    }, { passive: true });
+    svg.addEventListener("touchend", hideRead);
+
+    if (statsEl) {
+      const change = tr.change_min;
+      const changeText = change == null ? ""
+        : Math.abs(change) < 1 ? "about the same as last month"
+        : `${formatMinutes(Math.abs(change))} ${change > 0 ? "longer" : "shorter"} than last month`;
+      const sep = '<span class="bell-stats-sep" aria-hidden="true">·</span>';
+      statsEl.innerHTML = [
+        tr.usual_min != null ? `<span>Usually <strong>${formatMinutes(tr.usual_min)}</strong></span>` : "",
+        changeText ? `<span>${changeText}</span>` : "",
+        tr.next_min ? `<span>Next <strong>${formatMinutes(tr.next_min)}</strong></span>` : "",
+        `<span>Best <strong>${formatMinutes(bc.p95_min)}</strong></span>`,
+      ].filter(Boolean).join(sep);
+    }
+
+    container.classList.add("bell-curve-enter");
+    requestAnimationFrame(() => requestAnimationFrame(() => container.classList.add("bell-curve-visible")));
+    return true;
+  }
+
   function drawBellCurve() {
     const container = byId("bellCurveContainer");
     const statsEl = byId("bellCurveStats");
@@ -415,255 +611,35 @@
       return;
     }
 
-    const curve = bc.curve || [];
-    const durations = bc.durations || [];
-    const xMin = Number(bc.x_min);
-    const xMax = Number(bc.x_max);
-    const yMax = curve.reduce((m, p) => Math.max(m, p[1]), 0);
-    if (curve.length < 2 || !(xMax > xMin) || yMax <= 0) {
-      container.innerHTML = '<p class="empty-note">No rhythm data yet.</p>';
-      return;
-    }
+    if (drawSittingTrend(container, statsEl, bc)) return;
 
-    // The SVG is drawn at real pixel size (1 unit = 1 px) so label sizes and
-    // stroke weights stay true no matter how wide the panel gets.
-    const W = Math.max(300, Math.round(container.clientWidth || 560));
-    const H = Math.max(170, Math.min(Math.round(container.clientHeight || 240), 320));
-    const sizeKey = `${W}x${H}:${bc.bout_count}:${xMin}:${xMax}`;
-    if (sizeKey === bellLastSize) return;
-    bellLastSize = sizeKey;
+    // Every sitting so far falls in one week: nothing to show as a line yet.
+    container.innerHTML = `<div class="bell-curve-threshold">
+      <p class="bell-curve-threshold-text">Your usual sitting shows here after a second week of focus.</p>
+    </div>`;
+    if (statsEl) statsEl.innerHTML = "";
+    bellLastSize = "";
+  }
 
-    container.innerHTML = "";
-
-    const pad = { top: 24, right: 14, bottom: 56, left: 14 };
-    const plotW = W - pad.left - pad.right;
-    const plotH = H - pad.top - pad.bottom;
-    const baseY = pad.top + plotH;
-    const span = xMax - xMin;
-
-    const sx = (x) => pad.left + ((x - xMin) / span) * plotW;
-    const sy = (y) => baseY - (y / yMax) * plotH;
-    const clampLabel = (x, half) => Math.max(pad.left + half, Math.min(x, W - pad.right - half));
-
-    const svg = svgEl("svg", {
-      viewBox: `0 0 ${W} ${H}`,
-      width: W,
-      height: H,
-      class: "bell-curve-svg",
-      role: "img",
-      "aria-label": `Session length distribution: most common ${formatMinutes(bc.peak_min)}, typical ${formatMinutes(bc.p25_min)} to ${formatMinutes(bc.p75_min)}, best ${formatMinutes(bc.p95_min)}, from ${bc.bout_count} sessions`,
+  // The "i" beside the title: what the graph shows, in a few words.
+  function wireTrendInfo() {
+    const button = byId("trendInfoButton");
+    const pop = byId("trendInfo");
+    if (!button || !pop) return;
+    const setOpen = (open) => {
+      pop.classList.toggle("hidden", !open);
+      button.setAttribute("aria-expanded", open ? "true" : "false");
+    };
+    button.addEventListener("click", (e) => {
+      e.stopPropagation();
+      setOpen(pop.classList.contains("hidden"));
     });
-
-    svg.innerHTML = `
-      <defs>
-        <linearGradient id="bellGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" stop-color="#9a7b4f" />
-          <stop offset="45%" stop-color="#d4bc7c" />
-          <stop offset="100%" stop-color="#9a7b4f" />
-        </linearGradient>
-        <linearGradient id="bellFillGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stop-color="#d4bc7c" stop-opacity="0.2" />
-          <stop offset="100%" stop-color="#d4bc7c" stop-opacity="0.02" />
-        </linearGradient>
-      </defs>
-    `;
-
-    // Typical range band (p25–p75)
-    const p25x = sx(Math.max(xMin, bc.p25_min));
-    const p75x = sx(Math.min(xMax, bc.p75_min));
-    svg.appendChild(svgEl("rect", {
-      x: p25x, y: pad.top, width: Math.max(1, p75x - p25x), height: plotH, class: "bell-range-band",
-    }));
-
-    // Curve + fill
-    let d = `M ${sx(curve[0][0]).toFixed(2)} ${sy(curve[0][1]).toFixed(2)}`;
-    for (let i = 1; i < curve.length; i++) {
-      d += ` L ${sx(curve[i][0]).toFixed(2)} ${sy(curve[i][1]).toFixed(2)}`;
-    }
-    svg.appendChild(svgEl("path", {
-      d: `${d} L ${sx(curve[curve.length - 1][0]).toFixed(2)} ${baseY} L ${sx(curve[0][0]).toFixed(2)} ${baseY} Z`,
-      fill: "url(#bellFillGrad)",
-    }));
-    svg.appendChild(svgEl("path", { d, class: "bell-curve-line" }));
-
-    // Peak marker
-    const peakX = sx(Math.min(Math.max(bc.peak_min, xMin), xMax));
-    svg.appendChild(svgEl("line", {
-      x1: peakX, y1: sy(yMax) - 4, x2: peakX, y2: baseY, class: "bell-peak-line",
-    }));
-    const peakText = `Most often ${formatMinutes(bc.peak_min)}`;
-    const peakHalf = estimateTextWidth(peakText, 10.5) / 2;
-    const peakLabelX = clampLabel(peakX, peakHalf);
-    svg.appendChild(svgEl("text", {
-      x: peakLabelX, y: pad.top - 9, class: "bell-peak-label", "text-anchor": "middle",
-    }, peakText));
-
-    // Sessions past the right edge of the chart, when the axis was capped
-    const clipText = bc.clipped_count > 0
-      ? `${bc.clipped_count} longer, up to ${formatMinutes(bc.max_min)}`
-      : "";
-    const clipLeft = clipText ? W - pad.right - estimateTextWidth(clipText, 9.5) : W;
-
-    // Best (95th percentile) marker. Its label sits beside the peak label when
-    // there is room and drops to the row below otherwise, so the marker line is
-    // never left unexplained — and the line starts below whatever shares that row.
-    const p95x = sx(Math.min(Math.max(bc.p95_min, xMin), xMax));
-    const bestText = `Best ${formatMinutes(bc.p95_min)}`;
-    const bestHalf = estimateTextWidth(bestText, 9.5) / 2;
-    const bestLabelX = clampLabel(p95x, bestHalf);
-    const clearOfPeak = Math.abs(bestLabelX - peakLabelX) > peakHalf + bestHalf + 8;
-    const clearOfClip = bestLabelX + bestHalf < clipLeft - 8;
-    const bestBelow = !clearOfPeak && clearOfClip;
-    svg.appendChild(svgEl("line", {
-      x1: p95x,
-      y1: (bestBelow || p95x > clipLeft - 6) ? pad.top + 20 : pad.top + 4,
-      x2: p95x, y2: baseY, class: "bell-p95-line",
-    }));
-    if (clearOfPeak || bestBelow) {
-      svg.appendChild(svgEl("text", {
-        x: bestLabelX, y: clearOfPeak ? pad.top - 9 : pad.top + 11,
-        class: "bell-p95-label", "text-anchor": "middle",
-      }, bestText));
-    }
-
-    // Baseline
-    svg.appendChild(svgEl("line", {
-      x1: pad.left, y1: baseY, x2: W - pad.right, y2: baseY, class: "bell-axis",
-    }));
-
-    // X-axis ticks — spacing driven by how much room the panel actually has
-    const maxTicks = Math.max(2, Math.floor(plotW / 62));
-    const tickStep = niceTimeStep(span / maxTicks);
-    for (let t = Math.ceil(xMin / tickStep) * tickStep; t <= xMax + 1e-6; t += tickStep) {
-      const tx = sx(t);
-      svg.appendChild(svgEl("line", { x1: tx, y1: baseY, x2: tx, y2: baseY + 4, class: "bell-axis-tick" }));
-      svg.appendChild(svgEl("text", {
-        x: tx, y: baseY + 15, class: "bell-axis-label", "text-anchor": "middle",
-      }, formatAxisMinutes(t)));
-    }
-
-    // Preset zones below the axis. A name is drawn only where its slice of the
-    // axis is genuinely wide enough, and when they get tight the names stagger
-    // onto two rows rather than piling on top of each other.
-    const visibleZones = PRESET_ZONES
-      .map((zone) => {
-        const zStart = Math.max(zone.start, xMin);
-        const zEnd = Math.min(zone.end === Infinity ? xMax : zone.end, xMax);
-        return { zone, zStart, zEnd, width: sx(zEnd) - sx(zStart), mid: (sx(zStart) + sx(zEnd)) / 2 };
-      })
-      .filter((z) => z.zEnd > z.zStart);
-
-    const fitsSingleRow = visibleZones.every(
-      (z) => z.width >= estimateTextWidth(z.zone.name, 9.5) + 8
-    );
-
-    visibleZones.forEach((z, i) => {
-      if (z.zone.start > xMin && z.zone.start < xMax) {
-        svg.appendChild(svgEl("line", {
-          x1: sx(z.zone.start), y1: baseY + 21, x2: sx(z.zone.start), y2: baseY + 45, class: "bell-zone-sep",
-        }));
-      }
-      const room = fitsSingleRow ? z.width : z.width * 2;
-      if (room < estimateTextWidth(z.zone.name, 9.5) + 8) return;
-      const row = fitsSingleRow ? 0 : i % 2;
-      svg.appendChild(svgEl("text", {
-        x: z.mid, y: baseY + 30 + row * 11, class: "bell-zone-label", "text-anchor": "middle",
-      }, z.zone.name));
+    document.addEventListener("click", (e) => {
+      if (!pop.classList.contains("hidden") && !pop.contains(e.target)) setOpen(false);
     });
-
-    if (clipText) {
-      svg.appendChild(svgEl("text", {
-        x: W - pad.right, y: pad.top + 11, class: "bell-clip-note", "text-anchor": "end",
-      }, clipText));
-    }
-
-    // Crosshair + read-out dot
-    const crosshair = svgEl("line", {
-      x1: 0, y1: pad.top, x2: 0, y2: baseY, class: "bell-crosshair", style: "display:none",
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") setOpen(false);
     });
-    const dot = svgEl("circle", { cx: 0, cy: 0, r: 3.2, class: "bell-curve-dot", style: "display:none" });
-    svg.appendChild(crosshair);
-    svg.appendChild(dot);
-
-    container.appendChild(svg);
-
-    const tooltip = document.createElement("div");
-    tooltip.className = "bell-tooltip hidden";
-    tooltip.setAttribute("role", "status");
-    tooltip.setAttribute("aria-live", "polite");
-    container.appendChild(tooltip);
-
-    // The hover bucket scales with the axis, so it always covers a comparable
-    // slice of the chart whether the range is 20 minutes or 4 hours.
-    const bucket = Math.max(0.5, nearestTimeStep(span / 20));
-    const total = durations.length || 1;
-
-    function readAt(clientX, clientY) {
-      const rect = svg.getBoundingClientRect();
-      const ratio = (clientX - rect.left) / rect.width;
-      const px = ratio * W;
-      if (px < pad.left || px > W - pad.right) return hideRead();
-
-      const dataX = xMin + ((px - pad.left) / plotW) * span;
-      const idx = Math.max(0, Math.min(curve.length - 1,
-        Math.round(((dataX - xMin) / span) * (curve.length - 1))));
-      const cx = sx(curve[idx][0]);
-      const cy = sy(curve[idx][1]);
-
-      crosshair.setAttribute("x1", cx);
-      crosshair.setAttribute("x2", cx);
-      crosshair.setAttribute("y1", cy);
-      crosshair.style.display = "";
-      dot.setAttribute("cx", cx);
-      dot.setAttribute("cy", cy);
-      dot.style.display = "";
-
-      const lo = dataX - bucket / 2;
-      const hi = dataX + bucket / 2;
-      const count = durations.reduce((acc, v) => acc + (v >= lo && v < hi ? 1 : 0), 0);
-      const pct = (count / total) * 100;
-      const pctText = count === 0 ? "under 1%" : `~${pct < 1 ? pct.toFixed(1) : Math.round(pct)}%`;
-
-      const zone = PRESET_ZONES.find((z) => dataX >= z.start && dataX < z.end);
-      tooltip.textContent = `${formatMinutes(dataX)} · ${pctText} of sessions${zone ? ` · ${zone.name}` : ""}`;
-      tooltip.classList.remove("hidden");
-
-      const cRect = container.getBoundingClientRect();
-      const tipW = tooltip.offsetWidth;
-      const left = Math.max(4, Math.min(clientX - cRect.left + 12, cRect.width - tipW - 4));
-      tooltip.style.left = `${left}px`;
-      tooltip.style.top = `${Math.max(4, clientY - cRect.top - 34)}px`;
-    }
-
-    function hideRead() {
-      crosshair.style.display = "none";
-      dot.style.display = "none";
-      tooltip.classList.add("hidden");
-    }
-
-    svg.addEventListener("mousemove", (e) => readAt(e.clientX, e.clientY));
-    svg.addEventListener("mouseleave", hideRead);
-    svg.addEventListener("touchmove", (e) => {
-      if (e.touches.length === 1) readAt(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-    svg.addEventListener("touchend", hideRead);
-
-    if (statsEl) {
-      statsEl.innerHTML = `
-        <span>Most often <strong>${formatMinutes(bc.peak_min)}</strong></span>
-        <span class="bell-stats-sep" aria-hidden="true">·</span>
-        <span>Typical <strong>${formatMinutes(bc.p25_min)}–${formatMinutes(bc.p75_min)}</strong></span>
-        <span class="bell-stats-sep" aria-hidden="true">·</span>
-        <span>Best <strong>${formatMinutes(bc.p95_min)}</strong></span>
-        <span class="bell-stats-sep" aria-hidden="true">·</span>
-        <span>${bc.bout_count} sessions</span>
-      `;
-    }
-
-    container.classList.add("bell-curve-enter");
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      container.classList.add("bell-curve-visible");
-    }));
   }
 
   async function loadDashboard(year) {
@@ -687,6 +663,7 @@
 
   async function init() {
     if (window.__PAGE__ !== "dashboard") return;
+    wireTrendInfo();
     ["streakCard", "averageCard"].forEach((cardId) => {
       const card = byId(cardId);
       if (!card) return;
