@@ -1,0 +1,464 @@
+{
+ "versions": {
+  "1.15.0": [
+   {
+    "text": "The dashboard now shows how long you usually focus, week by week. A gentle line you can watch rise, with a small next step to aim for. Tap the \"i\" beside it for a short explanation.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "A break under 5 minutes no longer splits your focus in two: it counts as one sitting, everywhere.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   }
+  ],
+  "1.14.0": [
+   {
+    "text": "The Timer's quick lengths now fit you: your usual focus length sits in the middle, with shorter and longer steps around it, taken from your own rhythms.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "Phones show what's running in notifications, like the Mac menu bar. On Android a live clock, also on the lock screen; on iPhone a quiet note saying until when.",
+    "for": [
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "Rhythm now says \"Overtime\" when you focus past a block, the same as the Timer.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "An update in progress keeps showing its progress when you switch tabs.",
+    "for": [
+     "mac",
+     "windows"
+    ]
+   },
+   {
+    "text": "iPhone: Settings shows your notification choice at once, and says if alerts with the app closed aren't set up yet.",
+    "for": [
+     "iphone"
+    ]
+   }
+  ],
+  "1.13.0": [
+   {
+    "text": "Sign in with Google or Microsoft: one tap on the sign-in screen, on the Mac, Windows, iPhone and Android. Use the same email as before and it opens your existing account, with all your history.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "New to the app? After Google or Microsoft you just pick a username, and you're in.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "Creating a password is calmer, with a \"Suggest a strong password\" button and the website to save it under in your password manager.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   }
+  ],
+  "1.12.1": [
+   {
+    "text": "Phones now have Feedback in Settings too, like the computer.",
+    "for": [
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "Clearer icons in the phone's bottom bar: an hourglass for Rhythm, the infinity sign for Flow (as on the Mac) and a cog for Settings.",
+    "for": [
+     "android",
+     "iphone"
+    ]
+   }
+  ],
+  "1.12.0": [
+   {
+    "text": "iPhone: a bell and a notification now tell you when focus or rest ends, even with the phone locked. Add the app to your Home Screen, then turn it on in Settings > Notifications.",
+    "for": [
+     "iphone"
+    ]
+   }
+  ],
+  "1.11.2": [
+   {
+    "text": "Updating no longer looks frozen: after \"Update now\" a line fills as the update downloads, with the percentage, then says when it is installing and reopening.",
+    "for": [
+     "mac",
+     "windows"
+    ]
+   },
+   {
+    "text": "New in Settings: Feedback. Tell the maker what you like, what you don't, what could be better or what you'd like next, and see whether it was read.",
+    "for": [
+     "mac",
+     "windows"
+    ]
+   }
+  ],
+  "1.11.1": [
+   {
+    "text": "The \"new version\" notice is calmer: a short title, a small Download button, and on a phone one slim line that stays clear of the clock.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "\"Time's up\", \"What's new\" and \"Please update\" match it: same spacing, centred, no odd line breaks, and on a phone the buttons share the row evenly.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   }
+  ],
+  "1.11.0": [
+   {
+    "text": "A calmer Timer: one soft time in the ring. Tap it and type to change it (25, 5:30 or 1:30:00; Enter starts), or pick a quick length under the ring.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "Mac menu bar: a flame while you focus and a tea cup while you rest, so you can tell at a glance. Flow shows an infinity sign.",
+    "for": [
+     "mac"
+    ]
+   },
+   {
+    "text": "Creating a password is calmer: one hint line, a strength bar, and \"Copy website\" next to \"Copy password\" for saving it in a password manager.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "This \"What's new\" card now scrolls inside, so a long list never runs off the screen.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "The keyboard shortcut list now says what Space really does.",
+    "for": [
+     "mac",
+     "windows"
+    ]
+   }
+  ],
+  "1.10.1": [
+   {
+    "text": "Windows: the app now opens in its own window after unzipping with Extract All too. In 1.9.0 and 1.10.0 it opened in a browser window instead.",
+    "for": [
+     "windows"
+    ]
+   }
+  ],
+  "1.10.0": [
+   {
+    "text": "New: Muhurta Pomodoro for Android. Get it from the website on your phone, sign in with the same account, and your history, combinations and settings are there too.",
+    "for": [
+     "android"
+    ]
+   },
+   {
+    "text": "Use the phone and the computer side by side: changes go both ways on their own, and time both of them timed at once counts only once on the dashboard.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "On the phone, a bell and a notification tell you when focus or rest ends, even with the app closed or the screen off.",
+    "for": [
+     "android"
+    ]
+   }
+  ],
+  "1.9.0": [
+   {
+    "text": "On Windows the app now opens in its own window, like on a Mac, with its own icon in the taskbar. The time left shows on its taskbar button.",
+    "for": [
+     "windows"
+    ]
+   },
+   {
+    "text": "On Windows, notifications now always arrive as Windows notifications, with nothing to allow first.",
+    "for": [
+     "windows"
+    ]
+   },
+   {
+    "text": "On Windows, opening the app while it's already open brings its window back instead of opening another one.",
+    "for": [
+     "windows"
+    ]
+   },
+   {
+    "text": "Everything fits any window size now, from a small corner of the screen to full screen.",
+    "for": [
+     "mac",
+     "windows"
+    ]
+   },
+   {
+    "text": "Fixed: the window's title no longer flickers while the Timer counts down.",
+    "for": [
+     "mac",
+     "windows"
+    ]
+   }
+  ],
+  "1.8.0": [
+   {
+    "text": "New: Timer. Type any length (or tap 5m to 1h), press Start, and it counts down. It counts as focus, like everything else.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "What the Timer does at zero is up to you in Settings > Timer: stop with one chime, keep ringing until you dismiss it, or keep counting the extra time.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "The cycles you know are now called Rhythm, so the tabs read Rhythm, Timer, Flow. Starting one pauses whichever other one is running.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "Sound is simpler: the two bells, and one volume slider that works smoothly all the way.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   }
+  ],
+  "1.7.2": [
+   {
+    "text": "If the app can't check for updates for a few days, it now tells you, so you never get stuck on an old version without knowing.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "The app now tells your account which version it runs, so updates can reach everyone. Nothing else is sent besides your own sessions and settings.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   }
+  ],
+  "1.7.1": [
+   {
+    "text": "Update notices now work. Earlier versions could never tell that a new version was out; from now on you'll see \"Update now\" whenever there is one. Settings > About shows when it last checked.",
+    "for": [
+     "mac",
+     "windows"
+    ]
+   },
+   {
+    "text": "Creating a password? \"Suggest a strong password\" makes one for you, with a button to copy it.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "Saving your password in Passwords? Use the website harsh-0024.github.io/muhurta-pomodoro with your email (also shown in Settings > Account).",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   }
+  ],
+  "1.7.0": [
+   {
+    "text": "You now sign in with a free account: your name, a username, your email and a password. Your sessions, combinations and settings are kept in your account and appear on every computer you sign in on.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "The history already on this computer was added to your account the first time you signed in. Signing out saves everything to your account first, then clears it from this computer.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "Forgot your password? \"Forgot password?\" on the sign-in screen emails you a code to set a new one.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "On a Mac, the running timer or Flow now shows in the menu bar, like Apple's Clock. Click it to bring the window back.",
+    "for": [
+     "mac"
+    ]
+   }
+  ],
+  "1.6.0": [
+   {
+    "text": "Muhurta Pomodoro is now a proper Mac app. Download it from the website, drag it into Applications, and it opens in its own window with its own Dock icon. No Terminal, no Chrome.",
+    "for": [
+     "mac"
+    ]
+   },
+   {
+    "text": "The Mac app updates itself: when a new version is out, click \"Update now\".",
+    "for": [
+     "mac"
+    ]
+   },
+   {
+    "text": "A new website to share: harsh-0024.github.io/muhurta-pomodoro",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   }
+  ],
+  "1.5.3": [
+   {
+    "text": "On a Mac, the timer now opens even when Chrome is closed.",
+    "for": [
+     "mac"
+    ]
+   }
+  ],
+  "1.5.2": [
+   {
+    "text": "When a new version is out, a notice at the bottom of the window offers it. \"Update now\" installs it in a few seconds. Your timer and history are kept.",
+    "for": [
+     "mac",
+     "windows"
+    ]
+   },
+   {
+    "text": "After an update, this card tells you what changed.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   }
+  ],
+  "1.5.1": [
+   {
+    "text": "The website has a new address: harsh-0024.github.io/muhurta-pomodoro",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   }
+  ],
+  "1.5.0": [
+   {
+    "text": "The timer is now called Muhurta Pomodoro.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "On a Mac, the downloadable app opens in its own window with its own Dock icon, and installs like any other app: open the .dmg and drag it to Applications.",
+    "for": [
+     "mac"
+    ]
+   },
+   {
+    "text": "Starting the app no longer stalls for half a minute on some networks.",
+    "for": [
+     "mac",
+     "windows"
+    ]
+   }
+  ]
+ }
+}

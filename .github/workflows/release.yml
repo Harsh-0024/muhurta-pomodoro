@@ -265,7 +265,11 @@ jobs:
           # The tag's screens, written into main's website folder.
           git checkout "$GITHUB_SHA" -- . ':!docs'
           python mobile/build_web.py --iphone
+          # Every release's What's new lines with their devices: the apps read
+          # it to offer only updates with something for them.
+          python release_notes.py
           want="${GITHUB_REF_NAME#v}"
+          grep -q "\"$want\"" docs/release-notes.json || { echo "release-notes.json lacks $want" >&2; exit 1; }
           grep -q "\"$want\"" docs/app/version.json || { echo "docs/app is not version $want" >&2; exit 1; }
           for f in index.html timer.html sign-in.html sw.js manifest.webmanifest local-api.js account.js pwa.js icons/apple-touch-icon.png; do
             [ -f "docs/app/$f" ] || { echo "missing from the iPhone app: $f" >&2; exit 1; }
@@ -274,8 +278,8 @@ jobs:
       - name: Publish on the website
         run: |
           git reset -q
-          git checkout -- . ':!docs/app'
-          git add docs/app
+          git checkout -- . ':!docs/app' ':!docs/release-notes.json'
+          git add docs/app docs/release-notes.json
           if git diff --cached --quiet; then echo "docs/app already up to date"; exit 0; fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

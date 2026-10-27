@@ -765,18 +765,6 @@ body[data-theme="light"] .modal-backdrop {
   padding-top: 1rem;
 }
 
-.whats-new-version {
-  margin: 1rem 0 0.4rem;
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--muted);
-}
-
-.whats-new-version + .whats-new-list {
-  margin-top: 0;
-}
-
 .whats-new-list {
   margin: 0.75rem 0 0.5rem;
   padding-left: 1.1rem;
