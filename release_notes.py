@@ -34,6 +34,10 @@ def only(devices, text: str) -> dict:
 
 
 NOTES = {
+    "1.16.0": [
+        "\"What's new\" now shows only what's new on your device, in a few short lines, even after skipping updates.",
+        "You're only asked to update when a new version has something for your device.",
+    ],
     "1.15.0": [
         'The dashboard now shows how long you usually focus, week by week. A gentle line you can watch rise, with a small next step to aim for. Tap the "i" beside it for a short explanation.',
         "A break under 5 minutes no longer splits your focus in two: it counts as one sitting, everywhere.",
