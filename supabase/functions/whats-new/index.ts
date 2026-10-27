@@ -47,6 +47,7 @@ function db(method: string, query: string, body?: unknown, prefer = "return=mini
 async function savedLines(key: string): Promise<string[] | null> {
   try {
     const res = await db("GET", `key=eq.${encodeURIComponent(key)}&select=lines`, undefined, "");
+    if (!res.ok) console.warn("saved summaries:", res.status, await res.text());
     const rows = res.ok ? await res.json() : [];
     return Array.isArray(rows[0]?.lines) ? rows[0].lines : null;
   } catch {
@@ -66,7 +67,7 @@ async function postJson(url: string, headers: Record<string, string>, body: unkn
   const t = withTimeout(TIMEOUT_MS);
   try {
     const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json", ...headers }, body: JSON.stringify(body), signal: t.signal });
-    if (!res.ok) throw new Error(`${url}: ${res.status}`);
+    if (!res.ok) throw new Error(`${url}: ${res.status} ${(await res.text()).slice(0, 300)}`);
     return await res.json();
   } finally {
     t.done();
@@ -102,14 +103,20 @@ function anthropic() {
 // ChatGPT, Grok (xAI) and Groq share the same request shape. Their model names
 // change often, so each is used only when its model is named too
 // (OPENAI_MODEL, XAI_MODEL, GROQ_MODEL).
-function chatCompletions(name: string, url: string, keyVar: string, modelVar: string) {
+// `extra` adds model-specific settings to the request.
+function chatCompletions(name: string, url: string, keyVar: string, modelVar: string, extra: (model: string) => object = () => ({})) {
   const key = env(keyVar);
   const model = env(modelVar);
   if (!key || !model) return null;
   return {
     name,
     async ask(prompt: string) {
-      const data = await postJson(url, { Authorization: `Bearer ${key}` }, { model, messages: [{ role: "user", content: prompt }] });
+      const data = await postJson(url, { Authorization: `Bearer ${key}` }, {
+        model,
+        messages: [{ role: "user", content: prompt }],
+        response_format: { type: "json_object" }, // the answer is always JSON
+        ...extra(model),
+      });
       return String(data?.choices?.[0]?.message?.content ?? "");
     },
   };
@@ -123,7 +130,11 @@ function gemini() {
     name: "gemini",
     async ask(prompt: string) {
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`;
-      const data = await postJson(url, { "x-goog-api-key": key }, { contents: [{ parts: [{ text: prompt }] }] });
+      const data = await postJson(url, { "x-goog-api-key": key }, {
+        contents: [{ parts: [{ text: prompt }] }],
+        // A short rewrite: little thinking needed, and a quick answer.
+        generationConfig: { responseMimeType: "application/json", thinkingConfig: { thinkingLevel: "low" } },
+      });
       return (data?.candidates?.[0]?.content?.parts ?? []).map((p: { text?: string }) => p.text ?? "").join("");
     },
   };
@@ -134,7 +145,9 @@ const MAKERS: Record<string, () => { name: string; ask(p: string): Promise<strin
   openai: () => chatCompletions("openai", "https://api.openai.com/v1/chat/completions", "OPENAI_API_KEY", "OPENAI_MODEL"),
   gemini,
   xai: () => chatCompletions("xai", "https://api.x.ai/v1/chat/completions", "XAI_API_KEY", "XAI_MODEL"),
-  groq: () => chatCompletions("groq", "https://api.groq.com/openai/v1/chat/completions", "GROQ_API_KEY", "GROQ_MODEL"),
+  // gpt-oss models think first; a short rewrite needs little, which leaves room for the answer.
+  groq: () => chatCompletions("groq", "https://api.groq.com/openai/v1/chat/completions", "GROQ_API_KEY", "GROQ_MODEL",
+    (model) => (model.includes("gpt-oss") ? { reasoning_effort: "low" } : {})),
 };
 
 const providers = () => ORDER.map((name) => MAKERS[name]?.()).filter((p) => p !== null && p !== undefined);
@@ -165,8 +178,10 @@ Deno.serve(async (req) => {
     providers: providers(),
     saved: await savedLines(key),
     save: async (lines: string[], source: string) => {
-      await db("POST", "on_conflict=key", { key, lines, source }, "resolution=merge-duplicates,return=minimal");
+      const res = await db("POST", "on_conflict=key", { key, lines, source }, "resolution=merge-duplicates,return=minimal");
+      if (!res.ok) throw new Error(`save: ${res.status} ${await res.text()}`);
     },
+    warn: (who: string, why: unknown) => console.warn(who, String(why)),
   });
   if (result.fallback) console.warn("no summary for", key);
   return reply(200, result);

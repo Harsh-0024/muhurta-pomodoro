@@ -18,3 +18,6 @@ create table if not exists public.whats_new_summaries (
 
 alter table public.whats_new_summaries enable row level security;
 revoke all on public.whats_new_summaries from anon, authenticated;
+-- The function's own key (service role) reads and writes it. Newer Supabase
+-- projects no longer grant that by default.
+grant select, insert, update on public.whats_new_summaries to service_role;

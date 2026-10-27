@@ -64,25 +64,33 @@ export function prompt(device, lines) {
     "",
     `Write at most ${MAX_LINES} lines, fewer when fewer cover it. Merge related changes into one line.`,
     "Put what they will notice most first. Use simple, warm, everyday words and short sentences.",
+    `Keep each line under ${MAX_LINE_CHARS - 40} characters: one or two short sentences.`,
     "Mention only what is listed above. Never mention version numbers or other devices.",
-    "Answer with only a JSON array of strings, one string per line, and nothing else.",
+    'Answer with only JSON, in this shape and nothing else: {"lines": ["first line", "second line"]}',
   ].join("\n");
 }
 
-// The AI's answer, if it is what was asked for: a JSON array of 1-5 short strings.
+// The AI's answer, if it is what was asked for: {"lines": [1-5 short strings]}.
+// A bare array is fine too, and so is one string holding the lines one per row.
 export function parseLines(text) {
   if (typeof text !== "string") return null;
   const body = text.trim().replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  const start = body.indexOf("[");
-  const end = body.lastIndexOf("]");
-  if (start < 0 || end <= start) return null;
   let value;
   try {
-    value = JSON.parse(body.slice(start, end + 1));
+    value = JSON.parse(body);
   } catch (_) {
-    return null;
+    const start = body.indexOf("[");
+    const end = body.lastIndexOf("]");
+    if (start < 0 || end <= start) return null;
+    try {
+      value = JSON.parse(body.slice(start, end + 1));
+    } catch (_) {
+      return null;
+    }
   }
+  if (value && !Array.isArray(value) && typeof value === "object") value = value.lines;
   if (!Array.isArray(value)) return null;
+  if (value.length === 1 && typeof value[0] === "string" && value[0].includes("\n")) value = value[0].split("\n").filter((l) => l.trim());
   const lines = value.filter((l) => typeof l === "string").map((l) => l.trim()).filter(Boolean);
   if (!lines.length || lines.length > MAX_LINES || lines.length !== value.length) return null;
   if (lines.some((l) => l.length > MAX_LINE_CHARS || /\b\d+\.\d+\.\d+\b/.test(l))) return null;
@@ -97,10 +105,11 @@ export function parseLines(text) {
  *   providers?: { name: string, ask: (prompt: string) => Promise<string> }[],
  *   saved?: string[] | null,
  *   save?: (lines: string[], source: string) => Promise<void>,
+ *   warn?: (who: string, why: unknown) => void,
  * }} args
  * @returns {Promise<{ lines: string[], source: string, fallback?: boolean }>}
  */
-export async function whatsNew({ notes, from, to, device, providers = [], saved = null, save = async () => {} }) {
+export async function whatsNew({ notes, from, to, device, providers = [], saved = null, save = async () => {}, warn = () => {} }) {
   const found = linesFor(notes, device, from, to);
   const plain = found.map(([, text]) => text);
   if (new Set(found.map(([v]) => v)).size <= 1) return { lines: plain, source: "notes" };
@@ -109,13 +118,18 @@ export async function whatsNew({ notes, from, to, device, providers = [], saved 
   for (const provider of providers) {
     try {
       const lines = parseLines(await provider.ask(ask));
-      if (!lines) continue; // an answer in the wrong shape: try the next one
+      if (!lines) {
+        warn(provider.name, "answer in the wrong shape");
+        continue; // try the next one
+      }
       try {
         await save(lines, provider.name);
-      } catch (_) {} // not saved this time: still answer
+      } catch (err) {
+        warn("save", err); // not saved this time: still answer
+      }
       return { lines, source: provider.name };
-    } catch (_) {
-      // busy, down, too slow or refused: the next one
+    } catch (err) {
+      warn(provider.name, err); // busy, down, too slow or refused: the next one
     }
   }
   return { lines: plain, source: "notes", fallback: true };
