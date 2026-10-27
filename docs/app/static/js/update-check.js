@@ -10,6 +10,9 @@
   "use strict";
   const CHECK_EVERY = 60 * 60 * 1000;
   const DISMISS_KEY = "muhurata.update.dismissed";
+  // The update being installed, so a page opened mid-update (another tab)
+  // picks the progress up instead of offering the update again.
+  const RUNNING_KEY = "muhurata.update.running";
   let shown = null; // "bar:<version>" or "required:<version>"
 
   function dismissed(version) {
@@ -99,8 +102,9 @@
 
   // The "Update now" (or "Download") button, shared by the notice and the
   // required screen. While updating, `host` shows the progress line and
-  // `hide` (the buttons) step aside.
-  function updateButton(d, msg, host, hide) {
+  // `hide` (the buttons) step aside. `resume`: the update is already running
+  // (started on another page), so follow it without starting it again.
+  function updateButton(d, msg, host, hide, resume) {
     if (d.how !== "restart") {
       const link = el("a", "btn btn-primary", "Download");
       link.href = d.url;
@@ -110,7 +114,7 @@
     }
     const button = el("button", "btn btn-primary", "Update now");
     button.type = "button";
-    button.addEventListener("click", () => {
+    const start = (running) => {
       const before = msg.textContent;
       const title = host.querySelector(".update-bar-title, .update-required-title");
       const titleBefore = title && title.textContent;
@@ -127,13 +131,19 @@
         msg.textContent = text || before;
         hidden.forEach((b) => (b.hidden = false));
       };
+      if (running) return followUpdate(d.current, view, failed);
+      try {
+        sessionStorage.setItem(RUNNING_KEY, JSON.stringify(d));
+      } catch (_) {}
       fetch("/api/update/restart", { method: "POST" })
         .then((r) => {
           if (!r.ok) throw new Error();
           followUpdate(d.current, view, failed);
         })
         .catch(() => failed("Could not update just now. Close this window and open Muhurta Pomodoro again."));
-    });
+    };
+    button.addEventListener("click", () => start(false));
+    if (resume) start(true);
     return button;
   }
 
@@ -149,8 +159,13 @@
     return { bar, msg, actions };
   }
 
-  function showBar(d) {
-    if (shown === `bar:${d.latest}` || dismissed(d.latest)) return;
+  // A notice already showing an update in progress stays as it is.
+  function updating() {
+    return !!document.querySelector(".update-bar.is-updating, .update-required .is-updating");
+  }
+
+  function showBar(d, resume) {
+    if (updating() || shown === `bar:${d.latest}` || (dismissed(d.latest) && !resume)) return;
     document.querySelector(".update-bar")?.remove();
     shown = `bar:${d.latest}`;
 
@@ -165,7 +180,7 @@
       } catch (_) {}
       bar.remove();
     });
-    actions.append(later, updateButton(d, msg, bar, [actions]));
+    actions.append(later, updateButton(d, msg, bar, [actions], resume));
     document.body.appendChild(bar);
   }
 
@@ -181,8 +196,8 @@
     ev.stopPropagation();
   }
 
-  function showRequired(d) {
-    if (shown === `required:${d.latest}`) return;
+  function showRequired(d, resume) {
+    if (shown === `required:${d.latest}` || (updating() && !resume)) return;
     document.querySelector(".update-bar")?.remove();
     document.querySelector(".update-required")?.remove();
     shown = `required:${d.latest}`;
@@ -199,7 +214,7 @@
       d.message || `Version ${d.current} is no longer supported. Version ${d.latest} is ready.`);
     const note = el("p", "update-required-note",
       "Your sessions and settings are safe in your account and come back after the update.");
-    const button = updateButton(d, body, card, []);
+    const button = updateButton(d, body, card, [], resume);
     card.append(kicker, title, body, button, note);
     screen.append(card);
     document.body.appendChild(screen);
@@ -253,7 +268,25 @@
       .catch(() => {});
   }
 
-  check();
+  // An update already running (started before this page opened, e.g. on
+  // another tab): show it in progress rather than offering it again.
+  function resumeOrCheck() {
+    fetch("/api/update/progress", { cache: "no-store" })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((p) => {
+        if (!p || !p.progress) return check();
+        let d = null;
+        try {
+          d = JSON.parse(sessionStorage.getItem(RUNNING_KEY));
+        } catch (_) {}
+        if (!d || d.current !== p.current) d = { current: p.current, latest: "the new version", how: "restart" };
+        if (d.required) showRequired(d, true);
+        else showBar(d, true);
+      })
+      .catch(check);
+  }
+
+  resumeOrCheck();
   setInterval(check, CHECK_EVERY);
   window.addEventListener("muhurata:check-updates", check); // Settings > Check now
 })();

@@ -719,7 +719,7 @@
     if (!p || !phase || !hint) return;
 
     if (state.mode === "extend") {
-      phase.textContent = "Extended focus";
+      phase.textContent = "Overtime";
       hint.textContent = "";
       hint.classList.add("hidden");
       return;
@@ -929,7 +929,7 @@
       true,
       "",
       [
-        { label: "Extend", primary: false, onClick: () => chooseExtendFocus() },
+        { label: "Keep going", primary: false, onClick: () => chooseExtendFocus() },
         { label: "Rest", primary: true, onClick: () => chooseStartRest() },
         { label: "Skip", primary: false, onClick: () => chooseSkipRest() },
       ],
@@ -1022,7 +1022,7 @@
       chooseStartRest();
       return;
     }
-    notify("Focus complete", `${p.name} · extending focus until rest.`);
+    notify("Focus complete", `${p.name} · counting overtime until you rest.`);
     startExtendFocus(false);
   }
 
