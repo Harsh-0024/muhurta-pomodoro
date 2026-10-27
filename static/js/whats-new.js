@@ -8,14 +8,17 @@
   "use strict";
 
   const KEPT_KEY = "muhurta-whats-new-summary";
-  const ASK_TIMEOUT_MS = 6000;
+  // While the update downloads there is time for a slow (free) AI to answer;
+  // when the card opens, it waits only briefly, else shows the plain lines.
+  const PREFETCH_WAIT_MS = 2 * 60 * 1000;
+  const CARD_WAIT_MS = 6000;
 
   // One short summary of everything new for `device` from `from` to `to`.
   // Plain text body: no extra round trip before the request (CORS).
-  async function ask(url, from, to, device) {
+  async function ask(url, from, to, device, waitMs) {
     if (!url || !from || !to || !device) return null;
     const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), ASK_TIMEOUT_MS);
+    const timer = setTimeout(() => ctl.abort(), waitMs);
     try {
       const res = await fetch(url, {
         method: "POST", body: JSON.stringify({ from, to, device }),
@@ -35,7 +38,7 @@
 
   // Asked as an update starts, so the card has it as soon as the app reopens.
   async function prefetch(from, to, device, url) {
-    const lines = await ask(url, from, to, device);
+    const lines = await ask(url, from, to, device, PREFETCH_WAIT_MS);
     if (!lines) return;
     try {
       localStorage.setItem(KEPT_KEY, JSON.stringify({ key: keyFor(from, to, device), lines }));
@@ -50,7 +53,7 @@
         return kept.lines;
       }
     } catch (_) {}
-    return ask(d.summary_url, d.from, d.current, d.device);
+    return ask(d.summary_url, d.from, d.current, d.device, CARD_WAIT_MS);
   }
 
   window.MuhurtaWhatsNew = { prefetch };

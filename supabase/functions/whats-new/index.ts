@@ -18,7 +18,10 @@ const NOTES_URL = Deno.env.get("WHATS_NEW_NOTES_URL") ?? "https://harsh-0024.git
 const DB = `${Deno.env.get("SUPABASE_URL")}/rest/v1/whats_new_summaries`;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const ORDER = (Deno.env.get("WHATS_NEW_PROVIDERS") ?? "anthropic,openai,gemini,xai,groq").split(",").map((s) => s.trim());
-const TIMEOUT_MS = 20_000; // per AI; past this, the next one
+// Per AI; past this, the next one. Generous: the app asks while the update
+// downloads, and free plans can be slow when busy. Two AIs fit within
+// Supabase's 150-second limit for one request.
+const TIMEOUT_MS = 60_000;
 const NOTES_FRESH_MS = 5 * 60 * 1000;
 
 const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "POST, OPTIONS", "Access-Control-Allow-Headers": "content-type" };
