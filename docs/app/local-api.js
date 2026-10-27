@@ -167,6 +167,24 @@
     return (String(text || "").match(/\d+/g) || []).slice(0, 3).map(Number);
   }
 
+  // What's new lines for one device (release_notes.py lines_for, line for line):
+  // a line is text for every device, or {text, for: [devices]}.
+  const ALL_DEVICES = ["mac", "windows", "android", "iphone"];
+  const itemText = (item) => (item && typeof item === "object" ? String(item.text) : String(item));
+  const itemDevices = (item) => (item && typeof item === "object" && Array.isArray(item.for) && item.for.length ? item.for : ALL_DEVICES);
+  function linesFor(device, after, upto, notes) {
+    const out = [];
+    for (const [v, items] of Object.entries(notes || {})) {
+      if (compareVersions(v, upto) > 0) continue;
+      if (after ? compareVersions(v, after) <= 0 : compareVersions(v, upto) !== 0) continue;
+      for (const item of items) if (itemDevices(item).includes(device)) out.push([v, itemText(item)]);
+    }
+    return out.sort((a, b) => compareVersions(b[0], a[0]));
+  }
+  // Anything after this version, up to `latest`, for this device? Unknown: yes.
+  const hasNews = (notes, latest) => !notes || typeof notes !== "object" || !(latest in notes)
+    || linesFor(D.device, D.version, latest, notes).length > 0;
+
   function compareVersions(a, b) {
     const x = versionTuple(a);
     const y = versionTuple(b);
@@ -965,6 +983,10 @@
         error = err.status ? err.message : "no internet connection";
       }
       try {
+        const all = await getJson(D.release_notes_url);
+        if (all && all.versions && typeof all.versions === "object") data.notes = all.versions;
+      } catch (_) {} // without them every new version is offered, as before
+      try {
         data.policy = cleanPolicy(await getJson(D.update_policy_url));
       } catch (err) {
         if (err.status !== 404) error = error || (err.status ? err.message : "no internet connection");
@@ -998,7 +1020,12 @@
     const policy = cleanPolicy(info.policy);
     const required = (Boolean(policy.minimum_version) && compareVersions(D.version, policy.minimum_version) < 0)
       || policy.blocked_versions.some((v) => compareVersions(v, D.version) === 0);
-    return { ...payload, update_available: true, latest, how: WEB ? "restart" : "download", url: D.download_page, required, message: policy.message };
+    // Nothing in it for this device (it changes other devices): no notice.
+    if (!required && !hasNews(info.notes, latest)) return { ...payload, latest, nothing_new: true };
+    return {
+      ...payload, update_available: true, latest, how: WEB ? "restart" : "download", url: D.download_page, required,
+      message: policy.message, device: D.device, summary_url: D.summary_url || null,
+    };
   });
 
   route("POST", /^\/api\/update\/restart$/, () => {
@@ -1014,13 +1041,17 @@
     const seen = S.kv.get("seen_version");
     if (!seen) {
       await write([["kv", { k: "seen_version", version: D.version }]]);
-      return { current: D.version, notes: [] };
+      return { current: D.version, lines: [] };
     }
-    const notes = Object.entries(D.notes)
-      .filter(([v]) => compareVersions(v, D.version) <= 0 && compareVersions(v, seen.version) > 0)
-      .map(([version, items]) => ({ version, items }));
-    if (!notes.length) await write([["kv", { k: "seen_version", version: D.version }]]);
-    return { current: D.version, notes };
+    // Only this phone's lines (app.py api_whats_new).
+    const found = linesFor(D.device, seen.version, D.version, D.notes);
+    if (!found.length) await write([["kv", { k: "seen_version", version: D.version }]]);
+    return {
+      current: D.version, from: seen.version, device: D.device,
+      lines: found.map(([version, text]) => ({ version, text })),
+      several: new Set(found.map(([v]) => v)).size > 1,
+      summary_url: D.summary_url || null,
+    };
   });
   route("POST", /^\/api\/whats-new\/seen$/, async () => {
     await write([["kv", { k: "seen_version", version: D.version }]]);

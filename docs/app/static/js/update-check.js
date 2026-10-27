@@ -104,12 +104,17 @@
   // required screen. While updating, `host` shows the progress line and
   // `hide` (the buttons) step aside. `resume`: the update is already running
   // (started on another page), so follow it without starting it again.
+  // While the new version downloads, ask for its What's new summary
+  // (whats-new.js), so the card has it the moment the app reopens.
+  const prefetchSummary = (d) => window.MuhurtaWhatsNew?.prefetch(d.current, d.latest, d.device, d.summary_url);
+
   function updateButton(d, msg, host, hide, resume) {
     if (d.how !== "restart") {
       const link = el("a", "btn btn-primary", "Download");
       link.href = d.url;
       link.target = "_blank";
       link.rel = "noopener";
+      link.addEventListener("click", () => prefetchSummary(d));
       return link;
     }
     const button = el("button", "btn btn-primary", "Update now");
@@ -142,7 +147,10 @@
         })
         .catch(() => failed("Could not update just now. Close this window and open Muhurta Pomodoro again."));
     };
-    button.addEventListener("click", () => start(false));
+    button.addEventListener("click", () => {
+      prefetchSummary(d);
+      start(false);
+    });
     if (resume) start(true);
     return button;
   }
