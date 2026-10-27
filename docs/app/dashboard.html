@@ -18,8 +18,8 @@
   <title>Muhurta Pomodoro</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23040302'/%3E%3Cg fill='none' stroke='%23d8bd79' stroke-width='4' stroke-linecap='round'%3E%3Ccircle cx='32' cy='32' r='22'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M32 6v14M32 44v14M6 32h14M44 32h14M13.6 13.6l10 10M40.4 40.4l10 10M50.4 13.6l-10 10M23.6 40.4l-10 10'/%3E%3C/g%3E%3C/svg%3E" />
   <link href="/muhurta-pomodoro/app/fonts/fonts.css" rel="stylesheet" />
-  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/app.css?v=1.14.0" />
-  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/mobile.css?v=1.14.0" />
+  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/app.css?v=1.15.0" />
+  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/mobile.css?v=1.15.0" />
 </head>
 <body class="page-dashboard is-mobile" data-theme="system">
   <div class="ambient" aria-hidden="true"></div>
@@ -121,9 +121,18 @@
   </section>
 
   <section class="dashboard-panel bell-curve-panel" aria-labelledby="rhythmTitle">
-    <div class="panel-head">
-      <div>
-        <h2 class="card-title" id="rhythmTitle">Rhythm profile</h2>
+    <div class="panel-head trend-head">
+      <h2 class="card-title" id="rhythmTitle">Rhythm profile</h2>
+      <button type="button" class="info-button" id="trendInfoButton" aria-label="What this graph shows" aria-expanded="false" aria-controls="trendInfo">i</button>
+      <div class="info-pop hidden" id="trendInfo" role="dialog" aria-labelledby="trendInfoTitle">
+        <p class="info-pop-title" id="trendInfoTitle">How long you usually focus</p>
+        <ul class="info-pop-keys">
+          <li><span class="info-key info-key-line" aria-hidden="true"></span><span><b>Line</b>: how long you usually sit.</span></li>
+          <li><span class="info-key info-key-band" aria-hidden="true"></span><span><b>Shade</b>: your usual range. Narrow means steady.</span></li>
+          <li><span class="info-key info-key-next" aria-hidden="true"></span><span><b>Next</b>: a small step to aim for.</span></li>
+        </ul>
+        <p class="info-pop-note">A break under 5 minutes doesn't end a sitting.</p>
+        <p class="info-pop-goal">Aim: let the line rise slowly.</p>
       </div>
     </div>
     <div class="bell-curve-container" id="bellCurveContainer"></div>
@@ -134,7 +143,7 @@
   
   <footer class="foot">
     <span>1 Muhurat = 48 min · 1 Ghadi = 24 min</span>
-    <span class="foot-version">v1.14.0</span>
+    <span class="foot-version">v1.15.0</span>
   </footer>
   
   
@@ -196,22 +205,22 @@
     })();
   </script>
   
-  <script src="/muhurta-pomodoro/app/static/js/native.js?v=1.14.0"></script>
-  <script src="/muhurta-pomodoro/app/static/js/menubar.js?v=1.14.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/update-check.js?v=1.14.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/alive.js?v=1.14.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/native.js?v=1.15.0"></script>
+  <script src="/muhurta-pomodoro/app/static/js/menubar.js?v=1.15.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/update-check.js?v=1.15.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/alive.js?v=1.15.0" defer></script>
   
-  <script src="/muhurta-pomodoro/app/static/js/whats-new.js?v=1.14.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/sounds.js?v=1.14.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/session-monitor.js?v=1.14.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/one-clock.js?v=1.14.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/timer-core.js?v=1.14.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/dialog.js?v=1.14.0" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/shortcuts.js?v=1.14.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/whats-new.js?v=1.15.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/sounds.js?v=1.15.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/session-monitor.js?v=1.15.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/one-clock.js?v=1.15.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/timer-core.js?v=1.15.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/dialog.js?v=1.15.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/shortcuts.js?v=1.15.0" defer></script>
   
-  <script src="/muhurta-pomodoro/app/static/js/mobile.js?v=1.14.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/mobile.js?v=1.15.0" defer></script>
   
-<script src="/muhurta-pomodoro/app/static/js/dashboard.js?v=1.14.0" defer></script>
+<script src="/muhurta-pomodoro/app/static/js/dashboard.js?v=1.15.0" defer></script>
 
 </body>
 </html>

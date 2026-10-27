@@ -3322,6 +3322,207 @@ body[data-theme="light"] .bell-peak-label {
   pointer-events: none;
 }
 
+/* The "i" beside the Rhythm profile title and its short note */
+.dashboard-lower .panel-head.trend-head {
+  position: relative;
+  display: flex;
+  flex-direction: row; /* also on narrow screens, where panel heads stack */
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.5rem;
+}
+
+.dashboard-lower .panel-head.trend-head .card-title {
+  margin-bottom: 0;
+}
+
+.info-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  font-family: var(--font-serif);
+  font-size: 0.78rem;
+  font-style: italic;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+
+.info-button:hover,
+.info-button[aria-expanded="true"] {
+  color: var(--gold2);
+  border-color: var(--gold);
+}
+
+.info-button:focus-visible {
+  outline: 1px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.info-pop {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  left: 0;
+  z-index: 20;
+  width: min(21.5rem, calc(100vw - 3rem));
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--menu-bg-strong);
+  -webkit-backdrop-filter: blur(18px);
+  backdrop-filter: blur(18px);
+  box-shadow: var(--menu-shadow);
+  color: var(--ink);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+
+.info-pop.hidden {
+  display: none;
+}
+
+.info-pop p {
+  margin: 0;
+}
+
+.info-pop-title {
+  margin-bottom: 0.55rem !important;
+  font-family: var(--font-serif);
+  font-size: 1rem;
+}
+
+.info-pop-keys {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0 0 0.6rem;
+  padding: 0;
+  list-style: none;
+}
+
+.info-pop-keys li {
+  display: grid;
+  grid-template-columns: 1.1rem 1fr;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.info-pop-keys b {
+  font-weight: 500;
+}
+
+.info-key {
+  display: block;
+  width: 1.1rem;
+}
+
+.info-key-line {
+  height: 2px;
+  border-radius: 2px;
+  background: #d4bc7c;
+}
+
+.info-key-band {
+  height: 0.6rem;
+  border-radius: 3px;
+  background: rgba(212, 188, 124, 0.22);
+}
+
+.info-key-next {
+  border-top: 1px dashed var(--muted);
+}
+
+.info-pop-note,
+.info-pop-goal {
+  color: var(--muted);
+}
+
+.info-pop-goal {
+  margin-top: 0.3rem !important;
+  color: var(--gold2);
+}
+
+body[data-theme="light"] .info-key-line {
+  background: #8a6a35;
+}
+
+@media (prefers-color-scheme: light) {
+  body[data-theme="system"] .info-key-line {
+    background: #8a6a35;
+  }
+}
+
+/* The usual-sitting trend (dashboard.js drawSittingTrend) */
+.trend-grid {
+  stroke: var(--line, #333);
+  stroke-width: 1;
+  opacity: 0.5;
+}
+
+.trend-band {
+  fill: #d4bc7c;
+  opacity: 0.09;
+}
+
+/* One steady gold, so the latest weeks are as clear as the first. */
+.trend-line {
+  fill: none;
+  stroke: #d4bc7c;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.trend-point,
+.trend-now {
+  fill: #d4bc7c;
+  stroke: var(--surface, #1a1a1a);
+  stroke-width: 1.5;
+}
+
+body[data-theme="light"] .trend-band {
+  fill: #a98237;
+  opacity: 0.1;
+}
+
+body[data-theme="light"] .trend-line {
+  stroke: #8a6a35;
+}
+
+body[data-theme="light"] .trend-point,
+body[data-theme="light"] .trend-now {
+  fill: #8a6a35;
+}
+
+@media (prefers-color-scheme: light) {
+  body[data-theme="system"] .trend-band {
+    fill: #a98237;
+    opacity: 0.1;
+  }
+
+  body[data-theme="system"] .trend-line {
+    stroke: #8a6a35;
+  }
+
+  body[data-theme="system"] .trend-point,
+  body[data-theme="system"] .trend-now {
+    fill: #8a6a35;
+  }
+}
+
+.trend-next {
+  stroke: var(--muted, #888);
+  stroke-width: 1;
+  stroke-dasharray: 2, 4;
+  opacity: 0.55;
+}
+
 .bell-tooltip {
   position: absolute;
   top: 0;
