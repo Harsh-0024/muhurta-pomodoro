@@ -5,6 +5,11 @@ a few short lines per version, about what they will notice. Versions with
 nothing worth telling can be left out.
 """
 NOTES = {
+    "1.15.0": [
+        "The dashboard now shows how long you usually focus, week by week. A gentle line you can watch "
+        "rise, with a small next step to aim for. Tap the \"i\" beside it for a short explanation.",
+        "A break under 5 minutes no longer splits your focus in two: it counts as one sitting, everywhere.",
+    ],
     "1.14.0": [
         "The Timer's quick lengths now fit you: your usual focus length sits in the middle, with shorter "
         "and longer steps around it, taken from your own rhythms.",
