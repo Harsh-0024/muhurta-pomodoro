@@ -1,5 +1,6 @@
 {
  "versions": {
+  "1.16.1": [],
   "1.16.0": [
    {
     "text": "\"What's new\" now shows only what's new on your device, in a few short lines, even after skipping updates.",

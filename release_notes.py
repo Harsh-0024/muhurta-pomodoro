@@ -34,6 +34,9 @@ def only(devices, text: str) -> dict:
 
 
 NOTES = {
+    # Nothing anyone would notice (the summary may take longer to write), so
+    # nobody is invited to update for it alone.
+    "1.16.1": [],
     "1.16.0": [
         "\"What's new\" now shows only what's new on your device, in a few short lines, even after skipping updates.",
         "You're only asked to update when a new version has something for your device.",
