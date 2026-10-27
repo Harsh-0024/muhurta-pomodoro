@@ -57,6 +57,9 @@ await t("parseLines: fences ok; too many, version numbers or non-strings rejecte
   assert.equal(parseLines('["New in 1.15.0: x"]'), null);
   assert.equal(parseLines('["a", 3]'), null);
   assert.equal(parseLines("[]"), null);
+  assert.deepEqual(parseLines('{"lines": ["a", "b"]}'), ["a", "b"]);
+  assert.deepEqual(parseLines(JSON.stringify(["a  \nb\n"])), ["a", "b"]);
+  assert.equal(parseLines('{"text": "a"}'), null);
 });
 await t("only real requests are accepted", () => {
   assert.equal(problemWith({ from: "1.13.0", to: "1.16.0", device: "android" }, notes), null);
