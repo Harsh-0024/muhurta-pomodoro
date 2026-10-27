@@ -1085,6 +1085,8 @@
     if (d.update_available) {
       text.textContent = `Version ${d.latest} is available (you have ${d.current})` +
         (d.required ? " and is required." : ".") + " Use the notice to update.";
+    } else if (d.nothing_new) {
+      text.textContent = `You have everything for this device (${d.current}). Version ${d.latest} only changes other devices.${when}`;
     } else if (d.check_error) {
       text.textContent = `Couldn't check for updates: ${d.check_error}. It tries again by itself.${when}`;
     } else if (d.checked_at) {

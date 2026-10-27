@@ -176,7 +176,8 @@ def write_data(target: Target) -> None:
     import cloud
     import db
     import release_notes
-    from app import DOWNLOAD_PAGE, FALLBACK_QUOTES, RELEASES_API, SOUND_CHOICES, SOUND_SETTING_KEYS, UPDATE_POLICY_URL
+    from app import (DOWNLOAD_PAGE, FALLBACK_QUOTES, RELEASE_NOTES_URL, RELEASES_API, SOUND_CHOICES,
+                     SOUND_SETTING_KEYS, SUMMARY_URL, UPDATE_POLICY_URL)
     from presets import BUILTINS
 
     data = {
@@ -193,6 +194,11 @@ def write_data(target: Target) -> None:
         # Where the phone hears about updates (app.py), and where it gets them.
         "releases_api": RELEASES_API,
         "update_policy_url": UPDATE_POLICY_URL,
+        # Which device this is, for What's new and for which updates to offer
+        # (release_notes.py); where all releases' lines are; who summarises them.
+        "device": "iphone" if target.web else "android",
+        "release_notes_url": RELEASE_NOTES_URL,
+        "summary_url": SUMMARY_URL if cloud.SUPABASE_URL and cloud.SUPABASE_KEY else "",
         "download_page": DOWNLOAD_PAGE + ("?os=iphone" if target.web else "?os=android"),
         "platform": target.platform,
         # The iPhone copy updates itself from the website: version.json there

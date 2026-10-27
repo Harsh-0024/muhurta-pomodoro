@@ -665,6 +665,17 @@ UPDATE_POLICY_URL = os.environ.get("MUHURATA_UPDATE_POLICY_URL",
                                    "https://harsh-0024.github.io/muhurta-pomodoro/update-policy.json")
 # The download page picks the right file for the computer and shows the steps.
 DOWNLOAD_PAGE = "https://harsh-0024.github.io/muhurta-pomodoro/download.html"
+# Every release's What's new lines with the devices they are for (written
+# from release_notes.py by the release build). A new version is only offered
+# to this computer when it has a line for it, or is required.
+RELEASE_NOTES_URL = os.environ.get("MUHURATA_RELEASE_NOTES_URL",
+                                   "https://harsh-0024.github.io/muhurta-pomodoro/release-notes.json")
+DEVICE = "mac" if sys.platform == "darwin" else "windows" if sys.platform == "win32" else "linux"
+# Writes one short What's new from the lines of several skipped versions
+# (supabase/functions/whats-new); without it the card lists the lines.
+# MUHURATA_SUMMARY_URL points a test copy at a stand-in.
+SUMMARY_URL = os.environ.get("MUHURATA_SUMMARY_URL") or f"{cloud.SUPABASE_URL}/functions/v1/whats-new"
+_SUMMARIES_ON = bool(os.environ.get("MUHURATA_SUMMARY_URL")) or cloud.configured()
 UPDATE_CHECK_INTERVAL = 60 * 60  # hourly; GitHub allows 60 unsigned requests an hour
 UPDATE_RETRY_INTERVAL = 10 * 60  # after a failed check, try again this soon
 _update_lock = threading.Lock()
@@ -724,6 +735,12 @@ def _update_info(force: bool = False) -> dict:
             data["latest"] = str(release.get("tag_name") or "").lstrip("v") or data.get("latest")
         except Exception as exc:
             error = _describe_failure(exc)
+        try:
+            versions = _fetch_json(RELEASE_NOTES_URL).get("versions")
+            if isinstance(versions, dict):
+                data["notes"] = versions
+        except Exception:
+            pass  # without them every new version is offered, as before
         # The rules set in the Admin tab (Supabase app_config) come first; the
         # website's update-policy.json is the fallback when that can't be read.
         rules = None
@@ -772,9 +789,22 @@ def api_version():
     mine = _version_tuple(__version__)
     required = (bool(policy["minimum_version"]) and mine < _version_tuple(policy["minimum_version"])) \
         or any(_version_tuple(v) == mine for v in policy["blocked_versions"])
+    if not required and not _has_news(info.get("notes"), latest):
+        # Nothing in it for this computer (it changes other devices): no notice.
+        payload.update(latest=latest, nothing_new=True)
+        return jsonify(payload)
     payload.update(update_available=True, latest=latest, how=how, url=DOWNLOAD_PAGE,
-                   required=required, message=policy["message"])
+                   required=required, message=policy["message"], device=DEVICE,
+                   summary_url=SUMMARY_URL if _SUMMARIES_ON else None)
     return jsonify(payload)
+
+
+def _has_news(notes, latest: str) -> bool:
+    """Does any version after this one, up to `latest`, have a line for this
+    computer? Unknown (notes not read, or not yet listing `latest`): yes."""
+    if not isinstance(notes, dict) or latest not in notes:
+        return True
+    return bool(release_notes.lines_for(DEVICE, __version__, latest, notes))
 
 
 def _seen_version_file():
@@ -790,14 +820,17 @@ def api_whats_new():
         # Never recorded: a new install has nothing to catch up on, but an
         # existing one updated from before this existed should hear about it.
         seen = None if db.earliest_activity_day() else __version__
-    current = _version_tuple(__version__)
-    notes = [{"version": v, "items": items} for v, items in release_notes.NOTES.items()
-             if _version_tuple(v) <= current and (seen is None or _version_tuple(v) > _version_tuple(seen))]
-    if seen is None:
-        notes = notes[:1]  # updated from an unknown version: just the latest
-    if not notes:
+    # Only this computer's lines; from an unknown version, just this one's.
+    found = release_notes.lines_for(DEVICE, seen, __version__)
+    if not found:
         _mark_seen()
-    payload = {"current": __version__, "notes": notes}
+    payload = {
+        "current": __version__, "from": seen, "device": DEVICE,
+        "lines": [{"version": v, "text": text} for v, text in found],
+        # Several versions skipped: the card asks for one short summary.
+        "several": len({v for v, _ in found}) > 1,
+        "summary_url": SUMMARY_URL if _SUMMARIES_ON else None,
+    }
     if sys.platform == "darwin" and not IS_BUNDLED:
         payload["get_app_url"] = DOWNLOAD_PAGE  # a Terminal install: offer the real app
     return jsonify(payload)
