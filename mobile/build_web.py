@@ -85,6 +85,7 @@ LOCAL_API = """
   <script src="{base}mobile-data.js"></script>
   <script src="{base}local-api.js"></script>
   <script src="{base}account.js"></script>
+  <script src="{base}backup.js"></script>
   <script src="{base}{alerts}"></script>{more}"""
 
 # The iPhone copy: installable from Safari (Share > Add to Home Screen), opens
@@ -215,7 +216,7 @@ def write_data(target: Target) -> None:
         f"window.__MUHURTA__ = {json.dumps(data, ensure_ascii=False)};\n",
         encoding="utf-8",
     )
-    names = ["local-api.js", "account.js"] + (["web-alerts.js", "pwa.js"] if target.web else ["alerts.js", "live.js"])
+    names = ["local-api.js", "account.js", "backup.js"] + (["web-alerts.js", "pwa.js"] if target.web else ["alerts.js", "live.js"])
     for name in names:
         shutil.copy2(MOBILE / "web" / name, target.out / name)
     shutil.copytree(MOBILE / "web" / "fonts", target.out / "fonts")

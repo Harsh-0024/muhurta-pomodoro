@@ -218,6 +218,24 @@
           </div>
           <a class="btn btn-quiet btn-small" id="historyLink" href="{{ url_for('history_page') }}">Open history</a>
         </div>
+        <div class="pref-row">
+          <div class="pref-text">
+            <span class="pref-name">Save a backup</span>
+            <span class="pref-desc">A file with all your sessions, combinations and settings, kept wherever you choose. Works offline. Restores on any of your devices.</span>
+          </div>
+          <div class="account-actions">
+            <button type="button" class="btn btn-quiet btn-small" id="btnBackup">Save backup</button>
+            <button type="button" class="btn btn-quiet btn-small" id="btnSessionsCsv">Sessions as CSV</button>
+          </div>
+        </div>
+        <div class="pref-row">
+          <div class="pref-text">
+            <span class="pref-name">Restore a backup</span>
+            <span class="pref-desc">Adds back anything from the file that isn't here. Nothing you have now is changed.</span>
+          </div>
+          <button type="button" class="btn btn-quiet btn-small" id="btnRestore">Choose file</button>
+          <input type="file" id="restoreFile" accept=".json,application/json" hidden />
+        </div>
       </div>
     </section>
 
@@ -269,10 +287,52 @@
           </div>
           <button type="button" class="btn btn-quiet btn-small" id="btnCopySite" data-site="{{ password_site }}">Copy website</button>
         </div>
+        <div class="pref-row">
+          <div class="pref-text">
+            <span class="pref-name">Two-step sign-in</span>
+            <span class="pref-desc" id="twoStepDesc">Also ask for a code from an authenticator app (Google or Microsoft Authenticator, Apple Passwords, 1Password…) when signing in, so a password alone isn't enough.</span>
+          </div>
+          <button type="button" class="btn btn-quiet btn-small" id="btnTwoStep" disabled>Turn on</button>
+        </div>
+        <form class="pref-row profile-form" id="twoStepForm" novalidate hidden>
+          <div id="twoStepSetup" hidden>
+            <p class="field-note">1. In your authenticator app, add an account: scan this code, or tap <a class="signin-link" id="twoStepLink" href="#">Add to authenticator</a> on this device, or type the key.</p>
+            <img class="two-step-qr" id="twoStepQr" alt="QR code to scan with your authenticator app" width="180" height="180" />
+            <p class="field-note">Key: <code class="two-step-secret" id="twoStepSecret"></code></p>
+            <p class="field-note">2. Type the 6-digit code it shows for Muhurta Pomodoro.</p>
+          </div>
+          <p class="field-note" id="twoStepOffNote" hidden>Type the code your authenticator app shows now to turn two-step sign-in off.</p>
+          <div class="field">
+            <label class="signin-label" for="twoStepInput">Code</label>
+            <input type="text" id="twoStepInput" class="input sync-code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="7" />
+          </div>
+          <div class="profile-actions">
+            <button type="button" class="btn btn-quiet btn-small" id="btnTwoStepCancel">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-small" id="btnTwoStepSubmit">Turn on</button>
+          </div>
+        </form>
         <div class="pref-row pref-status" id="syncStatusRow">
           <p class="pref-status-text" id="syncStatus" aria-live="polite"></p>
           <button type="button" class="btn btn-quiet btn-small" id="btnSyncNow">Sync now</button>
         </div>
+        <div class="pref-row">
+          <div class="pref-text">
+            <span class="pref-name">Delete account</span>
+            <span class="pref-desc">Removes your account and everything in it (sessions, combinations, settings, feedback) from every device, for good.</span>
+          </div>
+          <button type="button" class="btn btn-danger btn-small" id="btnDeleteAccount">Delete account</button>
+        </div>
+        <form class="pref-row profile-form" id="deleteAccountForm" novalidate hidden>
+          <p class="field-note">This can't be undone. To keep your history, save a backup first (History → Save a backup).</p>
+          <div class="field">
+            <label class="signin-label" for="deleteConfirm">To confirm, type your email: <strong id="deleteEmail"></strong></label>
+            <input type="email" id="deleteConfirm" class="input" autocomplete="off" autocapitalize="none" spellcheck="false" />
+          </div>
+          <div class="profile-actions">
+            <button type="button" class="btn btn-quiet btn-small" id="btnDeleteCancel">Cancel</button>
+            <button type="submit" class="btn btn-danger btn-small" id="btnDeleteConfirm" disabled>Delete my account</button>
+          </div>
+        </form>
       </div>
     </section>
 

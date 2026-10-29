@@ -888,10 +888,12 @@
   // the account that started it, so it goes when that account signs out.
   const SESSION_KEYS = ["muhurat_timer_session_v1", "muhurat_flow_session_v1", "muhurat_session_command_v1"];
 
+  let accountEmail = "";
   let accountProfile = null;
 
   function showAccount(email, profile) {
     accountProfile = profile || null;
+    accountEmail = email || "";
     const full = profile ? [profile.first_name, profile.last_name].filter(Boolean).join(" ") : "";
     $("accountName").textContent = full || "Signed in";
     $("syncSignedInAs").textContent = profile ? `@${profile.username} · ${email}` : `${email || ""} · no name added yet`;
@@ -1058,13 +1060,182 @@
         result = await busy(button, "Signing out…", () => signOut(true));
       }
       if (!result?.done) return;
-      for (const key of SESSION_KEYS) {
-        try {
-          localStorage.removeItem(key);
-          sessionStorage.removeItem(key);
-        } catch (_) {}
+      leaveForSignIn();
+    });
+    const deleteForm = $("deleteAccountForm");
+    const typedEmail = () => $("deleteConfirm").value.trim().toLowerCase();
+    $("btnDeleteAccount").addEventListener("click", () => {
+      deleteForm.hidden = !deleteForm.hidden;
+      if (deleteForm.hidden) return;
+      $("deleteEmail").textContent = accountEmail;
+      $("deleteConfirm").value = "";
+      $("btnDeleteConfirm").disabled = true;
+      $("deleteConfirm").focus();
+    });
+    $("btnDeleteCancel").addEventListener("click", () => (deleteForm.hidden = true));
+    $("deleteConfirm").addEventListener("input", () => {
+      $("btnDeleteConfirm").disabled = !accountEmail || typedEmail() !== accountEmail.toLowerCase();
+    });
+    deleteForm.addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      if ($("btnDeleteConfirm").disabled) return;
+      const done = await busy($("btnDeleteConfirm"), "Deleting…", () =>
+        api("/api/cloud/delete-account", { method: "POST", body: JSON.stringify({ confirm: typedEmail() }) })
+      );
+      if (done) leaveForSignIn();
+    });
+  }
+
+  // Two-step sign-in (cloud.py mfa_*): on with a QR code and a first code,
+  // off with a current code.
+  let twoStepOn = false;
+  let twoStepFactor = null;
+
+  function renderTwoStep(on) {
+    twoStepOn = on;
+    $("btnTwoStep").disabled = false;
+    $("btnTwoStep").textContent = on ? "Turn off" : "Turn on";
+    $("twoStepDesc").textContent = on
+      ? "On. Signing in also asks for the code from your authenticator app."
+      : "Also ask for a code from an authenticator app (Google or Microsoft Authenticator, Apple Passwords, 1Password…) when signing in, so a password alone isn't enough.";
+  }
+
+  function closeTwoStep() {
+    $("twoStepForm").hidden = true;
+    twoStepFactor = null;
+  }
+
+  function wireTwoStep() {
+    if (!$("btnTwoStep")) return;
+    api("/api/cloud/two-step").then((r) => renderTwoStep(Boolean(r.enabled))).catch(() => {
+      $("twoStepDesc").textContent = "Needs a connection to check or change.";
+    });
+    $("btnTwoStep").addEventListener("click", async (ev) => {
+      if (!$("twoStepForm").hidden) return closeTwoStep();
+      if (twoStepOn) {
+        $("twoStepSetup").hidden = true;
+        $("twoStepOffNote").hidden = false;
+        $("btnTwoStepSubmit").textContent = "Turn off";
+      } else {
+        const r = await busy(ev.currentTarget, "Starting…", () => api("/api/cloud/two-step/start", { method: "POST" }));
+        if (!r) return;
+        twoStepFactor = r.factor_id;
+        $("twoStepQr").src = r.qr_code;
+        $("twoStepSecret").textContent = r.secret;
+        $("twoStepLink").href = r.uri;
+        $("twoStepSetup").hidden = false;
+        $("twoStepOffNote").hidden = true;
+        $("btnTwoStepSubmit").textContent = "Turn on";
       }
-      window.location.replace("/sign-in");
+      $("twoStepInput").value = "";
+      $("twoStepForm").hidden = false;
+      $("twoStepInput").focus();
+    });
+    $("btnTwoStepCancel").addEventListener("click", closeTwoStep);
+    $("twoStepForm").addEventListener("submit", async (ev) => {
+      ev.preventDefault();
+      const code = $("twoStepInput").value.replace(/\s+/g, "");
+      const r = twoStepOn
+        ? await busy($("btnTwoStepSubmit"), "Turning off…", () =>
+          api("/api/cloud/two-step/off", { method: "POST", body: JSON.stringify({ code }) }))
+        : await busy($("btnTwoStepSubmit"), "Checking…", () =>
+          api("/api/cloud/two-step/confirm", { method: "POST", body: JSON.stringify({ factor_id: twoStepFactor, code }) }));
+      if (!r) return;
+      closeTwoStep();
+      renderTwoStep(Boolean(r.enabled));
+      toast(r.enabled ? "Two-step sign-in is on" : "Two-step sign-in is off");
+    });
+  }
+
+  // Signed out or deleted: forget the running clocks, then the sign-in page.
+  function leaveForSignIn() {
+    for (const key of SESSION_KEYS) {
+      try {
+        localStorage.removeItem(key);
+        sessionStorage.removeItem(key);
+      } catch (_) {}
+    }
+    window.location.replace("/sign-in");
+  }
+
+  /* ---------- backup ---------- */
+
+  // On a computer the server sends the file and the browser or the app's
+  // window saves it. On a phone local-api.js / backup.js make it: Android
+  // saves through the app (SaveFilePlugin.java), the iPhone through the share
+  // sheet ("Save to Files"), anything else as a download.
+  async function saveFile(path, button) {
+    if (!window.__MUHURTA__) {
+      const a = document.createElement("a");
+      a.href = path;
+      a.download = "";
+      document.body.append(a);
+      a.click();
+      a.remove();
+      return;
+    }
+    await busy(button, "Preparing…", async () => {
+      const r = await fetch(path);
+      if (!r.ok) throw new Error("Couldn't make the file. Try again.");
+      const name = /filename="([^"]+)"/.exec(r.headers.get("Content-Disposition") || "")?.[1] || "muhurta.txt";
+      const type = r.headers.get("Content-Type") || "application/octet-stream";
+      const text = await r.text();
+      const native = window.Capacitor?.Plugins?.SaveFile;
+      if (native) {
+        const res = await native.save({ name, type, text });
+        if (res?.saved) toast("Saved");
+        return;
+      }
+      const file = new File([text], name, { type });
+      if (navigator.canShare?.({ files: [file] })) {
+        try {
+          await navigator.share({ files: [file] });
+        } catch (e) {
+          if (e.name !== "AbortError") throw e;
+        }
+        return;
+      }
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(file);
+      a.download = name;
+      document.body.append(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000);
+    });
+  }
+
+  function restoredText(n) {
+    const parts = [];
+    if (n.sessions) parts.push(`${n.sessions} session${n.sessions === 1 ? "" : "s"}`);
+    if (n.combinations) parts.push(`${n.combinations} combination${n.combinations === 1 ? "" : "s"}`);
+    if (n.days && !n.sessions) parts.push(`${n.days} day${n.days === 1 ? "" : "s"} of focus totals`);
+    if (n.settings) parts.push("your settings");
+    return parts.length ? `Restored ${parts.join(", ")}.` : "Nothing was missing: everything in that backup is already here.";
+  }
+
+  function wireBackup() {
+    if (!$("btnBackup")) return;
+    $("btnBackup").addEventListener("click", (ev) => saveFile("/api/backup", ev.currentTarget));
+    $("btnSessionsCsv").addEventListener("click", (ev) => saveFile("/api/backup/sessions.csv", ev.currentTarget));
+    $("btnRestore").addEventListener("click", () => $("restoreFile").click());
+    $("restoreFile").addEventListener("change", async (ev) => {
+      const picked = ev.target.files && ev.target.files[0];
+      ev.target.value = "";
+      if (!picked) return;
+      const n = await busy($("btnRestore"), "Restoring…", async () => {
+        let data;
+        try {
+          data = JSON.parse(await picked.text());
+        } catch (_) {
+          throw new Error("That isn't a Muhurta backup file.");
+        }
+        return api("/api/backup/restore", { method: "POST", body: JSON.stringify(data) });
+      });
+      if (!n) return;
+      toast(restoredText(n));
+      renderHistoryHint();
+      if (n.settings) setTimeout(() => window.location.reload(), 1600);
     });
   }
 
@@ -1114,7 +1285,9 @@
     wireControls();
     wireSectionNav();
     renderHistoryHint();
+    wireBackup();
     wireSync();
+    wireTwoStep();
     renderSync();
     try {
       s = await api("/api/settings");

@@ -3,7 +3,7 @@
 {% block body_class %}page-signin{% endblock %}
 {% block page_id %}signin{% endblock %}
 {% block content %}
-<section class="signin" id="signin" data-pending-email="{{ pending_email }}" data-pending-profile="{{ '1' if pending_has_profile else '' }}" data-email-from="{{ email_from }}" data-needs-profile="{{ '1' if needs_profile else '' }}" data-signed-in-email="{{ signed_in_email }}" data-suggested-name="{{ suggested_name }}">
+<section class="signin" id="signin" data-pending-email="{{ pending_email }}" data-mfa-pending="{{ '1' if mfa_pending else '' }}" data-pending-profile="{{ '1' if pending_has_profile else '' }}" data-email-from="{{ email_from }}" data-needs-profile="{{ '1' if needs_profile else '' }}" data-signed-in-email="{{ signed_in_email }}" data-suggested-name="{{ suggested_name }}">
   <div class="signin-card">
     <div class="signin-progress" id="signinProgress" hidden aria-hidden="true">
       <span class="signin-dot" data-dot="1"></span><span class="signin-dot" data-dot="2"></span><span class="signin-dot" data-dot="3"></span>
@@ -152,6 +152,17 @@
       </details>
       <button type="submit" class="btn btn-primary signin-submit" id="btnSavePassword">Create account</button>
       <p class="signin-switch"><button type="button" class="signin-link" id="btnCancelPending">Start over with a different email</button></p>
+    </form>
+
+    <!-- two-step sign-in: the authenticator app's code -->
+    <form class="signin-step" id="stepTwoStep" novalidate hidden>
+      <div class="field">
+        <label class="signin-label" for="twoStepCode">Code from your authenticator app</label>
+        <input type="text" id="twoStepCode" class="input sync-code signin-code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="7" required />
+      </div>
+      <button type="submit" class="btn btn-primary signin-submit" id="btnTwoStep">Continue</button>
+      <p class="field-note">Lost your phone? Email <a class="signin-link" href="mailto:muhurata.pomodoro.timer@gmail.com">muhurata.pomodoro.timer@gmail.com</a> from your account's address.</p>
+      <p class="signin-switch"><button type="button" class="signin-link" id="btnTwoStepCancel">Use another account</button></p>
     </form>
 
     <!-- signing in with Google / Microsoft in the browser -->

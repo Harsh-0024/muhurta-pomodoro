@@ -29,6 +29,7 @@ from datetime import datetime, timedelta, timezone
 
 import cloud
 import db
+import errors
 
 log = logging.getLogger("muhurata.sync")
 
@@ -403,7 +404,8 @@ def run_once() -> dict:
             db.init_db()
             token = cloud.access_token()
             uid = cloud.user_id()
-            if token and uid:
+            # Before the two-step code the server refuses the data anyway.
+            if token and uid and not cloud.status()["mfa_pending"]:
                 conn = _connect()
                 try:
                     up, down = _sync(conn, state, uid, token)
@@ -414,14 +416,16 @@ def run_once() -> dict:
                     log.info("sync: %d up, %d down", up, down)
                 try:
                     cloud.refresh_admin()  # whether to show the Admin tab
+                    errors.upload()
                 except cloud.CloudError:
                     pass
         except cloud.Offline:
             state["last_error"] = "offline"
         except cloud.CloudError as exc:
             state["last_error"] = str(exc)
-        except Exception:  # never let sync take the timer down
+        except Exception as exc:  # never let sync take the timer down
             log.exception("sync failed")
+            errors.record_exception(exc, page="sync")
             state["last_error"] = "Something went wrong while syncing. It will retry later."
         finally:
             _running = False
@@ -501,6 +505,21 @@ def leave_account(force: bool = False) -> dict:
             conn.close()
         _save_state({})
     return result
+
+
+def delete_account(confirm: str) -> dict:
+    """Delete the account on the server, then clear its data from this
+    computer. Changes not uploaded yet go too: they belonged to the account."""
+    with _run_lock:
+        cloud.delete_account(confirm)
+        db.init_db()
+        conn = _connect()
+        try:
+            _clear_account_data(conn)
+        finally:
+            conn.close()
+        _save_state({})
+    return cloud.status()
 
 
 # --------------------------------------------------------------------------- #
