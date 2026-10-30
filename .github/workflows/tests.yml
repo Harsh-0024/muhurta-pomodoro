@@ -36,7 +36,7 @@ jobs:
       - name: Phones
         env:
           PYTHON: python
-        run: node --test tests/phone/
+        run: node --test tests/phone/phone.test.mjs
 
       - name: What's new summaries
-        run: node --test supabase/functions/whats-new/
+        run: node --test supabase/functions/whats-new/core.test.mjs
