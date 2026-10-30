@@ -285,6 +285,68 @@
     }));
   })();
 
+  /* ---------- errors ---------- */
+
+  let errorReports = null;
+
+  function renderErrors() {
+    const list = $("errorList");
+    const items = errorReports || [];
+    $("btnClearErrors").hidden = !items.length;
+    list.replaceChildren();
+    if (!items.length) {
+      list.append(el("p", "admin-empty", "No errors reported."));
+      return;
+    }
+    items.forEach((e) => {
+      const row = el("div", "pref-row admin-feedback");
+      const text = el("div", "pref-text");
+      text.append(el("span", "pref-name", e.message));
+      text.append(el("span", "admin-facts", [
+        e.source === "page" ? "In a page" : "In the app",
+        e.page,
+        e.times > 1 && `${e.times} times`,
+        ago(e.last_seen || e.created_at),
+        e.app_version && `v${e.app_version}`,
+        PLATFORMS[e.platform] || (e.platform === "android" ? "Android" : e.platform === "ios" ? "iPhone" : e.platform),
+      ].filter(Boolean).join(" · ")));
+      if (e.detail) {
+        const more = el("details", "admin-error-detail");
+        more.append(el("summary", "", "Details"));
+        more.append(el("pre", "", e.detail));
+        text.append(more);
+      }
+      row.append(text);
+      list.append(row);
+    });
+  }
+
+  async function loadErrors() {
+    try {
+      errorReports = (await feedbackCall("/api/admin/errors", "GET")).items || [];
+      renderErrors();
+    } catch (e) {
+      if (!errorReports) $("errorList").replaceChildren(el("p", "admin-empty", e.message));
+    }
+  }
+
+  $("btnClearErrors").addEventListener("click", async (ev) => {
+    const ask = window.MuhurataDialog?.confirm
+      ? window.MuhurataDialog.confirm({ title: "Clear all errors?", message: "They can't be brought back.", accept: "Clear" })
+      : Promise.resolve(window.confirm("Clear all errors?"));
+    if (!(await ask)) return;
+    ev.currentTarget.disabled = true;
+    try {
+      await feedbackCall("/api/admin/errors", "DELETE");
+      errorReports = [];
+      renderErrors();
+    } catch (e) {
+      showError(e.message);
+    } finally {
+      $("btnClearErrors").disabled = false;
+    }
+  });
+
   /* ---------- data ---------- */
 
   let current = null;
@@ -320,7 +382,7 @@
     const b = ev.currentTarget;
     b.disabled = true;
     b.textContent = "Refreshing…";
-    await Promise.all([load(), loadFeedback()]);
+    await Promise.all([load(), loadFeedback(), loadErrors()]);
     b.disabled = false;
     b.textContent = "Refresh";
   });
@@ -366,4 +428,5 @@
 
   load();
   loadFeedback();
+  loadErrors();
 })();

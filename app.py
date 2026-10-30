@@ -14,10 +14,12 @@ import webbrowser
 from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
-from flask import Flask, jsonify, redirect, render_template, request, url_for
+from flask import Flask, Response, got_request_exception, jsonify, redirect, render_template, request, url_for
 
+import backup
 import cloud
 import db
+import errors
 import presence
 import release_notes
 import sync
@@ -131,7 +133,8 @@ OPEN_ENDPOINTS = {
     "static", "sign_in_page", "api_cloud_status", "api_cloud_sign_in", "api_cloud_send_code",
     "api_cloud_verify", "api_cloud_set_password", "api_cloud_cancel", "api_cloud_username_available",
     "api_alive", "api_version", "api_update_restart", "api_update_progress", "api_window_show",
-    "api_cloud_providers", "api_cloud_oauth_start", "auth_callback",
+    "api_cloud_providers", "api_cloud_oauth_start", "auth_callback", "api_cloud_mfa_verify",
+    "api_error_report",
 }
 
 
@@ -235,6 +238,7 @@ def sign_in_page():
     # Stopped after the code, before choosing a password: carry on from there.
     return render_template("sign_in.html", bare=True,
                            pending_email=st["email"] if st["password_pending"] else "",
+                           mfa_pending=st["mfa_pending"],
                            pending_has_profile=bool(st["profile"]), email_from=cloud.EMAIL_FROM,
                            password_site=cloud.PASSWORD_SITE,
                            needs_profile=st["signed_in"] and not st["profile"],
@@ -289,6 +293,42 @@ def api_admin_rules():
         return jsonify({"error": str(exc)}), exc.status
     _update_info(force=True)  # this copy follows the new rules straight away
     return jsonify(rules)
+
+
+@app.get("/api/admin/errors")
+def api_admin_errors():
+    blocked = _admin_only()
+    if blocked:
+        return blocked
+    try:
+        return jsonify({"items": cloud.admin_error_reports()})
+    except cloud.CloudError as exc:
+        return jsonify({"error": str(exc)}), exc.status
+
+
+@app.delete("/api/admin/errors")
+def api_admin_errors_clear():
+    blocked = _admin_only()
+    if blocked:
+        return blocked
+    return _cloud_call(lambda: cloud.admin_clear_error_reports() or {"cleared": True})
+
+
+# Errors reach the admin (errors.py): a page's own (static/js/error-report.js),
+# and the computer side's.
+@app.post("/api/error-report")
+def api_error_report():
+    body = request.get_json(silent=True) or {}
+    errors.record("page", str(body.get("message") or ""), str(body.get("detail") or ""), str(body.get("page") or ""))
+    return "", 204
+
+
+def _record_crash(sender, exception, **_):
+    errors.record_exception(exception, page=request.path)
+
+
+got_request_exception.connect(_record_crash, app)
+errors.install_hooks()
 
 
 @app.get("/api/feedback")
@@ -628,6 +668,74 @@ def api_cloud_sign_out():
         return jsonify({"error": str(exc), "pending": exc.pending}), exc.status
     except cloud.CloudError as exc:
         return jsonify({"error": str(exc)}), exc.status
+
+
+# Settings -> History: a backup file of everything in the account, a CSV of
+# the sessions for spreadsheets, and putting a backup back (backup.py).
+def _download(body: str, name: str, mimetype: str) -> Response:
+    return Response(body, mimetype=mimetype,
+                    headers={"Content-Disposition": f'attachment; filename="{name}"', "Cache-Control": "no-store"})
+
+
+@app.get("/api/backup")
+def api_backup():
+    data = backup.export()
+    return _download(json.dumps(data, indent=1), f"muhurta-backup-{date.today().isoformat()}.json", "application/json")
+
+
+@app.get("/api/backup/sessions.csv")
+def api_backup_csv():
+    return _download(backup.sessions_csv(), f"muhurta-sessions-{date.today().isoformat()}.csv", "text/csv")
+
+
+@app.post("/api/backup/restore")
+def api_backup_restore():
+    try:
+        return jsonify(backup.restore(request.get_json(silent=True)))
+    except backup.BadBackup as exc:
+        return jsonify({"error": str(exc)}), 400
+
+
+# Two-step sign-in: turned on and off in Settings -> Account; the code is
+# the last step of signing in (cloud.py mfa_*).
+@app.get("/api/cloud/two-step")
+def api_cloud_two_step():
+    return _cloud_call(cloud.mfa_status)
+
+
+@app.post("/api/cloud/two-step/start")
+def api_cloud_two_step_start():
+    return _cloud_call(cloud.mfa_enroll)
+
+
+@app.post("/api/cloud/two-step/confirm")
+def api_cloud_two_step_confirm():
+    body = request.get_json(silent=True) or {}
+    return _cloud_call(cloud.mfa_confirm, str(body.get("factor_id") or ""), str(body.get("code") or ""))
+
+
+@app.post("/api/cloud/two-step/off")
+def api_cloud_two_step_off():
+    body = request.get_json(silent=True) or {}
+    return _cloud_call(cloud.mfa_disable, str(body.get("code") or ""))
+
+
+@app.post("/api/cloud/mfa-verify")
+def api_cloud_mfa_verify():
+    body = request.get_json(silent=True) or {}
+    try:
+        st = cloud.mfa_verify(str(body.get("code") or ""))
+    except cloud.CloudError as exc:
+        return jsonify({"error": str(exc)}), exc.status
+    if st["signed_in"]:
+        sync.enter_account()  # fetch the account's data now, like any sign-in
+    return jsonify(_cloud_status())
+
+
+@app.post("/api/cloud/delete-account")
+def api_cloud_delete_account():
+    body = request.get_json(silent=True) or {}
+    return _cloud_call(sync.delete_account, str(body.get("confirm") or ""))
 
 
 @app.get("/api/quote")

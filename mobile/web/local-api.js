@@ -1196,7 +1196,36 @@
       : new Response(JSON.stringify(body), { status, headers: { "Content-Type": "application/json" } });
 
   // What works before signing in (app.py OPEN_ENDPOINTS).
-  const OPEN = /^\/api\/(cloud\/(status|sign-in|send-code|verify|set-password|cancel|username-available|providers|oauth\/start)|alive|version|update\/restart)$/;
+  const OPEN = /^\/api\/(cloud\/(status|sign-in|send-code|verify|set-password|cancel|username-available|providers|oauth\/start|mfa-verify)|alive|error-report|version|update\/restart)$/;
+
+  // errors.py on a computer: notes about errors, sent by account.js with the
+  // next sync. No account in them; the same error only counts up.
+  const ERRORS_MAX_KEPT = 30;
+  const ERRORS_MAX_NEW_PER_DAY = 20;
+  async function recordError(source, message, detail, page) {
+    try {
+      message = String(message || "").split(/\s+/).join(" ").trim().slice(0, 500);
+      if (!message) return;
+      detail = String(detail || "").slice(0, 4000);
+      const key = `${source}|${message}|${detail.split("\n")[0]}`;
+      const today = localDay(new Date());
+      const data = { notes: {}, ...(S.kv.get("error_reports") || {}), k: "error_reports" };
+      if (data.day !== today) Object.assign(data, { day: today, new_today: 0 });
+      const now = new Date().toISOString().replace(/\.\d+Z$/, "+00:00");
+      const note = data.notes[key];
+      if (note) data.notes[key] = { ...note, times: Math.min(note.times + 1, 10000), last_seen: now };
+      else if (Object.keys(data.notes).length < ERRORS_MAX_KEPT && data.new_today < ERRORS_MAX_NEW_PER_DAY) {
+        data.new_today++;
+        data.notes[key] = { source, message, detail, page: String(page || "").slice(0, 200), times: 1, first_seen: now, last_seen: now };
+      } else return;
+      await write([["kv", data]]);
+    } catch (_) {}
+  }
+
+  route("POST", /^\/api\/error-report$/, async ({ body }) => {
+    await recordError("page", body.message, body.detail, body.page);
+    return [204, null];
+  });
 
   async function handle(method, url, bodyText) {
     await ready;
@@ -1221,6 +1250,7 @@
       if (!m) continue;
       try {
         const out = await r.fn({ body, q: url.searchParams, m });
+        if (out instanceof Response) return out; // a file (backup.js)
         const res = Array.isArray(out) ? json(out[0], out[1]) : json(200, out);
         // Any saved change syncs a few seconds later (app.py _sync_after_change).
         if (method !== "GET" && res.status < 400 && !/^\/api\/(cloud\/|alive)/.test(path) && account) account.nudge();
@@ -1228,6 +1258,7 @@
       } catch (err) {
         if (err instanceof HttpError) return json(err.status, { error: err.message, ...err.extra });
         console.error("local api", method, path, err);
+        recordError("app", `${err && err.name ? err.name : "Error"}: ${err && err.message ? err.message : err}`, err && err.stack, `${method} ${path}`);
         return json(500, { error: "Something went wrong on this phone. Try again." });
       }
     }

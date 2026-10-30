@@ -452,3 +452,149 @@ end;
 $$;
 revoke all on function public.admin_delete_feedback(bigint) from public;
 grant execute on function public.admin_delete_feedback(bigint) to authenticated;
+
+-- --------------------------------------------------------------------------
+-- deleting your own account (Settings -> Account -> Delete account)
+-- --------------------------------------------------------------------------
+-- Removes the sign-in itself; every table above points at auth.users with
+-- "on delete cascade", so the sessions, combinations, settings, profile,
+-- devices and feedback go with it. Someone who turned on two-step sign-in
+-- must have used it in this session (aal2), so a stolen password alone
+-- can't delete an account.
+create or replace function public.delete_my_account()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+declare
+    me uuid := (select auth.uid());
+begin
+    if me is null then
+        raise exception 'sign in first' using errcode = '42501';
+    end if;
+    if exists (select 1 from auth.mfa_factors where user_id = me and status = 'verified')
+       and coalesce((select auth.jwt()) ->> 'aal', '') <> 'aal2' then
+        raise exception 'two-step sign-in needed' using errcode = '42501';
+    end if;
+    delete from auth.users where id = me;
+end;
+$$;
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;
+
+-- --------------------------------------------------------------------------
+-- two-step sign-in (Settings -> Account -> Two-step sign-in)
+-- --------------------------------------------------------------------------
+-- Supabase MFA with an authenticator app (Authentication -> Sign In / Up ->
+-- Multi-Factor: TOTP on, the default). Someone who turned it on has to give
+-- the code before their session counts (aal2); until then these rules hide
+-- and refuse every row, so a stolen password alone opens nothing. People who
+-- never turned it on are not affected.
+create or replace function public.two_step_ok()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+    select coalesce((select auth.jwt()) ->> 'aal', '') = 'aal2'
+        or not exists (select 1 from auth.mfa_factors
+                       where user_id = (select auth.uid()) and status = 'verified');
+$$;
+revoke all on function public.two_step_ok() from public, anon;
+grant execute on function public.two_step_ok() to authenticated;
+
+do $$
+declare
+    t text;
+begin
+    foreach t in array array['activity_segments', 'custom_presets', 'app_settings', 'focus_by_device',
+                             'profiles', 'app_devices', 'feedback']
+    loop
+        execute format('drop policy if exists two_step on public.%I', t);
+        execute format('create policy two_step on public.%I as restrictive for all to authenticated
+                        using ((select public.two_step_ok())) with check ((select public.two_step_ok()))', t);
+    end loop;
+end;
+$$;
+
+-- The Admin tab too: an admin who turned it on must have given the code.
+create or replace function public.is_admin()
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+    select exists (select 1 from public.admins where user_id = (select auth.uid()))
+        and public.two_step_ok();
+$$;
+
+-- --------------------------------------------------------------------------
+-- error reports (the Admin tab's Errors)
+-- --------------------------------------------------------------------------
+-- When something breaks in a copy of the app (a page error, a crash on the
+-- computer side), the copy keeps a short note and sends it with the next
+-- sync. Notes carry no account: only a random device id, the version, the
+-- platform, the page and the error itself. Anyone can add one (they are sent
+-- without signing in, so they can't be tied to a person); only admins read
+-- or clear them.
+create table if not exists public.error_reports (
+    id          bigint generated always as identity primary key,
+    device_id   text not null default '' check (char_length(device_id) <= 64),
+    app_version text not null default '' check (char_length(app_version) <= 20),
+    platform    text not null default '' check (char_length(platform) <= 20),
+    source      text not null check (source in ('page', 'app')),
+    message     text not null check (char_length(message) between 1 and 500),
+    detail      text not null default '' check (char_length(detail) <= 4000),
+    page        text not null default '' check (char_length(page) <= 200),
+    times       integer not null default 1 check (times between 1 and 10000),
+    first_seen  timestamptz not null default now(),
+    last_seen   timestamptz not null default now(),
+    created_at  timestamptz not null default now()
+);
+create index if not exists error_reports_newest on public.error_reports (created_at desc);
+
+alter table public.error_reports enable row level security;
+revoke all on public.error_reports from anon, authenticated;
+grant insert (device_id, app_version, platform, source, message, detail, page, times, first_seen, last_seen)
+    on public.error_reports to anon, authenticated;
+drop policy if exists anyone_adds on public.error_reports;
+create policy anyone_adds on public.error_reports for insert to anon, authenticated with check (true);
+
+create or replace function public.admin_error_reports()
+returns json
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+begin
+    if not public.is_admin() then
+        raise exception 'admins only' using errcode = '42501';
+    end if;
+    return (
+        select coalesce(json_agg(t order by t.created_at desc), '[]'::json)
+        from (select * from public.error_reports order by created_at desc limit 300) t
+    );
+end;
+$$;
+revoke all on function public.admin_error_reports() from public;
+grant execute on function public.admin_error_reports() to authenticated;
+
+create or replace function public.admin_clear_error_reports()
+returns void
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+    if not public.is_admin() then
+        raise exception 'admins only' using errcode = '42501';
+    end if;
+    delete from public.error_reports where true;
+end;
+$$;
+revoke all on function public.admin_clear_error_reports() from public;
+grant execute on function public.admin_clear_error_reports() to authenticated;

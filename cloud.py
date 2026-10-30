@@ -163,7 +163,33 @@ def _name_from(user: dict) -> str:
     return str(meta.get("full_name") or meta.get("name") or "").strip()[:100]
 
 
-def _save(payload: dict, password_pending: bool = False, profile: dict | None = None) -> dict:
+def _claims(token: str) -> dict:
+    """What an access token says about itself (it is a JWT); {} if unreadable."""
+    try:
+        part = token.split(".")[1]
+        return json.loads(base64.urlsafe_b64decode(part + "=" * (-len(part) % 4)))
+    except (IndexError, ValueError, TypeError):
+        return {}
+
+
+def _verified_factors(user: dict) -> list[dict]:
+    return [f for f in (user.get("factors") or []) if f.get("factor_type") == "totp" and f.get("status") == "verified"]
+
+
+def _second_step_needed(payload: dict, before: bool = False) -> bool:
+    """Signed in with a password, a code or Google / Microsoft, but the
+    account has two-step sign-in on and the authenticator code isn't in yet.
+    A refresh may leave out the user; then it stays as it was."""
+    if _claims(payload.get("access_token") or "").get("aal") == "aal2":
+        return False
+    user = payload.get("user") or {}
+    if "factors" not in user:
+        return before
+    return bool(_verified_factors(user))
+
+
+def _save(payload: dict, password_pending: bool = False, profile: dict | None = None,
+          mfa_before: bool = False) -> dict:
     user = payload.get("user") or {}
     expires_at = payload.get("expires_at") or (time.time() + int(payload.get("expires_in") or 3600))
     session = {
@@ -173,6 +199,8 @@ def _save(payload: dict, password_pending: bool = False, profile: dict | None = 
         "user_id": user.get("id"),
         "email": user.get("email"),
         "password_pending": password_pending,
+        # Two-step sign-in is on and its code is still to come (see mfa_*).
+        "mfa_pending": _second_step_needed(payload, mfa_before),
         # Name and username, kept here so pages can show them offline.
         "profile": _profile_from(user) or profile,
         "suggested_name": _name_from(user),
@@ -204,16 +232,18 @@ def status() -> dict:
     """Whether the app may be used, and as whom. Never touches the network."""
     session = _load()
     pending = bool(session and session.get("password_pending"))
+    mfa = bool(session and session.get("mfa_pending"))
     return {
         "configured": configured(),
-        "signed_in": session is not None and not pending,
+        "signed_in": session is not None and not pending and not mfa,
         "password_pending": pending,
+        "mfa_pending": mfa,
         "email": session.get("email") if session else None,
         "profile": (session.get("profile") if session else None) or None,
         "suggested_name": (session.get("suggested_name") if session else "") or "",
         # Only decides whether the Admin tab is shown; the data behind it is
         # checked by the server on every request (admin_overview()).
-        "is_admin": bool(session and session.get("is_admin") and not pending),
+        "is_admin": bool(session and session.get("is_admin") and not pending and not mfa),
     }
 
 
@@ -379,8 +409,10 @@ def set_password(password: str, profile: dict | None = None) -> dict:
 
 
 def cancel_pending() -> dict:
-    """Stopped between the code and the password: forget that half sign-in."""
-    if status()["password_pending"]:
+    """Stopped between the code and the password, or before the two-step
+    code: forget that half sign-in."""
+    st = status()
+    if st["password_pending"] or st["mfa_pending"]:
         sign_out()
     return status()
 
@@ -417,7 +449,8 @@ def access_token() -> str | None:
         if code < 400 and isinstance(payload, dict) and "access_token" in payload:
             # Supabase may leave out the user on refresh; keep what we know.
             payload.setdefault("user", {"id": session["user_id"], "email": session["email"]})
-            return _save(payload, session.get("password_pending", False), session.get("profile"))["access_token"]
+            return _save(payload, session.get("password_pending", False), session.get("profile"),
+                         session.get("mfa_pending", False))["access_token"]
         if code in (400, 401, 403):
             # The refresh token was revoked or expired (signed out elsewhere,
             # account deleted). Sign out here too, rather than retrying forever.
@@ -443,6 +476,159 @@ def sign_out() -> dict:
                 pass  # offline or already invalid: forgetting locally is what matters
         _forget()
     return status()
+
+
+def delete_account(confirm: str) -> None:
+    """Delete the account and everything in it on the server (see the
+    "deleting your own account" section of supabase/schema.sql), then forget
+    the sign-in here. The caller clears this computer's copy."""
+    session = _load()
+    if not session or session.get("password_pending"):
+        raise CloudError("Please sign in first.", 401)
+    if (confirm or "").strip().lower() != (session.get("email") or "").lower():
+        raise CloudError("Type your email exactly as shown to confirm.")
+    token = access_token()
+    if token is None:
+        raise CloudError("Please sign in first.", 401)
+    code, payload = _request("POST", "/rest/v1/rpc/delete_my_account", {}, token=token)
+    if code == 404:
+        raise CloudError("Deleting accounts isn't set up on the server yet (run the \"deleting your own "
+                         "account\" section of supabase/schema.sql).", 404)
+    if "two-step" in _error_text(payload):
+        raise CloudError("Sign out and sign in again with your authenticator code, then delete the account.", 403)
+    if code >= 400:
+        raise CloudError("Your account couldn't be deleted just now. Try again.", 502)
+    with _lock:
+        _forget()
+
+
+# --------------------------------------------------------------------------- #
+# two-step sign-in (Supabase MFA, an authenticator app's 6-digit code)
+# --------------------------------------------------------------------------- #
+# Turned on in Settings -> Account. From then on, signing in (any way) ends
+# with the code from the authenticator app, and the server's data rules (the
+# "two-step sign-in" section of supabase/schema.sql) refuse a session that
+# hasn't given it, so a stolen password alone opens nothing.
+MFA_ISSUER = "Muhurta Pomodoro"
+TOTP_RE = re.compile(r"^\d{6}$")
+
+
+def _mfa_token(allow_pending: bool = False) -> str:
+    session = _load()
+    if not session or session.get("password_pending") or (session.get("mfa_pending") and not allow_pending):
+        raise CloudError("Please sign in first.", 401)
+    token = access_token()
+    if token is None:
+        raise CloudError("Please sign in first.", 401)
+    return token
+
+
+def _clean_totp(code: str) -> str:
+    code = re.sub(r"\s+", "", code or "")
+    if not TOTP_RE.match(code):
+        raise CloudError("The code is the 6 digits your authenticator app shows now.")
+    return code
+
+
+def _factors(token: str) -> list[dict]:
+    code, payload = _request("GET", "/auth/v1/user", token=token)
+    if code >= 400 or not isinstance(payload, dict):
+        raise CloudError("The sync service is having trouble. Try again.", 502)
+    return [f for f in (payload.get("factors") or []) if f.get("factor_type") == "totp"]
+
+
+def _prove(token: str, factor_id: str, code: str) -> dict:
+    """One challenge and its answer; the reply is a new, two-step session."""
+    status_code, challenge = _request("POST", f"/auth/v1/factors/{factor_id}/challenge", {}, token=token)
+    if status_code == 429:
+        raise CloudError("Too many tries. Wait a minute, then try again.", 429)
+    if status_code >= 400 or not isinstance(challenge, dict) or not challenge.get("id"):
+        raise CloudError("The code couldn't be checked just now. Try again.", 502)
+    status_code, payload = _request("POST", f"/auth/v1/factors/{factor_id}/verify",
+                                    {"challenge_id": challenge["id"], "code": code}, token=token)
+    if status_code == 429:
+        raise CloudError("Too many tries. Wait a minute, then try again.", 429)
+    if status_code >= 400 or not isinstance(payload, dict) or "access_token" not in payload:
+        raise CloudError("That code is wrong. Codes change every 30 seconds; use the one showing now.")
+    return payload
+
+
+def mfa_status() -> dict:
+    """Whether two-step sign-in is on for this account."""
+    return {"enabled": any(f.get("status") == "verified" for f in _factors(_mfa_token()))}
+
+
+def mfa_enroll() -> dict:
+    """Start turning it on: a QR code (and the same key as text) for the
+    authenticator app. Nothing changes until mfa_confirm()."""
+    token = _mfa_token()
+    factors = _factors(token)
+    if any(f.get("status") == "verified" for f in factors):
+        raise CloudError("Two-step sign-in is already on.", 409)
+    for f in factors:  # an earlier attempt that wasn't finished
+        _request("DELETE", f"/auth/v1/factors/{f['id']}", token=token)
+    code, payload = _request("POST", "/auth/v1/factors", {"factor_type": "totp", "issuer": MFA_ISSUER}, token=token)
+    totp = payload.get("totp") if isinstance(payload, dict) else None
+    if code == 404 or "mfa" in _error_text(payload) and "disabled" in _error_text(payload):
+        raise CloudError("Two-step sign-in isn't switched on for this app's server yet.", 404)
+    if code >= 400 or not isinstance(totp, dict):
+        raise CloudError("Two-step sign-in couldn't be started. Try again.", 502)
+    return {"factor_id": payload["id"], "qr_code": totp.get("qr_code") or "", "secret": totp.get("secret") or "",
+            "uri": totp.get("uri") or ""}
+
+
+def mfa_confirm(factor_id: str, code: str) -> dict:
+    """Finish turning it on with the first code the app shows."""
+    if not re.match(r"^[0-9a-f-]{36}$", factor_id or ""):
+        raise CloudError("Start again: turn on two-step sign-in.")
+    payload = _prove(_mfa_token(), factor_id, _clean_totp(code))
+    with _lock:
+        session = _load()
+        _save(payload, profile=session.get("profile") if session else None)
+    return {"enabled": True}
+
+
+def mfa_verify(code: str) -> dict:
+    """The second step of signing in: the authenticator code."""
+    code = _clean_totp(code)
+    if not status()["mfa_pending"]:
+        raise CloudError("Please sign in first.", 401)
+    token = _mfa_token(allow_pending=True)
+    verified = [f for f in _factors(token) if f.get("status") == "verified"]
+    if not verified:  # turned off on another device meanwhile
+        payload = None
+    else:
+        payload = _prove(token, verified[0]["id"], code)
+    with _lock:
+        session = _load()
+        if session is None:
+            raise CloudError("Please sign in first.", 401)
+        if payload is None:
+            session["mfa_pending"] = False
+            _write(session)
+        else:
+            _save(payload, session.get("password_pending", False), session.get("profile"))
+    return status()
+
+
+def mfa_disable(code: str) -> dict:
+    """Turn it off; asks for a current code, so an unattended computer
+    can't be used to switch it off."""
+    code = _clean_totp(code)
+    token = _mfa_token()
+    verified = [f for f in _factors(token) if f.get("status") == "verified"]
+    if not verified:
+        return {"enabled": False}
+    payload = _prove(token, verified[0]["id"], code)
+    token = payload["access_token"]
+    for f in verified:
+        status_code, _ = _request("DELETE", f"/auth/v1/factors/{f['id']}", token=token)
+        if status_code >= 400:
+            raise CloudError("Two-step sign-in couldn't be turned off. Try again.", 502)
+    with _lock:
+        session = _load()
+        _save(payload, profile=session.get("profile") if session else None)
+    return {"enabled": False}
 
 
 # --------------------------------------------------------------------------- #
@@ -645,6 +831,15 @@ def admin_set_feedback_status(feedback_id: int, status: str) -> None:
                         {"feedback_id": int(feedback_id), "new_status": status})
     if found is False:
         raise CloudError("That feedback no longer exists.", 404)
+
+
+def admin_error_reports() -> list:
+    rows = _admin_call("POST", "/rest/v1/rpc/admin_error_reports", {})
+    return rows if isinstance(rows, list) else []
+
+
+def admin_clear_error_reports() -> None:
+    _admin_call("POST", "/rest/v1/rpc/admin_clear_error_reports", {})
 
 
 def admin_delete_feedback(feedback_id: int) -> None:

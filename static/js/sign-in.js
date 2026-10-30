@@ -78,7 +78,7 @@
 
   /* ---------- steps ---------- */
 
-  const STEPS = ["stepSignin", "stepDetails", "stepResetEmail", "stepCode", "stepPassword", "stepBrowser", "stepProfile"];
+  const STEPS = ["stepSignin", "stepDetails", "stepResetEmail", "stepCode", "stepPassword", "stepBrowser", "stepProfile", "stepTwoStep"];
   let providerName = "";
 
   function copyFor(step) {
@@ -97,6 +97,8 @@
       case "stepBrowser":
         return ["Continue in your browser", `Signing in with ${providerName}`,
           "Your browser opened. Finish signing in there, and this window carries on by itself.", 0];
+      case "stepTwoStep":
+        return ["Two-step sign-in", "Enter your code", "Open your authenticator app and type the 6-digit code it shows for Muhurta Pomodoro.", 0];
       case "stepProfile":
         return ["Almost done", "Finish your profile", `Signed in as ${email}. Choose how you appear in the app.`, 0];
       default:
@@ -133,6 +135,9 @@
         : "Not there? Look in your Spam folder.";
       $("signinCode").value = "";
       $("signinCode").focus();
+    } else if (step === "stepTwoStep") {
+      $("twoStepCode").value = "";
+      $("twoStepCode").focus();
     } else if (step === "stepProfile") {
       $("profileFirstName").focus();
     } else if (step === "stepPassword") {
@@ -428,11 +433,34 @@
   /* ---------- sign in ---------- */
 
   function enterApp(st) {
-    if (st && st.signed_in) {
+    if (st && st.mfa_pending) {
+      say("");
+      show("stepTwoStep");
+    } else if (st && st.signed_in) {
       clearDraft();
       window.location.replace("/");
     }
   }
+
+  // The last step of any sign-in when two-step sign-in is on.
+  $("stepTwoStep").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const code = $("twoStepCode").value.replace(/\s+/g, "");
+    if (!code) {
+      say("Enter the code from your authenticator app.", "error");
+      return $("twoStepCode").focus();
+    }
+    const st = await busy($("btnTwoStep"), "Checking…", () => api("/api/cloud/mfa-verify", { code }));
+    if (!st) return;
+    if (st.password_pending) return window.location.reload(); // carry on to choosing a password
+    if (st.signed_in && !st.profile) return askProfile(st.email, st.suggested_name);
+    enterApp(st);
+  });
+  $("btnTwoStepCancel").addEventListener("click", async () => {
+    await api("/api/cloud/cancel", {});
+    say("");
+    show("stepSignin");
+  });
 
   $("stepSignin").addEventListener("submit", async (ev) => {
     ev.preventDefault();
@@ -518,7 +546,10 @@
       return $("signinCode").focus();
     }
     const st = await busy($("btnVerify"), "Checking…", () => api("/api/cloud/verify", { email, code }));
-    if (st) {
+    if (st && st.mfa_pending) {
+      say("Email confirmed.", "ok");
+      show("stepTwoStep");
+    } else if (st) {
       show("stepPassword");
       say("Email confirmed.", "ok");
     }
@@ -630,6 +661,10 @@
       try {
         const r = await fetch("/api/cloud/status", { cache: "no-store" });
         const st = await r.json();
+        if (st.mfa_pending) {
+          clearInterval(waiting);
+          return enterApp(st);
+        }
         if (!st.signed_in) return;
         clearInterval(waiting);
         if (st.profile) return enterApp(st);
@@ -686,7 +721,9 @@
   // Came back after the code but before choosing a password: pick up there.
   const root = $("signin");
   const pendingEmail = root.dataset.pendingEmail;
-  if (pendingEmail) {
+  if (root.dataset.mfaPending) {
+    show("stepTwoStep");
+  } else if (pendingEmail) {
     email = pendingEmail;
     const draft = loadDraft();
     if (draft && draft.email === pendingEmail && draft.profile) {
@@ -706,6 +743,13 @@
     askProfile(root.dataset.signedInEmail, root.dataset.suggestedName);
   } else {
     show("stepSignin");
+  }
+
+  // Phones build this page ahead of time, so ask whether a two-step code is due.
+  if (!root.dataset.mfaPending) {
+    api("/api/cloud/status", undefined, "GET").then((st) => {
+      if (st && st.mfa_pending) show("stepTwoStep");
+    }).catch(() => {});
   }
 
   // Phones come back here from Google / Microsoft; if it didn't work, say why.

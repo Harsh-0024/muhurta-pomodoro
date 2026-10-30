@@ -95,6 +95,7 @@
       </div>
     </div>
   </div>
+  <script src="{{ url_for('static', filename='js/error-report.js') }}?v={{ asset_version }}"></script>
   <script>window.__PAGE__ = "{% block page_id %}home{% endblock %}";</script>
   {% if not bare %}
   <script>

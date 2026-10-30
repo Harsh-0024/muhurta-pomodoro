@@ -4495,6 +4495,22 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
   display: none;
 }
 
+/* Settings -> Account -> Two-step sign-in. The QR code stays dark on white
+   in both themes, so every authenticator app can read it. */
+.two-step-qr {
+  align-self: flex-start;
+  width: 180px;
+  height: 180px;
+  padding: 8px;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.two-step-secret {
+  word-break: break-all;
+  user-select: all;
+}
+
 @media (max-width: 720px) {
   .account-chip-name {
     display: none;
@@ -5261,4 +5277,14 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   display: block;
   text-align: center;
   text-decoration: none;
+}
+
+/* Admin -> Errors: the technical part, folded */
+.admin-error-detail pre {
+  max-height: 16rem;
+  overflow: auto;
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  word-break: break-word;
 }

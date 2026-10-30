@@ -770,6 +770,7 @@ def _native_window(url: str, data_dir: Path, flask_app):
     import webview
 
     global _WINDOW
+    webview.settings["ALLOW_DOWNLOADS"] = True  # Settings > History saves backup files
     place = {"width": 1180, "height": 820}
     if sys.platform == "win32":
         _register_windows_app()  # before the window exists, so its taskbar button is ours
