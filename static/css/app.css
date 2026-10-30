@@ -2398,6 +2398,69 @@ body.mode-cumulative .phase-label {
   background: var(--danger-ink);
 }
 
+/* Refresh = sync (static/js/refresh-sync.js) */
+
+.refresh-sync {
+  position: fixed;
+  left: 50%;
+  top: calc(env(safe-area-inset-top, 0px) + 4.5rem);
+  z-index: 70;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem 0.5rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--menu-bg-strong);
+  box-shadow: var(--menu-shadow);
+  color: var(--gold2);
+  font-size: 0.85rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -0.75rem);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.refresh-sync svg {
+  width: 1rem;
+  height: 1rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.refresh-sync.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.refresh-sync.is-pulling {
+  transition: none;
+}
+
+.refresh-sync.is-ready {
+  color: var(--gold);
+}
+
+.refresh-sync.is-syncing svg {
+  animation: refresh-sync-spin 0.9s linear infinite;
+}
+
+@keyframes refresh-sync-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .refresh-sync.is-syncing svg {
+    animation-duration: 2.4s;
+  }
+}
+
 /* Narrow screens */
 
 @media (max-width: 880px) {

@@ -123,6 +123,7 @@
   <script src="{{ url_for('static', filename='js/timer-core.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/dialog.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/shortcuts.js') }}?v={{ asset_version }}" defer></script>
+  <script src="{{ url_for('static', filename='js/refresh-sync.js') }}?v={{ asset_version }}" defer></script>
   {% endif %}
   {% if mobile %}<script src="{{ url_for('static', filename='js/mobile.js') }}?v={{ asset_version }}" defer></script>{% endif %}
   {% block scripts %}{% endblock %}
