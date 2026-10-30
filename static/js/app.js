@@ -1713,6 +1713,7 @@
 
   async function handleShortcut(e) {
     if (isTypingTarget(e.target)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return; // ⌘R is refresh, not Reset
     const k = e.key.toLowerCase();
 
     if (state.mode === "work_choice") {

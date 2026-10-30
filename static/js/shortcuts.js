@@ -11,6 +11,7 @@
     { keys: "B", action: "Rest (during overtime)" },
     { keys: "3", action: "Skip (during overtime)" },
     { keys: "1 · 2 · 3", action: "Choose options when a dialog is open" },
+    { keys: "⌘R · Ctrl+R · F5", action: "Refresh and sync with your account" },
   ];
 
   function isInput(el) {
