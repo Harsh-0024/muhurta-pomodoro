@@ -34,6 +34,12 @@ def only(devices, text: str) -> dict:
 
 
 NOTES = {
+    "1.17.0": [
+        "Refreshing now syncs: press ⌘R, Ctrl+R or F5 on a computer, or pull the page down on a phone, and you see what you did on your other devices. A small note says how it went.",
+        "Save a backup of your history, or your sessions as a spreadsheet (CSV), from Settings, History. Restoring a backup only adds what's missing, so nothing is lost.",
+        "Two-step sign-in: turn it on in Settings, Account, and signing in also asks for a code from an authenticator app.",
+        "You can delete your account and all its history from Settings, Account.",
+    ],
     # Nothing anyone would notice (the summary may take longer to write), so
     # nobody is invited to update for it alone.
     "1.16.1": [],
