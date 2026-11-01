@@ -13,13 +13,14 @@
   <script src="/muhurta-pomodoro/app/mobile-data.js"></script>
   <script src="/muhurta-pomodoro/app/local-api.js"></script>
   <script src="/muhurta-pomodoro/app/account.js"></script>
+  <script src="/muhurta-pomodoro/app/backup.js"></script>
   <script src="/muhurta-pomodoro/app/web-alerts.js"></script>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Muhurta Pomodoro</title>
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23040302'/%3E%3Cg fill='none' stroke='%23d8bd79' stroke-width='4' stroke-linecap='round'%3E%3Ccircle cx='32' cy='32' r='22'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M32 6v14M32 44v14M6 32h14M44 32h14M13.6 13.6l10 10M40.4 40.4l10 10M50.4 13.6l-10 10M23.6 40.4l-10 10'/%3E%3C/g%3E%3C/svg%3E" />
   <link href="/muhurta-pomodoro/app/fonts/fonts.css" rel="stylesheet" />
-  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/app.css?v=1.16.1" />
-  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/mobile.css?v=1.16.1" />
+  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/app.css?v=1.17.0" />
+  <link rel="stylesheet" href="/muhurta-pomodoro/app/static/css/mobile.css?v=1.17.0" />
 </head>
 <body class="page-signin is-mobile" data-theme="system">
   <div class="ambient" aria-hidden="true"></div>
@@ -37,7 +38,7 @@
     
   </header>
   <main class="main">
-<section class="signin" id="signin" data-pending-email="" data-pending-profile="" data-email-from="muhurata.pomodoro.timer@gmail.com" data-needs-profile="" data-signed-in-email="" data-suggested-name="">
+<section class="signin" id="signin" data-pending-email="" data-mfa-pending="" data-pending-profile="" data-email-from="muhurata.pomodoro.timer@gmail.com" data-needs-profile="" data-signed-in-email="" data-suggested-name="">
   <div class="signin-card">
     <div class="signin-progress" id="signinProgress" hidden aria-hidden="true">
       <span class="signin-dot" data-dot="1"></span><span class="signin-dot" data-dot="2"></span><span class="signin-dot" data-dot="3"></span>
@@ -188,6 +189,17 @@
       <p class="signin-switch"><button type="button" class="signin-link" id="btnCancelPending">Start over with a different email</button></p>
     </form>
 
+    <!-- two-step sign-in: the authenticator app's code -->
+    <form class="signin-step" id="stepTwoStep" novalidate hidden>
+      <div class="field">
+        <label class="signin-label" for="twoStepCode">Code from your authenticator app</label>
+        <input type="text" id="twoStepCode" class="input sync-code signin-code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="7" required />
+      </div>
+      <button type="submit" class="btn btn-primary signin-submit" id="btnTwoStep">Continue</button>
+      <p class="field-note">Lost your phone? Email <a class="signin-link" href="mailto:muhurata.pomodoro.timer@gmail.com">muhurata.pomodoro.timer@gmail.com</a> from your account's address.</p>
+      <p class="signin-switch"><button type="button" class="signin-link" id="btnTwoStepCancel">Use another account</button></p>
+    </form>
+
     <!-- signing in with Google / Microsoft in the browser -->
     <div class="signin-step" id="stepBrowser" hidden>
       <p class="browser-wait" id="browserWait">Waiting for you to finish in your browser…</p>
@@ -227,7 +239,7 @@
   
   <footer class="foot">
     <span>1 Muhurat = 48 min · 1 Ghadi = 24 min</span>
-    <span class="foot-version">v1.16.1</span>
+    <span class="foot-version">v1.17.0</span>
   </footer>
   
   <div id="shortcutsModal" class="modal hidden" role="dialog" aria-labelledby="shortcutsTitle" aria-hidden="true">
@@ -250,16 +262,17 @@
       </div>
     </div>
   </div>
+  <script src="/muhurta-pomodoro/app/static/js/error-report.js?v=1.17.0"></script>
   <script>window.__PAGE__ = "signin";</script>
   
-  <script src="/muhurta-pomodoro/app/static/js/native.js?v=1.16.1"></script>
-  <script src="/muhurta-pomodoro/app/static/js/menubar.js?v=1.16.1" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/update-check.js?v=1.16.1" defer></script>
-  <script src="/muhurta-pomodoro/app/static/js/alive.js?v=1.16.1" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/native.js?v=1.17.0"></script>
+  <script src="/muhurta-pomodoro/app/static/js/menubar.js?v=1.17.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/update-check.js?v=1.17.0" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/alive.js?v=1.17.0" defer></script>
   
-  <script src="/muhurta-pomodoro/app/static/js/mobile.js?v=1.16.1" defer></script>
+  <script src="/muhurta-pomodoro/app/static/js/mobile.js?v=1.17.0" defer></script>
   
-<script src="/muhurta-pomodoro/app/static/js/sign-in.js?v=1.16.1" defer></script>
+<script src="/muhurta-pomodoro/app/static/js/sign-in.js?v=1.17.0" defer></script>
 
 </body>
 </html>

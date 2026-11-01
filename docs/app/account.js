@@ -122,17 +122,35 @@
   const NEEDS_PROFILE_KEY = "muhurta-needs-profile";
   function rememberPending(s) {
     try {
-      if (s && !s.password_pending && !s.profile && s.from_provider) {
+      if (s && !s.password_pending && !s.mfa_pending && !s.profile && s.from_provider) {
         localStorage.setItem(NEEDS_PROFILE_KEY, JSON.stringify({ email: s.email || "", name: s.suggested_name || "" }));
       } else localStorage.removeItem(NEEDS_PROFILE_KEY);
       if (s && s.password_pending) localStorage.setItem(PENDING_KEY, JSON.stringify({ email: s.email || "", profile: Boolean(s.profile) }));
       else localStorage.removeItem(PENDING_KEY);
-      if (s && !s.password_pending) localStorage.setItem(AUTH_KEY, "1");
+      if (s && !s.password_pending && !s.mfa_pending) localStorage.setItem(AUTH_KEY, "1");
       else localStorage.removeItem(AUTH_KEY);
     } catch (_) {}
   }
 
-  async function saveSession(payload, passwordPending, profile, fromProvider) {
+  // cloud.py _claims / _second_step_needed: two-step sign-in is on and its
+  // code isn't in yet. A refresh may leave out the user; then it stays.
+  function claims(token) {
+    try {
+      const part = String(token).split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+      return JSON.parse(atob(part + "=".repeat((4 - (part.length % 4)) % 4)));
+    } catch (_) {
+      return {};
+    }
+  }
+  const verifiedFactors = (user) => (user.factors || []).filter((f) => f.factor_type === "totp" && f.status === "verified");
+  function secondStepNeeded(payload, before) {
+    if (claims(payload.access_token).aal === "aal2") return false;
+    const user = payload.user || {};
+    if (!("factors" in user)) return Boolean(before);
+    return verifiedFactors(user).length > 0;
+  }
+
+  async function saveSession(payload, passwordPending, profile, fromProvider, mfaBefore) {
     const user = payload.user || {};
     const expiresAt = payload.expires_at || Date.now() / 1000 + Number(payload.expires_in || 3600);
     const s = {
@@ -143,6 +161,7 @@
       user_id: user.id,
       email: user.email,
       password_pending: Boolean(passwordPending),
+      mfa_pending: secondStepNeeded(payload, mfaBefore),
       profile: profileFrom(user) || profile || null,
       suggested_name: nameFrom(user) || ((session() || {}).suggested_name || ""),
       from_provider: Boolean(fromProvider),
@@ -160,10 +179,12 @@
   function status() {
     const s = session();
     const pending = Boolean(s && s.password_pending);
+    const mfa = Boolean(s && s.mfa_pending);
     return {
       configured: CONFIGURED,
-      signed_in: Boolean(s) && !pending,
+      signed_in: Boolean(s) && !pending && !mfa,
       password_pending: pending,
+      mfa_pending: mfa,
       email: s ? s.email : null,
       profile: (s && s.profile) || null,
       suggested_name: (s && s.suggested_name) || "",
@@ -247,7 +268,7 @@
       const [code, payload] = await request("POST", "/auth/v1/token?grant_type=refresh_token", { refresh_token: s.refresh_token });
       if (code < 400 && payload && payload.access_token) {
         payload.user = payload.user || { id: s.user_id, email: s.email };
-        return (await saveSession(payload, s.password_pending, s.profile, s.from_provider)).access_token;
+        return (await saveSession(payload, s.password_pending, s.profile, s.from_provider, s.mfa_pending)).access_token;
       }
       if ([400, 401, 403].includes(code)) {
         // Revoked or expired (signed out elsewhere): sign out here too.
@@ -583,6 +604,23 @@
     return [up, down];
   }
 
+  // errors.py upload(): the error notes local-api.js kept, sent without the
+  // sign-in (they are not tied to an account). Never fails a sync.
+  async function uploadErrors() {
+    const data = S.kv.get("error_reports");
+    const notes = Object.values((data && data.notes) || {});
+    if (!notes.length) return;
+    try {
+      const rows = notes.map((n) => ({ ...n, device_id: L.deviceId(), app_version: String(D.version || "").slice(0, 20), platform: D.platform || "android" }));
+      const [code] = await request("POST", "/rest/v1/error_reports", rows, null, { Prefer: "return=minimal" });
+      if (code >= 400 && code !== 404) return;
+      const now = S.kv.get("error_reports") || { k: "error_reports", notes: {} };
+      const kept = { ...now.notes };
+      for (const [k, v] of Object.entries(kept)) if (notes.some((n) => JSON.stringify(n) === JSON.stringify(v))) delete kept[k];
+      await write([["kv", { ...now, notes: kept }]]);
+    } catch (_) {}
+  }
+
   let syncing = null;
 
   // Upload, then download. Never throws; the result is in syncStatus().
@@ -594,8 +632,9 @@
       try {
         const token = await accessToken();
         const s = session();
-        if (token && s && s.user_id && !s.password_pending) {
+        if (token && s && s.user_id && !s.password_pending && !s.mfa_pending) {
           const [up, down] = await doSync(st, s.user_id, token);
+          await uploadErrors();
           st.last_sync = nowIso();
           st.last_error = null;
           if (up || down) {
@@ -743,7 +782,7 @@
   });
 
   route("POST", /^\/api\/cloud\/cancel$/, async () => {
-    if (status().password_pending) await signOutOfService();
+    if (status().password_pending || status().mfa_pending) await signOutOfService();
     return status();
   });
 
@@ -757,6 +796,124 @@
       }
     }
     await signOutOfService();
+    await clearAccountData();
+    await write([["kv", { k: "sync_state" }]]);
+    return status();
+  });
+
+  /* ------------------------------------------------------------------ */
+  /* two-step sign-in (cloud.py mfa_*)                                   */
+  /* ------------------------------------------------------------------ */
+  const MFA_ISSUER = "Muhurta Pomodoro";
+
+  async function mfaToken(allowPending) {
+    const s = session();
+    if (!s || s.password_pending || (s.mfa_pending && !allowPending)) throw new HttpError(401, "Please sign in first.");
+    const token = await accessToken();
+    if (!token) throw new HttpError(401, "Please sign in first.");
+    return token;
+  }
+
+  function cleanTotp(code) {
+    code = String(code || "").replace(/\s+/g, "");
+    if (!/^\d{6}$/.test(code)) throw new HttpError(400, "The code is the 6 digits your authenticator app shows now.");
+    return code;
+  }
+
+  async function factors(token) {
+    const [code, payload] = await request("GET", "/auth/v1/user", null, token);
+    if (code >= 400 || !payload) throw new HttpError(502, "The sync service is having trouble. Try again.");
+    return (payload.factors || []).filter((f) => f.factor_type === "totp");
+  }
+
+  async function prove(token, factorId, code) {
+    let [status_, challenge] = await request("POST", `/auth/v1/factors/${factorId}/challenge`, {}, token);
+    if (status_ === 429) throw new HttpError(429, "Too many tries. Wait a minute, then try again.");
+    if (status_ >= 400 || !challenge || !challenge.id) throw new HttpError(502, "The code couldn't be checked just now. Try again.");
+    const [verified, payload] = await request("POST", `/auth/v1/factors/${factorId}/verify`, { challenge_id: challenge.id, code }, token);
+    if (verified === 429) throw new HttpError(429, "Too many tries. Wait a minute, then try again.");
+    if (verified >= 400 || !payload || !payload.access_token) {
+      throw new HttpError(400, "That code is wrong. Codes change every 30 seconds; use the one showing now.");
+    }
+    return payload;
+  }
+
+  route("GET", /^\/api\/cloud\/two-step$/, async () => {
+    const all = await factors(await mfaToken());
+    return { enabled: all.some((f) => f.status === "verified") };
+  });
+
+  route("POST", /^\/api\/cloud\/two-step\/start$/, async () => {
+    const token = await mfaToken();
+    const all = await factors(token);
+    if (all.some((f) => f.status === "verified")) throw new HttpError(409, "Two-step sign-in is already on.");
+    for (const f of all) await request("DELETE", `/auth/v1/factors/${f.id}`, null, token);
+    const [code, payload] = await request("POST", "/auth/v1/factors", { factor_type: "totp", issuer: MFA_ISSUER }, token);
+    const text = errorText(payload);
+    if (code === 404 || (text.includes("mfa") && text.includes("disabled"))) {
+      throw new HttpError(404, "Two-step sign-in isn't switched on for this app's server yet.");
+    }
+    if (code >= 400 || !payload || !payload.totp) throw new HttpError(502, "Two-step sign-in couldn't be started. Try again.");
+    return { factor_id: payload.id, qr_code: payload.totp.qr_code || "", secret: payload.totp.secret || "", uri: payload.totp.uri || "" };
+  });
+
+  route("POST", /^\/api\/cloud\/two-step\/confirm$/, async ({ body }) => {
+    if (!/^[0-9a-f-]{36}$/.test(String(body.factor_id || ""))) throw new HttpError(400, "Start again: turn on two-step sign-in.");
+    const payload = await prove(await mfaToken(), body.factor_id, cleanTotp(body.code));
+    const s = session();
+    await saveSession(payload, false, s && s.profile, s && s.from_provider);
+    return { enabled: true };
+  });
+
+  route("POST", /^\/api\/cloud\/two-step\/off$/, async ({ body }) => {
+    const code = cleanTotp(body.code);
+    const token = await mfaToken();
+    const verified = (await factors(token)).filter((f) => f.status === "verified");
+    if (!verified.length) return { enabled: false };
+    const payload = await prove(token, verified[0].id, code);
+    for (const f of verified) {
+      const [status_] = await request("DELETE", `/auth/v1/factors/${f.id}`, null, payload.access_token);
+      if (status_ >= 400) throw new HttpError(502, "Two-step sign-in couldn't be turned off. Try again.");
+    }
+    const s = session();
+    await saveSession(payload, false, s && s.profile, s && s.from_provider);
+    return { enabled: false };
+  });
+
+  route("POST", /^\/api\/cloud\/mfa-verify$/, async ({ body }) => {
+    const code = cleanTotp(body.code);
+    if (!status().mfa_pending) throw new HttpError(401, "Please sign in first.");
+    const token = await mfaToken(true);
+    const verified = (await factors(token)).filter((f) => f.status === "verified");
+    const s = session();
+    if (!verified.length) {
+      await write([["kv", { ...s, mfa_pending: false }]]); // turned off on another device meanwhile
+      rememberPending({ ...s, mfa_pending: false });
+    } else {
+      await saveSession(await prove(token, verified[0].id, code), s.password_pending, s.profile, s.from_provider);
+    }
+    if (status().signed_in) await enterAccount();
+    return fullStatus();
+  });
+
+  // cloud.py delete_account + sync.py delete_account.
+  route("POST", /^\/api\/cloud\/delete-account$/, async ({ body }) => {
+    const s = session();
+    if (!s || s.password_pending) throw new HttpError(401, "Please sign in first.");
+    if (String(body.confirm || "").trim().toLowerCase() !== String(s.email || "").toLowerCase()) {
+      throw new HttpError(400, "Type your email exactly as shown to confirm.");
+    }
+    const token = await accessToken();
+    if (!token) throw new HttpError(401, "Please sign in first.");
+    const [code, payload] = await request("POST", "/rest/v1/rpc/delete_my_account", {}, token);
+    if (code === 404) {
+      throw new HttpError(404, "Deleting accounts isn't set up on the server yet (run the \"deleting your own account\" section of supabase/schema.sql).");
+    }
+    if (errorText(payload).includes("two-step")) {
+      throw new HttpError(403, "Sign out and sign in again with your authenticator code, then delete the account.");
+    }
+    if (code >= 400) throw new HttpError(502, "Your account couldn't be deleted just now. Try again.");
+    await forget();
     await clearAccountData();
     await write([["kv", { k: "sync_state" }]]);
     return status();
@@ -970,4 +1127,6 @@
 
   window.__MUHURTA_ACCOUNT__ = { signedIn: () => !CONFIGURED || status().signed_in, nudge, runOnce, status: fullStatus };
   L.cloudConfigured = CONFIGURED;
+  // backup.js reads and writes rows in the server's shape, like sync does.
+  L.syncRows = { TABLES, LOCAL_ONLY_SETTINGS, hasOwnSettings, settingsRow, nextId, email: () => status().email };
 })();
