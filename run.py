@@ -828,7 +828,23 @@ def _native_window(url: str, data_dir: Path, flask_app):
         try:
             from menubar import MenuBar
 
-            _MENU_BAR = MenuBar(on_click=bring_to_front)
+            def open_running():
+                # The click is about the clock in the menu bar: show its page,
+                # not whichever page the window was last on.
+                bring_to_front()
+                kind = (_MENU_BAR.kind() if _MENU_BAR else None) or ""
+                script = f"window.MuhurtaOpenRunning && window.MuhurtaOpenRunning({json.dumps(kind)})"
+
+                def go():
+                    try:
+                        window.evaluate_js(script)
+                    except Exception:
+                        log.exception("Could not open the running clock's page")
+
+                # evaluate_js waits on the main thread, where this click runs.
+                threading.Thread(target=go, name="open-running", daemon=True).start()
+
+            _MENU_BAR = MenuBar(on_click=open_running)
         except Exception:
             log.exception("No menu bar timer this time")
     # Not private: the page keeps a running session in localStorage, which

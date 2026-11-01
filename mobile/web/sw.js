@@ -82,12 +82,16 @@ self.addEventListener("push", (event) => {
   })());
 });
 
-// A tap on a notification brings the app forward.
+// A tap on a notification brings the app forward, on the running clock's
+// page (static/js/open-running.js), not whichever page was last open.
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   event.waitUntil((async () => {
     const open = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
-    if (open.length) return open[0].focus();
-    return self.clients.openWindow(scope.href);
+    if (open.length) {
+      open[0].postMessage({ type: "open-running" });
+      return open[0].focus();
+    }
+    return self.clients.openWindow(scope.href + "?open=running");
   })());
 });

@@ -29,6 +29,9 @@ import com.getcapacitor.annotation.CapacitorPlugin;
  * (ms since 1970); a count-up has run `sec` seconds plus the time since
  * `since`; paused, it stands still at `sec`. plus puts a "+" before the
  * time (past zero). hide() removes it.
+ *
+ * A tap on it opens the app and sends "tapped" to the page, which goes to the
+ * running clock's page (static/js/open-running.js).
  */
 @CapacitorPlugin(name = "LiveTimer")
 public class LiveTimerPlugin extends Plugin {
@@ -36,6 +39,7 @@ public class LiveTimerPlugin extends Plugin {
     private static final String CHANNEL = "running";
     private static final int ID = 4100;
     private static final int GOLD = 0xFFA98237;
+    private static final String TAPPED = "com.muhurata.timer.LIVE_TAPPED";
 
     // The status bar icon says what runs, like the Mac menu bar.
     private static int iconFor(String mode) {
@@ -60,6 +64,16 @@ public class LiveTimerPlugin extends Plugin {
             channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
             getContext().getSystemService(NotificationManager.class).createNotificationChannel(channel);
         }
+        // Opened by a tap while the app was closed.
+        if (getActivity() != null) handleOnNewIntent(getActivity().getIntent());
+    }
+
+    @Override
+    protected void handleOnNewIntent(Intent intent) {
+        super.handleOnNewIntent(intent);
+        if (intent == null || !intent.getBooleanExtra(TAPPED, false)) return;
+        intent.removeExtra(TAPPED); // once, not again on the next page
+        notifyListeners("tapped", new JSObject(), true);
     }
 
     @PluginMethod
@@ -103,7 +117,8 @@ public class LiveTimerPlugin extends Plugin {
         view.setChronometer(R.id.live_clock, base, Boolean.TRUE.equals(call.getBoolean("plus", false)) ? "+%s" : null, !paused);
         view.setChronometerCountDown(R.id.live_clock, !up);
 
-        Intent open = new Intent(ctx, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Intent open = new Intent(ctx, MainActivity.class).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .putExtra(TAPPED, true);
         PendingIntent tap = PendingIntent.getActivity(ctx, 0, open, PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
 
         NotificationCompat.Builder b = new NotificationCompat.Builder(ctx, CHANNEL)

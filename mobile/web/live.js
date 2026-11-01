@@ -138,6 +138,13 @@
     last = null; // the notification may have timed out or been swiped away meanwhile
     check();
   });
+  // A tap on the notification: show that clock's page (open-running.js,
+  // which loads after this file).
+  Live.addListener("tapped", () => {
+    const go = () => window.MuhurtaOpenRunning && window.MuhurtaOpenRunning();
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go, { once: true });
+    else go();
+  });
   L.ready.then(check);
   setInterval(check, 1000);
 })();
