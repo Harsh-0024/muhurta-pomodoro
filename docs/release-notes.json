@@ -1,5 +1,36 @@
 {
  "versions": {
+  "1.17.1": [
+   {
+    "text": "Clicking the clock in the menu bar now opens the page of the clock that's running, not the last page you had open.",
+    "for": [
+     "mac"
+    ]
+   },
+   {
+    "text": "Tapping a notification about a running clock, or one saying focus or time is up, opens that clock's page.",
+    "for": [
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "On other pages, the window title now shows a running Timer or Flow too, not only Rhythm.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "Space and S now start, pause and resume the Timer and Flow, like Rhythm. The keyboard guide says which keys are for Rhythm only.",
+    "for": [
+     "mac",
+     "windows"
+    ]
+   }
+  ],
   "1.17.0": [
    {
     "text": "Refreshing now syncs: press ⌘R, Ctrl+R or F5 on a computer, or pull the page down on a phone, and you see what you did on your other devices. A small note says how it went.",

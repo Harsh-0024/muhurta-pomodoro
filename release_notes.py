@@ -34,6 +34,12 @@ def only(devices, text: str) -> dict:
 
 
 NOTES = {
+    "1.17.1": [
+        only(MAC, "Clicking the clock in the menu bar now opens the page of the clock that's running, not the last page you had open."),
+        only(PHONES, "Tapping a notification about a running clock, or one saying focus or time is up, opens that clock's page."),
+        "On other pages, the window title now shows a running Timer or Flow too, not only Rhythm.",
+        only(COMPUTERS, "Space and S now start, pause and resume the Timer and Flow, like Rhythm. The keyboard guide says which keys are for Rhythm only."),
+    ],
     "1.17.0": [
         "Refreshing now syncs: press ⌘R, Ctrl+R or F5 on a computer, or pull the page down on a phone, and you see what you did on your other devices. A small note says how it went.",
         "Save a backup of your history, or your sessions as a spreadsheet (CSV), from Settings, History. Restoring a backup only adds what's missing, so nothing is lost.",
