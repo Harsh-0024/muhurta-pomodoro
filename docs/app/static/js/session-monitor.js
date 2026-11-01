@@ -132,12 +132,50 @@
     return Number(data.remainingSec || 0);
   }
 
+  function hms(sec) {
+    const s = Math.max(0, Math.floor(sec));
+    const h = Math.floor(s / 3600);
+    const rest = `${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+    return h ? `${h}:${rest}` : rest;
+  }
+
+  // The title Timer's or Flow's own page would show (timer.js, flow.js).
+  function otherClockTitle() {
+    const T = window.MuhurtaTimer;
+    const timer = T?.read();
+    if (timer && timer.mode !== "idle") {
+      const left = hms(Math.ceil(T.remainingSec(timer) - 0.001));
+      if (timer.mode === "running") return { running: true, text: `${left} timer` };
+      if (timer.mode === "paused") return { running: false, text: `${left} timer paused` };
+      if (timer.mode === "overtime") return { running: true, text: `+${hms(T.overtimeSec(timer))} timer` };
+      return { running: true, text: "Time's up" };
+    }
+    let flow = null;
+    try {
+      flow = JSON.parse(localStorage.getItem("muhurat_flow_session_v1") || "null");
+    } catch (_) {}
+    if (flow && (flow.mode === "running" || flow.mode === "paused")) {
+      const live = flow.mode === "running" && flow.runStartedAt ? (Date.now() - Number(flow.runStartedAt)) / 1000 : 0;
+      const text = `${hms(Number(flow.focusedSec || 0) + live)} flow${flow.mode === "paused" ? " paused" : ""}`;
+      return { running: flow.mode === "running", text };
+    }
+    return null;
+  }
+
   function syncTitle(data) {
     // On the Timer page a running Timer owns the title (timer.js); writing
     // ours too made the two take turns and the window title blink.
     const timer = window.__PAGE__ === "timer" && window.MuhurtaTimer?.read();
     if (timer && timer.mode !== "idle") return;
-    if (!data?.session?.active || data.mode === "idle") {
+    // Timer or Flow running from this page (Dashboard, Settings...) shows in
+    // the title too, as Rhythm does; a running one beats a paused Rhythm.
+    const other = otherClockTitle();
+    const rhythmIdle = !data?.session?.active || data.mode === "idle";
+    if (other && (other.running || rhythmIdle || !data.running)) {
+      document.title = other.text;
+      return;
+    }
+    if (rhythmIdle) {
       document.title = baseTitle;
       return;
     }
