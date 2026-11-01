@@ -73,6 +73,11 @@ class MenuBar:
             threading.Thread(target=self._loop, name="menubar", daemon=True).start()
         self._refresh()
 
+    def kind(self) -> str | None:
+        """Which clock the menu bar shows now ("timer", "rest", "countdown", "flow")."""
+        with self._lock:
+            return self._state.get("kind") if self._state else None
+
     def _loop(self):
         while True:
             # Wake just after each whole second so the digits tick evenly.

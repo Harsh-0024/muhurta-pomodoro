@@ -96,7 +96,10 @@
     </div>
   </div>
   <script src="{{ url_for('static', filename='js/error-report.js') }}?v={{ asset_version }}"></script>
-  <script>window.__PAGE__ = "{% block page_id %}home{% endblock %}";</script>
+  <script>
+    window.__PAGE__ = "{% block page_id %}home{% endblock %}";
+    window.__CLOCK_PAGES__ = { rhythm: "{{ url_for('index') }}", countdown: "{{ url_for('timer_page') }}", flow: "{{ url_for('flow_page') }}" };
+  </script>
   {% if not bare %}
   <script>
     // Signed out while a page was open (from another window, or the account
@@ -120,6 +123,7 @@
   <script src="{{ url_for('static', filename='js/sounds.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/session-monitor.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/one-clock.js') }}?v={{ asset_version }}" defer></script>
+  <script src="{{ url_for('static', filename='js/open-running.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/timer-core.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/dialog.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/shortcuts.js') }}?v={{ asset_version }}" defer></script>

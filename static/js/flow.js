@@ -334,6 +334,35 @@
       render();
       persist();
     });
+    wireKeys();
+  }
+
+  // Space and S, as on Rhythm (shortcuts.js lists them).
+  function isTyping(el) {
+    const tag = el?.tagName;
+    return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || Boolean(el?.isContentEditable);
+  }
+
+  function wireKeys() {
+    const space = (e) => e.code === "Space" || e.key === " ";
+    // keydown only stops the page from scrolling; keyup acts, and taking it
+    // stops a focused button from also clicking.
+    document.addEventListener("keydown", (e) => {
+      if (space(e) && !isTyping(e.target) && !document.body.classList.contains("modal-open")) e.preventDefault();
+    });
+    document.addEventListener("keyup", (e) => {
+      if (isTyping(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (document.body.classList.contains("modal-open")) return;
+      if (space(e)) {
+        e.preventDefault();
+        if (state.mode === "running") pauseFlow();
+        else if (state.mode === "paused") resumeFlow();
+        else startFlow();
+      } else if (e.key.toLowerCase() === "s") {
+        if (state.mode === "paused") resumeFlow();
+        else if (state.mode === "idle") startFlow();
+      }
+    });
   }
 
   function init() {

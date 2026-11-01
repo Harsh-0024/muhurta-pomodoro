@@ -2,15 +2,15 @@
   "use strict";
 
   const SHORTCUTS = [
-    { keys: "S", action: "Start or resume" },
-    { keys: "Space", action: "Pause or resume (or rest, if waiting)" },
+    { keys: "S", action: "Start or resume (Rhythm, Timer, Flow)" },
+    { keys: "Space", action: "Start, pause or resume (on Rhythm: or rest, if waiting)" },
     { keys: "Shift + /", action: "Open this guide" },
-    { keys: "R", action: "Reset" },
-    { keys: "T", action: "Take rest from pool" },
-    { keys: "K", action: "Skip remaining rest (during rest)" },
-    { keys: "B", action: "Rest (during overtime)" },
-    { keys: "3", action: "Skip (during overtime)" },
-    { keys: "1 · 2 · 3", action: "Choose options when a dialog is open" },
+    { keys: "R", action: "Rhythm: reset" },
+    { keys: "T", action: "Rhythm: take rest from pool" },
+    { keys: "K", action: "Rhythm: skip remaining rest (during rest)" },
+    { keys: "B", action: "Rhythm: rest (during overtime)" },
+    { keys: "3", action: "Rhythm: skip (during overtime)" },
+    { keys: "1 · 2 · 3", action: "Rhythm: choose options when a dialog is open" },
     { keys: "⌘R · Ctrl+R · F5", action: "Refresh and sync with your account" },
   ];
 

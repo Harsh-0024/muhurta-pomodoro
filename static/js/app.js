@@ -400,7 +400,13 @@
     if (!("Notification" in window) || Notification.permission !== "granted") return;
     if (document.visibilityState === "visible") return;
     try {
-      new Notification(title, { body, silent: true });
+      const note = new Notification(title, { body, silent: true });
+      // A click brings the window back, on this clock's page.
+      note.onclick = () => {
+        window.focus();
+        note.close?.();
+        window.MuhurtaOpenRunning?.("rhythm");
+      };
     } catch (_) {}
   }
 

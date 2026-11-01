@@ -94,11 +94,11 @@
   function nextEnd() {
     const rhythm = saved(TIMER_KEY);
     if (rhythm && rhythm.running && ENDS[rhythm.mode] && rhythm.phaseEndsAt) {
-      return { at: Number(rhythm.phaseEndsAt), ...ENDS[rhythm.mode] };
+      return { at: Number(rhythm.phaseEndsAt), clock: "rhythm", ...ENDS[rhythm.mode] };
     }
     const countdown = saved(COUNTDOWN_KEY);
     if (countdown && countdown.mode === "running" && countdown.endsAt) {
-      return { at: Number(countdown.endsAt), ...ENDS.countdown };
+      return { at: Number(countdown.endsAt), clock: "countdown", ...ENDS.countdown };
     }
     return null;
   }
@@ -140,6 +140,7 @@
         notifications: [{
           id: BLOCK_ID, title: w.title, body: w.body, channelId: w.channel,
           schedule: { at: new Date(w.at), allowWhileIdle: true }, isExactNotification: exact,
+          extra: { clock: w.clock },
         }],
       });
       booked = key;
@@ -169,6 +170,16 @@
     realSetItem.call(this, key, value);
     if (this === window.localStorage && (key === TIMER_KEY || key === COUNTDOWN_KEY) && document.visibilityState === "hidden") book();
   };
+
+  // A tap on the bell's notification: show the page of the clock that rang
+  // (open-running.js, which loads after this file).
+  LN.addListener("localNotificationActionPerformed", (e) => {
+    const n = e && e.notification;
+    if (!n || n.id !== BLOCK_ID) return;
+    const go = () => window.MuhurtaOpenRunning && window.MuhurtaOpenRunning((n.extra && n.extra.clock) || "");
+    if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", go, { once: true });
+    else go();
+  });
 
   /* ---------- Settings: phone words for the Notifications section ---------- */
 
