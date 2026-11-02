@@ -1,0 +1,65 @@
+{
+  "about": "Sessions two or three devices recorded at the same time, and the minutes the day should count. Work beats rest; between two works or two rests the earlier start wins; one device's own overlaps are left alone. Times are UTC on the case's day. Used by tests/test_shared_time.py and tests/phone/phone.test.mjs.",
+  "cases": [
+    {
+      "name": "rest on the laptop, work on the phone inside it",
+      "day": "2026-03-02",
+      "sessions": [["rest", "laptop", "10:00", "10:30"], ["work", "phone", "10:05", "10:25"]],
+      "focus": 20, "rest": 10
+    },
+    {
+      "name": "work started first, a rest inside it",
+      "day": "2026-03-03",
+      "sessions": [["work", "phone", "10:00", "10:25"], ["rest", "laptop", "10:10", "10:20"]],
+      "focus": 25, "rest": 0
+    },
+    {
+      "name": "a rest that runs on past the work",
+      "day": "2026-03-04",
+      "sessions": [["flow", "phone", "10:00", "10:20"], ["rest", "laptop", "10:10", "10:30"]],
+      "focus": 20, "rest": 10
+    },
+    {
+      "name": "work that starts before a rest ends",
+      "day": "2026-03-05",
+      "sessions": [["rest", "laptop", "10:00", "10:20"], ["timer", "phone", "10:10", "10:30"]],
+      "focus": 20, "rest": 10
+    },
+    {
+      "name": "two works: the earlier one keeps the shared time",
+      "day": "2026-03-06",
+      "sessions": [["work", "laptop", "10:00", "10:25"], ["work", "phone", "10:10", "10:40"]],
+      "focus": 40, "rest": 0
+    },
+    {
+      "name": "two rests: the earlier one keeps the shared time",
+      "day": "2026-03-07",
+      "sessions": [["rest", "laptop", "10:00", "10:10"], ["pause", "phone", "10:05", "10:20"]],
+      "focus": 0, "rest": 20
+    },
+    {
+      "name": "one device's own overlap is left alone",
+      "day": "2026-03-08",
+      "sessions": [["work", "laptop", "10:00", "10:25"], ["rest", "laptop", "10:10", "10:20"]],
+      "focus": 25, "rest": 10
+    },
+    {
+      "name": "a long rest around two works on another device: three pieces",
+      "day": "2026-03-09",
+      "sessions": [["rest", "laptop", "10:00", "11:00"], ["work", "phone", "10:05", "10:25"], ["work", "phone", "10:30", "10:50"]],
+      "focus": 40, "rest": 20
+    },
+    {
+      "name": "three devices",
+      "day": "2026-03-10",
+      "sessions": [["rest", "laptop", "10:00", "10:30"], ["work", "phone", "10:05", "10:15"], ["rest", "windows", "10:20", "10:40"]],
+      "focus": 10, "rest": 30
+    },
+    {
+      "name": "no overlap: nothing changes",
+      "day": "2026-03-11",
+      "sessions": [["work", "laptop", "10:00", "10:25"], ["rest", "phone", "10:25", "10:30"]],
+      "focus": 25, "rest": 5
+    }
+  ]
+}

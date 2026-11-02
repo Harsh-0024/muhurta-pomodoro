@@ -437,26 +437,86 @@
     return new HttpError(409, "Those times overlap another session.", { conflict: first ? segmentPublic(first) : null });
   }
 
+  function isWorkRow(item) {
+    return item.kind ? PRODUCTIVE_KINDS.includes(item.kind) : Number(item.productive_sec || 0) > 0;
+  }
+
+  function mergeSpans(spans) {
+    const merged = [];
+    for (const [s, e] of [...spans].sort((a, b) => a[0] - b[0] || a[1] - b[1])) {
+      const last = merged[merged.length - 1];
+      if (last && s <= last[1]) last[1] = Math.max(last[1], e);
+      else merged.push([s, e]);
+    }
+    return merged;
+  }
+
   // Trim time two *devices* both recorded, so it is counted once (db._count_shared_time_once).
+  // Work beats rest, which can leave a rest in two pieces; between two works
+  // or two rests the one that started first keeps the shared time.
   function countSharedTimeOnce(rows) {
-    const out = [];
-    const coveredUntil = new Map();
+    const parsed = [];
+    const workByDevice = new Map();
     for (const row of rows) {
       const item = { ...row };
-      let start = parseTime(item.started_at);
+      const start = parseTime(item.started_at);
       const end = parseTime(item.ended_at);
       if (start == null || end == null || end <= start) continue;
       const device = item.device_id || "";
-      let otherEnd = null;
-      for (const [dev, e] of coveredUntil) if (dev !== device && (otherEnd == null || e > otherEnd)) otherEnd = e;
-      coveredUntil.set(device, Math.max(coveredUntil.get(device) ?? end, end));
-      if (otherEnd != null && otherEnd > start) {
-        if (otherEnd >= end) continue;
-        const keep = (end - otherEnd) / (end - start);
-        for (const k of ["duration_sec", "productive_sec", "rest_sec"]) item[k] = Number(item[k] || 0) * keep;
-        start = otherEnd;
+      const isWork = isWorkRow(item);
+      if (isWork) {
+        if (!workByDevice.has(device)) workByDevice.set(device, []);
+        workByDevice.get(device).push([start, end]);
       }
-      out.push([item, start, end]);
+      parsed.push([item, start, end, device, isWork]);
+    }
+    const workSpans = new Map([...workByDevice].map(([dev, spans]) => [dev, mergeSpans(spans)]));
+
+    const out = [];
+    // per kind, per device: latest end so far among the rows already seen
+    const coveredUntil = { true: new Map(), false: new Map() };
+    for (const [item, start, end, device, isWork] of parsed) {
+      const sameKind = coveredUntil[isWork];
+      let otherEnd = null;
+      for (const [dev, e] of sameKind) if (dev !== device && (otherEnd == null || e > otherEnd)) otherEnd = e;
+      sameKind.set(device, Math.max(sameKind.get(device) ?? end, end));
+
+      const taken = []; // spans another device already counts
+      if (otherEnd != null && otherEnd > start) taken.push([start, otherEnd]);
+      if (!isWork) {
+        for (const [dev, spans] of workSpans) {
+          if (dev === device) continue;
+          let lo = 0;
+          let hi = spans.length;
+          while (lo < hi) {
+            const mid = (lo + hi) >> 1;
+            if (spans[mid][0] <= start) lo = mid + 1;
+            else hi = mid;
+          }
+          for (let i = Math.max(0, lo - 1); i < spans.length && spans[i][0] < end; i++) {
+            if (spans[i][1] > start) taken.push(spans[i]);
+          }
+        }
+      }
+
+      const pieces = [];
+      let cursor = start;
+      for (const [s, e] of mergeSpans(taken)) {
+        if (s > cursor) pieces.push([cursor, Math.min(s, end)]);
+        cursor = Math.max(cursor, e);
+        if (cursor >= end) break;
+      }
+      if (cursor < end) pieces.push([cursor, end]);
+      if (pieces.length === 1 && pieces[0][0] === start && pieces[0][1] === end) {
+        out.push([item, start, end]);
+        continue;
+      }
+      for (const [s, e] of pieces) {
+        const piece = { ...item };
+        const keep = (e - s) / (end - start);
+        for (const k of ["duration_sec", "productive_sec", "rest_sec"]) piece[k] = Number(piece[k] || 0) * keep;
+        out.push([piece, s, e]);
+      }
     }
     return out;
   }

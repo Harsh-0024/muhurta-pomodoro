@@ -33,6 +33,9 @@ jobs:
       - name: Computer side
         run: python tests/test_sign_in.py
 
+      - name: Shared time across devices
+        run: python tests/test_shared_time.py
+
       - name: Phones
         env:
           PYTHON: python
