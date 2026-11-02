@@ -34,6 +34,10 @@ def only(devices, text: str) -> dict:
 
 
 NOTES = {
+    "1.17.2": [
+        "If a rest is still running on one device while you work on another, the work now counts. Before, whichever clock started first got the shared minutes, so a forgotten rest could hide real work.",
+        "In Settings, History, each day's total now matches the dashboard: time two devices both recorded is counted once.",
+    ],
     "1.17.1": [
         only(MAC, "Clicking the clock in the menu bar now opens the page of the clock that's running, not the last page you had open."),
         only(PHONES, "Tapping a notification about a running clock, or one saying focus or time is up, opens that clock's page."),

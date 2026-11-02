@@ -1,5 +1,25 @@
 {
  "versions": {
+  "1.17.2": [
+   {
+    "text": "If a rest is still running on one device while you work on another, the work now counts. Before, whichever clock started first got the shared minutes, so a forgotten rest could hide real work.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   },
+   {
+    "text": "In Settings, History, each day's total now matches the dashboard: time two devices both recorded is counted once.",
+    "for": [
+     "mac",
+     "windows",
+     "android",
+     "iphone"
+    ]
+   }
+  ],
   "1.17.1": [
    {
     "text": "Clicking the clock in the menu bar now opens the page of the clock that's running, not the last page you had open.",
