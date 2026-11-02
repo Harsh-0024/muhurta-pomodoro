@@ -25,6 +25,9 @@
   let oldestLoaded = null; // earliest day the "By day" view has fetched
   let earliestDay = null; // earliest day anything was ever logged
   let longList = [];
+  // day -> {focus, rest} as the dashboard counts it: time two devices both
+  // recorded counts once, and work beats rest (db._count_shared_time_once)
+  const counted = new Map();
   let longThresholdSec = 3 * 60 * 60;
 
   // The open editor: { segment } when editing, { segment: null } when adding.
@@ -178,7 +181,22 @@
     earliestDay = data.earliest_day;
     longThresholdSec = Number(data.long_threshold_sec || longThresholdSec);
     oldestLoaded = data.start;
-    return data.segments || [];
+    const segs = data.segments || [];
+    await loadCounted(segs.map((s) => s.day));
+    return segs;
+  }
+
+  async function loadCounted(days) {
+    await Promise.all(
+      [...new Set(days)].filter(Boolean).map(async (day) => {
+        try {
+          const { totals } = await api(`/api/activity/day?day=${day}`);
+          counted.set(day, { focus: Number(totals.productive_sec || 0), rest: Number(totals.rest_sec || 0) });
+        } catch (_) {
+          counted.delete(day); // fall back to adding up the list
+        }
+      })
+    );
   }
 
   async function loadEarlier() {
@@ -308,7 +326,7 @@
     return days
       .map((day) => {
         const segs = groups.get(day);
-        const t = dayTotals(segs);
+        const t = counted.get(day) || dayTotals(segs);
         return `
           <section class="pref-group history-day">
             <header class="history-day-head">
@@ -546,7 +564,7 @@
             body: JSON.stringify({ ...body, kind: segmentedValue("kindPicker") }),
           });
       closeEditor();
-      await afterChange(saved);
+      await afterChange(saved, seg?.day);
       toast(message);
       flash(saved.id);
     } catch (err) {
@@ -561,13 +579,13 @@
     }
   }
 
-  async function afterChange(saved) {
+  async function afterChange(saved, oldDay) {
     if (saved) {
       recent = recent.filter((s) => s.id !== saved.id);
       if (!oldestLoaded || saved.day >= oldestLoaded) mergeRecent([saved]);
     }
     try {
-      await loadLong();
+      await Promise.all([loadLong(), loadCounted([saved?.day, oldDay])]);
     } catch (_) {}
     render();
   }
@@ -583,7 +601,7 @@
     try {
       await api(`/api/activity/segment/${seg.id}`, { method: "DELETE" });
       recent = recent.filter((s) => s.id !== seg.id);
-      await afterChange(null);
+      await afterChange(null, seg.day);
       toast("Session deleted");
     } catch (e) {
       toast(e.message || "Could not delete", "error");
