@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import bisect
 import json
 import math
 import os
@@ -399,20 +400,41 @@ def _activity_public(row: sqlite3.Row) -> dict:
     return item
 
 
+def _is_work_row(item: dict) -> bool:
+    kind = item.get("kind")
+    if kind:
+        return kind in PRODUCTIVE_KINDS
+    return float(item.get("productive_sec") or 0) > 0
+
+
+def _merge_spans(spans: list[tuple[datetime, datetime]]) -> list[tuple[datetime, datetime]]:
+    merged: list[tuple[datetime, datetime]] = []
+    for start, end in sorted(spans):
+        if merged and start <= merged[-1][1]:
+            merged[-1] = (merged[-1][0], max(merged[-1][1], end))
+        else:
+            merged.append((start, end))
+    return merged
+
+
 def _count_shared_time_once(rows) -> list[tuple[dict, datetime, datetime]]:
-    """Trim time two *computers* both recorded, so it is counted once.
+    """Trim time two *devices* both recorded, so it is counted once.
 
-    With sync, two computers timing at the same moment both send their
-    sessions. Rows must be sorted by start; the session that started first
-    keeps the shared time and the later one keeps only what is left, with
-    its focus and rest scaled to match. Overlaps between sessions from the
-    same computer are left exactly as they were.
+    With sync, two devices timing at the same moment both send their
+    sessions. Work beats rest: if one device was working while another was
+    resting, the work keeps the shared time and the rest keeps only what is
+    outside it, which can leave a rest in two pieces (a rest left running
+    on the laptop while working on the phone). Between two works or two
+    rests, the one that started first keeps the shared time. Rows must be
+    sorted by start. Kept pieces have their focus and rest scaled to match.
+    Overlaps between sessions from the same device are left exactly as they
+    were.
 
-    Returns (row as dict, start, end) with the trimmed start, skipping rows
-    that are entirely shared and rows with unreadable times.
+    Returns (row as dict, start, end) per kept piece, in row order, skipping
+    rows that are entirely shared and rows with unreadable times.
     """
-    out = []
-    covered_until: dict[str, datetime] = {}  # per computer: latest end so far
+    parsed = []
+    work_by_device: dict[str, list[tuple[datetime, datetime]]] = {}
     for row in rows:
         item = dict(row)
         started_at = _parse_segment_time(item["started_at"])
@@ -420,18 +442,56 @@ def _count_shared_time_once(rows) -> list[tuple[dict, datetime, datetime]]:
         if started_at is None or ended_at is None or ended_at <= started_at:
             continue
         device = item.get("device_id") or ""
-        others = [end for dev, end in covered_until.items() if dev != device]
-        covered_until[device] = max(covered_until.get(device, ended_at), ended_at)
-        other_end = max(others, default=None)
+        is_work = _is_work_row(item)
+        if is_work:
+            work_by_device.setdefault(device, []).append((started_at, ended_at))
+        parsed.append((item, started_at, ended_at, device, is_work))
+    work_spans = {dev: _merge_spans(spans) for dev, spans in work_by_device.items()}
+    work_starts = {dev: [s for s, _ in spans] for dev, spans in work_spans.items()}
+
+    out = []
+    # per kind, per device: latest end so far among the rows already seen
+    covered_until: dict[bool, dict[str, datetime]] = {True: {}, False: {}}
+    for item, started_at, ended_at, device, is_work in parsed:
+        same_kind = covered_until[is_work]
+        other_end = max((end for dev, end in same_kind.items() if dev != device), default=None)
+        same_kind[device] = max(same_kind.get(device, ended_at), ended_at)
+
+        taken = []  # spans another device already counts
         if other_end is not None and other_end > started_at:
-            if other_end >= ended_at:
-                continue  # all of it was already counted from another computer
-            keep = (ended_at - other_end) / (ended_at - started_at)
+            taken.append((started_at, other_end))
+        if not is_work:
+            for dev, spans in work_spans.items():
+                if dev == device:
+                    continue
+                i = max(0, bisect.bisect_right(work_starts[dev], started_at) - 1)
+                while i < len(spans) and spans[i][0] < ended_at:
+                    if spans[i][1] > started_at:
+                        taken.append(spans[i])
+                    i += 1
+
+        pieces = []
+        cursor = started_at
+        for start, end in _merge_spans(taken):
+            if start > cursor:
+                pieces.append((cursor, min(start, ended_at)))
+            cursor = max(cursor, end)
+            if cursor >= ended_at:
+                break
+        if cursor < ended_at:
+            pieces.append((cursor, ended_at))
+        if pieces == [(started_at, ended_at)]:
+            out.append((item, started_at, ended_at))
+            continue
+
+        span = (ended_at - started_at).total_seconds()
+        for start, end in pieces:
+            piece = dict(item)
+            keep = (end - start).total_seconds() / span
             for key in ("duration_sec", "productive_sec", "rest_sec"):
-                if key in item:
-                    item[key] = float(item[key] or 0) * keep
-            started_at = other_end
-        out.append((item, started_at, ended_at))
+                if key in piece:
+                    piece[key] = float(piece[key] or 0) * keep
+            out.append((piece, start, end))
     return out
 
 

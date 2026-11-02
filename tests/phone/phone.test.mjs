@@ -358,3 +358,37 @@ test("deleting the account, then restoring its backup into a new one", async () 
   await p.call("POST", "/api/cloud/sync-now");
   assert.deepEqual(serverPresets("asha@x.com"), ["Phone rhythm"]);
 });
+
+test("time two devices both recorded is counted once, and work beats rest", async () => {
+  const { cases } = JSON.parse(readFileSync(join(ROOT, "tests/shared_time_cases.json"), "utf8"));
+  const p = await phone();
+  await createAccount(p, "ravi@x.com");
+  const devices = new Map(); // device name in the cases -> a real-looking device id
+  const minutes = (hhmm) => hhmm.split(":").reduce((h, m) => Number(h) * 60 + Number(m));
+  for (const c of cases) {
+    const activity_segments = c.sessions.map(([kind, device, start, end]) => {
+      const seconds = (minutes(end) - minutes(start)) * 60;
+      const work = ["work", "extend", "flow", "timer"].includes(kind);
+      if (!devices.has(device)) devices.set(device, crypto.randomUUID());
+      return {
+        uuid: crypto.randomUUID(), updated_at: `${c.day}T12:00:00.000Z`, day: c.day, kind,
+        started_at: `${c.day}T${start}:00Z`, ended_at: `${c.day}T${end}:00Z`, duration_sec: seconds,
+        productive_sec: work ? seconds : 0, rest_sec: work ? 0 : seconds, preset_id: "", preset_name: "",
+        phase_index: null, details_json: "{}", created_at: `${c.day} ${end}:00`, device_id: devices.get(device),
+      };
+    });
+    const back = await p.call("POST", "/api/backup/restore", {
+      app: "muhurta-pomodoro", kind: "backup", format: 1, activity_segments, custom_presets: [], focus_by_device: [], settings: {},
+    });
+    assert.equal(back.data.sessions, c.sessions.length, `${c.name}: sessions restored`);
+
+    const day = (await p.call("GET", `/api/activity/day?day=${c.day}`)).data;
+    const counted = [Math.round(day.totals.productive_sec / 6) / 10, Math.round(day.totals.rest_sec / 6) / 10];
+    assert.deepEqual(counted, [c.focus, c.rest], `${c.name}: the day's focus and rest`);
+    assert.equal(day.segments.length, c.sessions.length, `${c.name}: every session still listed`);
+
+    const dash = (await p.call("GET", `/api/dashboard?day=${c.day}&days=7`)).data;
+    const record = dash.days.find((d) => d.day === c.day);
+    assert.deepEqual([record.focus_minutes, record.rest_minutes], [c.focus, c.rest], `${c.name}: the dashboard`);
+  }
+});
