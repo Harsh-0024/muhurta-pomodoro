@@ -1071,6 +1071,8 @@
       current: D.version, bundled: true, update_available: false, required: false,
       checked_at: info.checked_at ? info.checked_at / 1000 : null, check_error: info.error || null,
     };
+    // A test copy never updates itself (app.py api_version).
+    if (D.channel === "test") return { ...payload, test: true };
     if (info.error && info.failing_since) {
       payload.check_failing_days = Math.floor((Date.now() - info.failing_since) / 86400000);
       payload.url = D.download_page;

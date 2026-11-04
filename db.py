@@ -20,6 +20,7 @@ from platformdirs import user_data_dir
 from sqlalchemy import create_engine
 
 from presets import BUILTINS
+from version import DATA_DIR_NAME
 
 DEFAULT_SETTINGS = {
     "auto_start_work": False,
@@ -52,7 +53,8 @@ DEFAULT_SETTINGS = {
 PROJECT_ROOT = Path(__file__).resolve().parent
 LEGACY_DB_PATH = PROJECT_ROOT / "data" / "focus_timer.db"
 # MUHURATA_DATA_DIR: a separate data folder, for tests and side-by-side copies.
-DB_PATH = Path(os.environ.get("MUHURATA_DATA_DIR") or user_data_dir("MuhurataTimer", appauthor=False)) / "focus_timer.db"
+# A test copy (version.py CHANNEL) keeps its own folder, apart from the real app's.
+DB_PATH = Path(os.environ.get("MUHURATA_DATA_DIR") or user_data_dir(DATA_DIR_NAME, appauthor=False)) / "focus_timer.db"
 BACKUP_DIR = DB_PATH.parent / "backups"
 BACKUPS_TO_KEEP = 3
 MIGRATIONS_DIR = PROJECT_ROOT / "migrations"

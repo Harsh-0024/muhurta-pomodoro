@@ -2,7 +2,7 @@
   "use strict";
 
   const STORAGE_KEY = "muhurat_flow_session_v1";
-  const baseTitle = "Muhurta Pomodoro";
+  const baseTitle = window.__APP_NAME__ || "Muhurta Pomodoro";
   let tickTimer = null;
   let quoteLoadId = 0;
   let settings = null;

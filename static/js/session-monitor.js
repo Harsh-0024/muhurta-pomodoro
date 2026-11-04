@@ -2,7 +2,7 @@
   "use strict";
 
   const SESSION_STORAGE_KEY = "muhurat_timer_session_v1";
-  const baseTitle = "Muhurta Pomodoro";
+  const baseTitle = window.__APP_NAME__ || "Muhurta Pomodoro";
   let settings = null;
   let presets = null;
   let monitorTimer = null;

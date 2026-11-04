@@ -15,10 +15,11 @@ trap 'rm -rf "$STAGE"' EXIT
 
 # What the window shows: the app, and a shortcut to Applications to drop it on.
 # ditto keeps the app's signature and symlinks intact (cp -R can break them).
-ditto "$APP" "$STAGE/Muhurta Pomodoro.app"
+NAME="$(basename "$APP" .app)"  # "Muhurta Pomodoro", or "Muhurta Pomodoro Test"
+ditto "$APP" "$STAGE/$NAME.app"
 ln -s /Applications "$STAGE/Applications"
 
 rm -f "$OUT"
-hdiutil create -volname "Muhurta Pomodoro" -srcfolder "$STAGE" \
+hdiutil create -volname "$NAME" -srcfolder "$STAGE" \
   -fs HFS+ -format UDZO -ov "$OUT" >/dev/null
 echo "Made $OUT ($(du -h "$OUT" | cut -f1))"

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Testers · Muhurta Pomodoro</title>
+<meta name="description" content="Test versions of Muhurta Pomodoro, for the app's admins." />
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#070605" />
+<script>
+  /* Starting theme before anything paints: the visitor's pick, else the system's (theme.js). */
+  try { var t = localStorage.getItem("muhurta-theme"); } catch (e) {}
+  document.documentElement.dataset.theme = t || (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23040302'/%3E%3Cg fill='none' stroke='%23d8bd79' stroke-width='4' stroke-linecap='round'%3E%3Ccircle cx='32' cy='32' r='22'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M32 6v14M32 44v14M6 32h14M44 32h14M13.6 13.6l10 10M40.4 40.4l10 10M50.4 13.6l-10 10M23.6 40.4l-10 10'/%3E%3C/g%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css?v=1.18.0" />
+</head>
+<body class="dl-page testers-page">
+
+<nav class="nav scrolled">
+  <div class="container">
+    <a class="brand" href="./">
+      <svg class="wheel-mark" viewBox="0 0 80 80" aria-hidden="true">
+        <circle cx="40" cy="40" r="23" /><circle cx="40" cy="40" r="6.2" />
+        <path d="M40 10v13M40 57v13M10 40h13M57 40h13M18.8 18.8l9.2 9.2M52 52l9.2 9.2M61.2 18.8L52 28M28 52l-9.2 9.2" />
+      </svg>
+      <span>Muhurta Pomodoro</span>
+    </a>
+    <div class="nav-links">
+      <button class="theme-toggle" type="button" aria-label="Switch theme">
+        <svg class="to-light" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4L6 18M18 6l1.4-1.4" /></svg>
+        <svg class="to-dark" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.6A8.2 8.2 0 0 1 9.4 4 8.2 8.2 0 1 0 20 14.6z" /></svg>
+      </button>
+      <a href="./">← Back</a>
+    </div>
+  </div>
+</nav>
+
+<main>
+  <div class="container narrow center">
+    <p class="eyebrow">Testers</p>
+    <h1 id="title">Test versions.</h1>
+    <p class="quiet" id="lede">For the app's admins: sign in with your Muhurta account to download the newest test build.</p>
+
+    <!-- Signed out -->
+    <form class="tester-form" id="signIn" novalidate hidden>
+      <label class="tester-field">
+        <span>Email</span>
+        <input type="email" id="email" autocomplete="username" required />
+      </label>
+      <label class="tester-field">
+        <span>Password</span>
+        <input type="password" id="password" autocomplete="current-password" required />
+      </label>
+      <button type="submit" class="btn-download tester-submit" id="signInButton">Sign in</button>
+      <p class="tester-error" id="signInError" role="alert" hidden></p>
+      <p class="quiet small">Use the email and password you sign in to the app with.</p>
+    </form>
+
+    <p class="dl-status" id="busy" hidden><span class="spin"></span><span id="busyText">Checking…</span></p>
+
+    <!-- Signed in, not an admin -->
+    <div id="notAdmin" hidden>
+      <p class="quiet">This page is for the app's admins. Everyone else gets the app from the <a href="./">home page</a>.</p>
+    </div>
+
+    <!-- Signed in as an admin -->
+    <section id="builds" hidden aria-live="polite">
+      <div class="tester-build" id="latest"></div>
+      <div class="tester-older" id="older"></div>
+      <div class="more tester-notes">
+        <p class="quiet small"><b>A test copy installs next to the real app</b> as “Muhurta Pomodoro Test” (on Android, “Muhurta Test”), keeps its own data on the device, and never updates itself: come back here for newer builds. It syncs with your account like the real app, so what you time in it is real.</p>
+        <p class="quiet small">Test builds come from the <code>testing</code> branch: each push there makes a new one in about 20 minutes. When one is good, merge <code>testing</code> into <code>main</code> and tag the release as usual.</p>
+        <p class="quiet small">iPhone has no test copy yet: its app is the website itself, so it always runs the released version.</p>
+      </div>
+    </section>
+
+    <p class="tester-who" id="who" hidden><span id="whoText"></span> · <a href="#" id="signOut">Sign out</a></p>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <span>Test builds are for trying things before everyone gets them.</span>
+    <span><a href="privacy.html">Privacy</a> · <a href="./">muhurta-pomodoro</a></span>
+  </div>
+</footer>
+
+<script src="theme.js?v=1.6.0"></script>
+<script>
+  (function () {
+    "use strict";
+
+    // The same account the app signs in to (cloud.py SUPABASE_URL / _KEY: a
+    // publishable key, safe in a page). Being an admin is decided there
+    // (supabase/schema.sql public.admins, is_admin()), never by this page.
+    const SUPABASE_URL = "https://ybjyzvtilicsncuiujks.supabase.co";
+    const SUPABASE_KEY = "sb_publishable_YDL_wTS1iPM9bKHpR6yP7g_o8pnFBDk";
+    const RELEASES = "https://api.github.com/repos/Harsh-0024/muhurta-pomodoro/releases?per_page=30";
+    const SESSION_KEY = "muhurta-testers-session";
+    const FILES = [
+      [/-macos-arm64\.dmg$/, "Mac", "Apple Silicon · .dmg"],
+      [/-windows-x64\.zip$/, "Windows", "64-bit · .zip"],
+      [/-android\.apk$/, "Android", ".apk"],
+      [/-macos-arm64\.zip$/, "Mac (zipped)", "Apple Silicon · .zip"],
+    ];
+
+    const $ = (id) => document.getElementById(id);
+    const show = (id, on) => { $(id).hidden = !on; };
+    const el = (tag, cls, text) => {
+      const n = document.createElement(tag);
+      if (cls) n.className = cls;
+      if (text != null) n.textContent = text;
+      return n;
+    };
+
+    function saveSession(s) {
+      try {
+        if (s) localStorage.setItem(SESSION_KEY, JSON.stringify(s));
+        else localStorage.removeItem(SESSION_KEY);
+      } catch (_) {}
+    }
+    function loadSession() {
+      try {
+        return JSON.parse(localStorage.getItem(SESSION_KEY) || "null");
+      } catch (_) {
+        return null;
+      }
+    }
+
+    async function auth(grant, body) {
+      const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=${grant}`, {
+        method: "POST",
+        headers: { apikey: SUPABASE_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const code = data.error_code || data.error || "";
+        const err = new Error(code === "invalid_credentials" || code === "invalid_grant"
+          ? "That email and password don't match an account."
+          : data.msg || data.error_description || "Couldn't sign in. Try again.");
+        err.code = code;
+        throw err;
+      }
+      return {
+        access_token: data.access_token,
+        refresh_token: data.refresh_token,
+        expires_at: Date.now() + (Number(data.expires_in) || 3600) * 1000,
+        email: data.user && data.user.email,
+      };
+    }
+
+    async function isAdmin(session) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/is_admin`, {
+        method: "POST",
+        headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}`, "Content-Type": "application/json" },
+        body: "{}",
+      });
+      if (!res.ok) throw new Error("Couldn't check your account. Try again.");
+      return (await res.json()) === true;
+    }
+
+    async function testBuilds() {
+      const res = await fetch(RELEASES, { headers: { Accept: "application/vnd.github+json" } });
+      if (!res.ok) throw new Error(res.status === 403 ? "GitHub is busy. Try again in a few minutes." : "Couldn't reach GitHub. Try again.");
+      return (await res.json()).filter((r) => r.prerelease && /^test-v/.test(r.tag_name));
+    }
+
+    const when = (iso) => new Date(iso).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" });
+    const size = (n) => `${(n / 1048576).toFixed(n > 10485760 ? 0 : 1)} MB`;
+
+    function renderBuilds(list) {
+      const latest = $("latest");
+      const older = $("older");
+      latest.replaceChildren();
+      older.replaceChildren();
+      if (!list.length) {
+        latest.append(el("p", "quiet", "No test builds yet. Push to the testing branch and one appears here in about 20 minutes."));
+        return;
+      }
+      const [top, ...rest] = list;
+      latest.append(el("p", "tester-build-name", top.name || top.tag_name));
+      // The release notes' second line is the commit it was built from.
+      const subject = String(top.body || "").split("\n").map((l) => l.trim()).filter(Boolean)[1] || "";
+      latest.append(el("p", "quiet small tester-build-meta", `${when(top.created_at)}${subject ? ` · ${subject}` : ""}`));
+      const grid = el("div", "tester-files");
+      FILES.forEach(([re, label, note]) => {
+        const asset = (top.assets || []).find((a) => re.test(a.name));
+        if (!asset) return;
+        const a = el("a", "tester-file");
+        a.href = asset.browser_download_url;
+        a.append(el("span", "tester-file-name", label), el("span", "tester-file-note", `${note} · ${size(asset.size)}`));
+        grid.append(a);
+      });
+      if (!grid.children.length) grid.append(el("p", "quiet small", "This build is still uploading its files. Refresh in a minute."));
+      latest.append(grid);
+      if (rest.length) {
+        older.append(el("p", "tester-older-title", "Earlier test builds"));
+        rest.slice(0, 4).forEach((r) => {
+          const a = el("a", "tester-older-item", r.name || r.tag_name);
+          a.href = r.html_url;
+          a.append(el("span", "quiet small", ` · ${when(r.created_at)}`));
+          older.append(a);
+        });
+      }
+    }
+
+    function signedOut(message) {
+      saveSession(null);
+      ["busy", "notAdmin", "builds", "who"].forEach((id) => show(id, false));
+      show("signIn", true);
+      show("lede", true);
+      $("signInError").textContent = message || "";
+      show("signInError", Boolean(message));
+      $("signInButton").disabled = false;
+    }
+
+    async function enter(session) {
+      show("signIn", false);
+      show("busy", true);
+      $("busyText").textContent = "Checking your account…";
+      try {
+        if (!session.access_token || Date.now() > session.expires_at - 60000) {
+          session = { ...(await auth("refresh_token", { refresh_token: session.refresh_token })), email: session.email };
+        }
+        saveSession(session);
+        $("whoText").textContent = `Signed in as ${session.email || "you"}`;
+        show("who", true);
+        if (!(await isAdmin(session))) {
+          show("busy", false);
+          show("lede", false);
+          show("notAdmin", true);
+          return;
+        }
+        $("busyText").textContent = "Finding the newest test build…";
+        renderBuilds(await testBuilds());
+        show("busy", false);
+        show("lede", false);
+        show("builds", true);
+      } catch (err) {
+        if (err.code) return signedOut("Please sign in again.");
+        show("busy", false);
+        show("builds", true);
+        $("latest").replaceChildren(el("p", "tester-error", err.message || "Something went wrong. Try again."));
+      }
+    }
+
+    $("signIn").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = $("email").value.trim();
+      const password = $("password").value;
+      if (!email || !password) return signedOut("Enter your email and password.");
+      $("signInButton").disabled = true;
+      try {
+        const session = await auth("password", { email, password });
+        $("password").value = "";
+        await enter(session);
+      } catch (err) {
+        signedOut(err.message);
+      }
+    });
+
+    $("signOut").addEventListener("click", (e) => {
+      e.preventDefault();
+      const s = loadSession();
+      if (s && s.access_token) {
+        fetch(`${SUPABASE_URL}/auth/v1/logout`, {
+          method: "POST",
+          headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${s.access_token}` },
+        }).catch(() => {});
+      }
+      signedOut("");
+    });
+
+    const saved = loadSession();
+    if (saved && saved.refresh_token) enter(saved);
+    else signedOut("");
+  })();
+</script>
+</body>
+</html>

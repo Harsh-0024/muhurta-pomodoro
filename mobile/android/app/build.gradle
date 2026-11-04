@@ -4,6 +4,12 @@ apply plugin: 'com.android.application'
 def appVersion = (file('../../../version.py').text =~ /__version__\s*=\s*"([^"]+)"/)[0][1]
 def versionParts = appVersion.tokenize('.').collect { it.toInteger() }
 def appVersionCode = versionParts[0] * 10000 + versionParts[1] * 100 + versionParts[2]
+// A test copy (version.py CHANNEL = "test") is another app on the phone, so it
+// installs next to the real one and keeps its own data.
+def versionFile = file('../../../version.py').text
+def isTest = (versionFile =~ /(?m)^CHANNEL\s*=\s*"test"/).find()
+def testBuildMatch = versionFile =~ /(?m)^TEST_BUILD\s*=\s*(\d+)/
+def testBuild = testBuildMatch.find() ? testBuildMatch.group(1) : "0"
 
 // Release builds are signed with the app's own key (kept off GitHub except as
 // encrypted secrets; see mobile/RELEASING.md). Every update must use the same key.
@@ -17,7 +23,10 @@ android {
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode appVersionCode
-        versionName appVersion
+        versionName isTest ? "${appVersion}-test.${testBuild}" : appVersion
+        if (isTest) applicationIdSuffix ".test"
+        manifestPlaceholders = [appLabel: isTest ? "Muhurta Test" : "@string/app_name",
+                                activityLabel: isTest ? "Muhurta Pomodoro Test" : "@string/title_activity_main"]
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

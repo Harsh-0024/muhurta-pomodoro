@@ -24,7 +24,8 @@ import presence
 import release_notes
 import sync
 from presets import BUILTINS
-from version import __version__
+from version import DISPLAY_VERSION, IS_TEST, TEST_BUILD, __version__
+from version import APP_NAME as WINDOW_NAME
 
 app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
@@ -65,7 +66,9 @@ def inject_asset_version():
         version = int(max(path.stat().st_mtime for path in ASSET_VERSION_PATHS if path.exists()))
     except ValueError:
         version = 1
-    return {"asset_version": version, "app_version": __version__}
+    # A test copy says so everywhere (version.py CHANNEL).
+    return {"asset_version": version, "app_version": DISPLAY_VERSION, "app_name": WINDOW_NAME,
+            "is_test": IS_TEST, "test_build": TEST_BUILD}
 
 
 def _normalize_quote(item: dict) -> dict | None:
@@ -880,6 +883,11 @@ def _update_info(force: bool = False) -> dict:
 @app.get("/api/version")
 def api_version():
     payload = {"current": __version__, "bundled": IS_BUNDLED, "update_available": False, "required": False}
+    if IS_TEST:
+        # A test copy never updates itself: new test builds come from the
+        # website's Testers page, and the real app is installed apart from it.
+        payload.update(test=True, test_build=TEST_BUILD)
+        return jsonify(payload)
     # A git checkout started some other way (app.py in development) cannot
     # restart itself, so it gets no notice.
     how = "restart" if app.config.get(RESTART_KEY) else "download" if IS_BUNDLED else None

@@ -35,7 +35,7 @@ ROOT = Path(__file__).resolve().parent.parent
 MOBILE = ROOT / "mobile"
 sys.path.insert(0, str(ROOT))
 
-from version import __version__  # noqa: E402
+from version import APP_NAME, DISPLAY_VERSION, IS_TEST, TEST_BUILD, __version__  # noqa: E402
 
 # Flask endpoint -> (template, file in www/). index.html doubles as the router.
 PAGES = {
@@ -137,7 +137,10 @@ def render_pages(target: Target) -> None:
             url_for=url_for,
             request=SimpleNamespace(endpoint=endpoint),
             asset_version=__version__,
-            app_version=__version__,
+            app_version=DISPLAY_VERSION,
+            app_name=APP_NAME,
+            is_test=IS_TEST,
+            test_build=TEST_BUILD,
             theme="system",
             account=None,
             bare=endpoint == "sign_in_page",
@@ -183,6 +186,9 @@ def write_data(target: Target) -> None:
 
     data = {
         "version": __version__,
+        # A test copy (version.py CHANNEL) never offers updates: new test
+        # builds come from the website's Testers page.
+        "channel": "test" if IS_TEST else "stable",
         "builtins": BUILTINS,
         "default_settings": db.DEFAULT_SETTINGS,
         "sound_choices": sorted(SOUND_CHOICES),

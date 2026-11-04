@@ -375,7 +375,7 @@ def _report_version(state: dict, uid: str, token: str) -> None:
     """Tell the owner which version this computer runs and when it was last
     online (the app_devices table; see supabase/schema.sql). Only the
     version, the platform and the time; never fails a sync."""
-    from version import __version__
+    from version import DISPLAY_VERSION as __version__  # "1.18.0 test 7" from a test copy
 
     last = state.get("device_report") or {}
     if last.get("version") == __version__ and time.time() - float(last.get("at") or 0) < DEVICE_REPORT_EVERY:

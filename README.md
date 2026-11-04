@@ -129,3 +129,31 @@ git tag v1.6.1 && git push origin main v1.6.1
 GitHub Actions builds the Mac `.dmg`/`.zip` and the Windows `.zip` and attaches
 them to a release; installed apps pick it up from there. Local build:
 `pip install -r requirements-dev.txt && python -m PyInstaller muhurata.spec`.
+
+**Test versions** — three kinds of branch:
+
+| Branch | What it is |
+|---|---|
+| `main` | What everyone has. Tagged `v*` to release. |
+| `testing` | The next version, for admins to try. Every push builds a test copy. |
+| any other | Work in progress. Merge into `testing` when it's ready to try. |
+
+A push to `testing` runs the release workflow as a *test build*: `version.py`
+gets `CHANNEL = "test"` and the run number, and the Mac, Windows and Android
+apps are built as **Muhurta Pomodoro Test** (Android: **Muhurta Test**) with
+their own app id and data folder, so they install next to the real app and
+never touch its data on that device. They sync with the account like the real
+app, never offer updates, and show a "Test" badge and "1.18.0 test 7" as their
+version. The builds become a GitHub pre-release (`test-v<version>-<run>`, the
+newest five kept). Pre-releases are never "latest", so the website's download
+buttons and the apps' update checks never see them.
+
+Admins download them from **https://harsh-0024.github.io/muhurta-pomodoro/testers.html**:
+sign in with the app account, and the page asks the account (`is_admin()`,
+`public.admins` in `supabase/schema.sql`) before showing the files. The
+repository is public, so a test build can still be found on GitHub's releases
+page by anyone who looks; the Testers page only keeps it out of everyone
+else's way. The iPhone app is the website itself, so it has no test copy.
+
+When a test build is good: merge `testing` into `main`, bump `version.py`, and
+tag the release as above.

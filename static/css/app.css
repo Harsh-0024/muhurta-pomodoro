@@ -5288,3 +5288,19 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* A test copy (version.py CHANNEL = "test") says so beside the name. */
+.test-badge {
+  margin-left: 0.6rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, #d9906f 60%, transparent);
+  background: color-mix(in srgb, #d9906f 16%, transparent);
+  color: #d9906f;
+  font-family: var(--font-sans);
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}

@@ -10,6 +10,9 @@ import sys
 
 from PyInstaller.utils.hooks import collect_submodules
 
+sys.path.insert(0, ".")
+from version import APP_NAME, IS_TEST  # noqa: E402  "Muhurta Pomodoro Test" for a test copy
+
 datas = [
     ("templates", "templates"),
     ("static", "static"),
@@ -40,7 +43,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name="Muhurta Pomodoro",
+    name=APP_NAME,
     debug=False,
     strip=False,
     upx=False,
@@ -54,7 +57,7 @@ coll = COLLECT(
     a.datas,
     strip=False,
     upx=False,
-    name="Muhurta Pomodoro",
+    name=APP_NAME,
 )
 
 if sys.platform == "win32":
@@ -64,7 +67,7 @@ if sys.platform == "win32":
     # from the internet, and .NET then refuses to load the window's parts
     # (pythonnet, WebView2): the app fell back to a browser window (1.9.0).
     # This file next to the .exe lets .NET load the app's own files anyway.
-    with open(os.path.join(DISTPATH, "Muhurta Pomodoro", "Muhurta Pomodoro.exe.config"), "w", encoding="utf-8") as f:
+    with open(os.path.join(DISTPATH, APP_NAME, f"{APP_NAME}.exe.config"), "w", encoding="utf-8") as f:
         f.write('<?xml version="1.0" encoding="utf-8"?>\n'
                 "<configuration>\n"
                 "  <runtime>\n"
@@ -76,12 +79,13 @@ if sys.platform == "darwin":
     VERSION = re.search(r'"(.+)"', open("version.py").read()).group(1)
     app = BUNDLE(
         coll,
-        name="Muhurta Pomodoro.app",
+        name=f"{APP_NAME}.app",
         icon="packaging/icon.icns",
-        bundle_identifier="com.muhurata.timer",
+        # A test copy is another app to macOS, so it sits next to the real one.
+        bundle_identifier="com.muhurata.timer.test" if IS_TEST else "com.muhurata.timer",
         version=VERSION,
         info_plist={
-            "CFBundleDisplayName": "Muhurta Pomodoro",
+            "CFBundleDisplayName": APP_NAME,
             "NSHighResolutionCapable": True,
             # The app draws the timer's window itself (pywebview), so it gets
             # a Dock icon and a menu bar like any other app.

@@ -71,19 +71,29 @@ log = logging.getLogger("muhurata.launcher")
 # --------------------------------------------------------------------------- #
 # setup
 # --------------------------------------------------------------------------- #
+def _window_name() -> str:
+    from version import APP_NAME as name  # "Muhurta Pomodoro Test" for a test copy
+
+    return name
+
+
 def _data_dir() -> Path:
     if os.environ.get("MUHURATA_DATA_DIR"):  # tests and side-by-side copies
         return Path(os.environ["MUHURATA_DATA_DIR"])
-    # Same locations platformdirs.user_data_dir("MuhurataTimer", appauthor=False)
+    # A test copy (version.py CHANNEL) keeps its own folder, so it never
+    # touches the real app's data on this computer.
+    from version import DATA_DIR_NAME
+
+    # Same locations platformdirs.user_data_dir(DATA_DIR_NAME, appauthor=False)
     # resolves to, computed by hand because platformdirs isn't installed yet on
     # the very first run.
     if sys.platform == "darwin":
-        return Path.home() / "Library" / "Application Support" / "MuhurataTimer"
+        return Path.home() / "Library" / "Application Support" / DATA_DIR_NAME
     if sys.platform == "win32":
         base = os.environ.get("LOCALAPPDATA") or str(Path.home() / "AppData" / "Local")
-        return Path(base) / "MuhurataTimer"
+        return Path(base) / DATA_DIR_NAME
     base = os.environ.get("XDG_DATA_HOME") or str(Path.home() / ".local" / "share")
-    return Path(base) / "MuhurataTimer"
+    return Path(base) / DATA_DIR_NAME
 
 
 def _setup_logging(data_dir: Path):
@@ -775,7 +785,7 @@ def _native_window(url: str, data_dir: Path, flask_app):
     if sys.platform == "win32":
         _register_windows_app()  # before the window exists, so its taskbar button is ours
         place = _fit_on_screen(place["width"], place["height"])
-    window = _WINDOW = webview.create_window(APP_NAME, url, **place, min_size=(420, 560),
+    window = _WINDOW = webview.create_window(_window_name(), url, **place, min_size=(420, 560),
                                              background_color="#070605", js_api=_WindowApi())
 
     def closing():
@@ -855,7 +865,7 @@ def _native_window(url: str, data_dir: Path, flask_app):
 # --------------------------------------------------------------------------- #
 # the Desktop launcher
 # --------------------------------------------------------------------------- #
-APP_NAME = "Muhurta Pomodoro"
+APP_NAME = "Muhurta Pomodoro"  # the .app a git install makes (not a test copy's)
 OLD_APP_NAME = "Muhurata Timer"  # before v1.5.0; renamed on the next start
 
 

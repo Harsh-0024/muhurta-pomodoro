@@ -679,3 +679,61 @@ footer a { color: var(--muted); }
   .legal section { padding: 0; margin-top: 40px; }
   .legal-lede { font-size: 1.02rem; }
 }
+
+/* ------------------------------------------------------------------ testers (docs/testers.html) */
+.testers-page h1 { margin-bottom: 8px; }
+.tester-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: min(360px, 100%);
+  margin: 48px auto 0;
+  text-align: left;
+}
+.tester-field { display: flex; flex-direction: column; gap: 6px; color: var(--muted); font-size: 0.88rem; }
+.tester-field input {
+  height: 48px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--card-strong);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1rem;
+}
+.tester-field input:focus { outline: none; border-color: var(--accent-strong-line); }
+.tester-submit { justify-content: center; margin-top: 8px; border: 0; cursor: pointer; font: inherit; font-weight: 500; }
+.tester-submit:disabled { opacity: 0.6; cursor: default; }
+.tester-error { margin: 0; color: #e0a3a3; font-size: 0.9rem; }
+:root[data-theme="light"] .tester-error { color: #8a2f2f; }
+.tester-form .quiet { margin-top: 4px; }
+.tester-build { margin-top: 48px; }
+.tester-build-name { margin: 0; font-family: var(--serif); font-size: 1.7rem; }
+.tester-build-meta { margin-top: 6px; }
+.tester-files {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 28px;
+}
+.tester-file {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 18px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--accent-line);
+  background: var(--accent-soft);
+  color: var(--ink);
+  transition: border-color 0.2s, transform 0.2s;
+}
+.tester-file:hover { text-decoration: none; border-color: var(--accent-strong-line); transform: translateY(-2px); }
+.tester-file-name { font-weight: 500; font-size: 1.05rem; color: var(--gold); }
+.tester-file-note { color: var(--muted); font-size: 0.82rem; }
+.tester-older { margin-top: 40px; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+.tester-older-title { margin: 0 0 4px; color: var(--faint); font-size: 0.78rem; letter-spacing: 0.16em; text-transform: uppercase; }
+.tester-notes { margin-top: 48px; text-align: left; }
+.tester-notes .quiet { max-width: none; }
+.tester-who { margin-top: 48px; color: var(--faint); font-size: 0.88rem; }
+.testers-page [hidden] { display: none !important; }
+.testers-page #builds { padding: 0; }

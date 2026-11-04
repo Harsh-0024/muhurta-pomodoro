@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 
 import cloud
 import db
-from version import __version__
+from version import DISPLAY_VERSION as __version__  # "1.18.0 test 7" from a test copy
 
 log = logging.getLogger("muhurata.errors")
 

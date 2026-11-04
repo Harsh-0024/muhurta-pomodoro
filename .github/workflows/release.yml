@@ -1,11 +1,25 @@
 # Build standalone one-folder bundles on every version tag and attach them
 # to a GitHub Release. Trigger:  git tag v1.0.0 && git push origin v1.0.0
+#
+# Test builds: every push to the testing branch builds the same apps as a
+# test copy (version.py CHANNEL = "test": its own name, app id and data
+# folder, next to the real app) and publishes them as a GitHub pre-release.
+# Pre-releases are never "latest", so the website's downloads and the apps'
+# update checks never see them; admins get them from the website's Testers
+# page (docs/testers.html). The newest few are kept.
 name: Release builds
 
 on:
   push:
     tags: ["v*"]
+    branches: ["testing"]
   workflow_dispatch:
+
+# A newer push to testing replaces a test build still running; releases
+# always finish.
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref == 'refs/heads/testing' }}
 
 permissions:
   contents: write  # needed to create the release / upload assets
@@ -35,6 +49,31 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt -r requirements-dev.txt
 
+      - name: Mark as a test build (testing branch)
+        if: github.ref == 'refs/heads/testing'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re, os
+          text = open("version.py").read()
+          text = re.sub(r'(?m)^CHANNEL = .*$', 'CHANNEL = "test"', text)
+          text = re.sub(r'(?m)^TEST_BUILD = .*$', f'TEST_BUILD = {os.environ["GITHUB_RUN_NUMBER"]}', text)
+          open("version.py", "w").write(text)
+          PY
+          python -c "import version; print('Test build', version.DISPLAY_VERSION)"
+
+      # The app's name, data folder and file names: a test copy's differ.
+      - name: Names
+        shell: bash
+        run: |
+          python - >> "$GITHUB_ENV" <<'PY'
+          import sys, version
+          sys.stdout.reconfigure(newline="\n")  # no \r on Windows
+          print(f"APP={version.APP_NAME}")
+          print(f"DATA={version.DATA_DIR_NAME}")
+          print("ASSET=" + ("Muhurta-Pomodoro-Test" if version.IS_TEST else "Muhurta-Pomodoro"))
+          PY
+
       - name: Check version.py matches the tag
         if: startsWith(github.ref, 'refs/tags/v')
         shell: bash
@@ -54,11 +93,11 @@ jobs:
         shell: bash
         run: |
           if [ "$RUNNER_OS" = "Windows" ]; then
-            exe="dist/Muhurta Pomodoro/Muhurta Pomodoro.exe"
-            logfile="$(cygpath "$LOCALAPPDATA")/MuhurataTimer/launcher.log"
+            exe="dist/$APP/$APP.exe"
+            logfile="$(cygpath "$LOCALAPPDATA")/$DATA/launcher.log"
           else
-            exe="dist/Muhurta Pomodoro.app/Contents/MacOS/Muhurta Pomodoro"
-            logfile="$HOME/Library/Application Support/MuhurataTimer/launcher.log"
+            exe="dist/$APP.app/Contents/MacOS/$APP"
+            logfile="$HOME/Library/Application Support/$DATA/launcher.log"
           fi
           "$exe" --no-browser > /dev/null 2>&1 &
           pid=$!
@@ -87,6 +126,7 @@ jobs:
           v=$(curl -fsS "$url/api/version?refresh=1")
           echo "update check: $v"
           case "$v" in
+            *'"test":true'*|*'"test": true'*) echo "a test copy: it never offers updates" ;;
             *'"check_error":null'*|*'"check_error": null'*|*'update server answered'*) ;;
             *) echo "The built app can't check for updates."; exit 1 ;;
           esac
@@ -108,23 +148,23 @@ jobs:
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $data = "$env:LOCALAPPDATA\MuhurataTimer"
+          $data = "$env:LOCALAPPDATA\$env:DATA"
           $log = "$data\launcher.log"
           # As friends get it: Explorer's "Extract All" marks every file as
           # downloaded from the internet, which once stopped the window
           # loading (1.9.0) while this test, without the mark, passed.
-          Get-ChildItem -Recurse "dist\Muhurta Pomodoro" -File | ForEach-Object {
+          Get-ChildItem -Recurse "dist\$env:APP" -File | ForEach-Object {
             Set-Content -Path $_.FullName -Stream Zone.Identifier -Value "[ZoneTransfer]`r`nZoneId=3"
           }
           # The copy from the step above, if it outlived its shell.
-          Stop-Process -Name "Muhurta Pomodoro" -Force -ErrorAction SilentlyContinue
+          Stop-Process -Name "$env:APP" -Force -ErrorAction SilentlyContinue
           Start-Sleep 2
           Remove-Item "$data\running.json" -ErrorAction SilentlyContinue
           $before = @(Get-Content $log).Count
           $since = { @(Get-Content $log) | Select-Object -Skip $before }
           # Started directly (no shell), as it runs once a friend has said
           # "Run anyway": the shell would stop here to ask about the mark.
-          $start = [System.Diagnostics.ProcessStartInfo]::new((Resolve-Path "dist\Muhurta Pomodoro\Muhurta Pomodoro.exe").Path)
+          $start = [System.Diagnostics.ProcessStartInfo]::new((Resolve-Path "dist\$env:APP\$env:APP.exe").Path)
           $start.UseShellExecute = $false
           $p = [System.Diagnostics.Process]::Start($start)
           $opened = $false
@@ -148,18 +188,18 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           cd dist
-          ditto -c -k --sequesterRsrc --keepParent "Muhurta Pomodoro.app" "../Muhurta-Pomodoro-${{ matrix.label }}.zip"
+          ditto -c -k --sequesterRsrc --keepParent "$APP.app" "../$ASSET-${{ matrix.label }}.zip"
 
       # The usual Mac download: open it, drag the app onto Applications.
       - name: Disk image (macOS)
         if: runner.os == 'macOS'
-        run: bash packaging/make_dmg.sh "dist/Muhurta Pomodoro.app" "Muhurta-Pomodoro-${{ matrix.label }}.dmg"
+        run: bash packaging/make_dmg.sh "dist/$APP.app" "$ASSET-${{ matrix.label }}.dmg"
 
       - name: Zip (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          Compress-Archive -Path "dist/Muhurta Pomodoro" -DestinationPath "Muhurta-Pomodoro-${{ matrix.label }}.zip"
+          Compress-Archive -Path "dist/$env:APP" -DestinationPath "$env:ASSET-${{ matrix.label }}.zip"
 
       - uses: actions/upload-artifact@v4
         with:
@@ -197,6 +237,31 @@ jobs:
           python -m pip install -r requirements.txt
           cd mobile && npm ci
 
+      - name: Mark as a test build (testing branch)
+        if: github.ref == 'refs/heads/testing'
+        shell: bash
+        run: |
+          python - <<'PY'
+          import re, os
+          text = open("version.py").read()
+          text = re.sub(r'(?m)^CHANNEL = .*$', 'CHANNEL = "test"', text)
+          text = re.sub(r'(?m)^TEST_BUILD = .*$', f'TEST_BUILD = {os.environ["GITHUB_RUN_NUMBER"]}', text)
+          open("version.py", "w").write(text)
+          PY
+          python -c "import version; print('Test build', version.DISPLAY_VERSION)"
+
+      # The app's name, data folder and file names: a test copy's differ.
+      - name: Names
+        shell: bash
+        run: |
+          python - >> "$GITHUB_ENV" <<'PY'
+          import sys, version
+          sys.stdout.reconfigure(newline="\n")  # no \r on Windows
+          print(f"APP={version.APP_NAME}")
+          print(f"DATA={version.DATA_DIR_NAME}")
+          print("ASSET=" + ("Muhurta-Pomodoro-Test" if version.IS_TEST else "Muhurta-Pomodoro"))
+          PY
+
       - name: Check version.py matches the tag
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
@@ -227,19 +292,22 @@ jobs:
           "$tools/apksigner" verify --print-certs "$apk" | tee certs.txt
           grep -qi "SHA-256 digest: $RELEASE_CERT_SHA256" certs.txt || { echo "Signed with the wrong key." >&2; exit 1; }
           "$tools/aapt2" dump badging "$apk" | head -1 | tee badging.txt
-          want=$(python -c "from version import __version__; print(__version__)")
+          want=$(python -c "import version as v; print(f'{v.__version__}-test.{v.TEST_BUILD}' if v.IS_TEST else v.__version__)")
           grep -q "versionName='$want'" badging.txt || { echo "The app says a different version than version.py." >&2; exit 1; }
           # The pages, the phone's own server and the account code are inside.
           for f in index.html timer.html sign-in.html local-api.js account.js alerts.js mobile-data.js fonts/fonts.css; do
             unzip -l "$apk" "assets/public/$f" > /dev/null || { echo "missing from the app: $f" >&2; exit 1; }
           done
           # Asset name without a version: a permanent link for the website.
-          cp "$apk" Muhurta-Pomodoro-android.apk
+          if [ "$ASSET" = "Muhurta-Pomodoro-Test" ]; then
+            grep -q "package: name='com.muhurata.timer.test'" badging.txt || { echo "A test copy must have its own app id." >&2; exit 1; }
+          fi
+          cp "$apk" "$ASSET-android.apk"
 
       - uses: actions/upload-artifact@v4
         with:
           name: Muhurta-Pomodoro-android
-          path: Muhurta-Pomodoro-android.apk
+          path: Muhurta-Pomodoro*-android.apk
 
   # The iPhone app: the same screens as a web app on the website (docs/app,
   # GitHub Pages from main). Rebuilt for the tag and committed to main; copies
@@ -324,3 +392,52 @@ jobs:
             Security → Open Anyway (the website shows where).
 
             Your data lives outside the app folder, so replacing the folder with a newer version keeps your history.
+
+  # A push to testing: the test copies as a pre-release, for the Testers page.
+  test-release:
+    needs: [build, android]
+    if: github.ref == 'refs/heads/testing'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: What this build is
+        id: about
+        run: |
+          v=$(python3 -c "from version import __version__; print(__version__)")
+          echo "tag=test-v$v-$GITHUB_RUN_NUMBER" >> "$GITHUB_OUTPUT"
+          echo "name=Test build $GITHUB_RUN_NUMBER ($v)" >> "$GITHUB_OUTPUT"
+          { echo "subject<<EOF"; git log -1 --format=%s; echo "EOF"; } >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.about.outputs.tag }}
+          name: ${{ steps.about.outputs.name }}
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          make_latest: false
+          files: |
+            artifacts/*.zip
+            artifacts/*.dmg
+            artifacts/*.apk
+          body: |
+            **A test version, for testing only.** Built from the `testing` branch:
+            ${{ steps.about.outputs.subject }}
+
+            It installs next to the real app as "Muhurta Pomodoro Test" (Android:
+            "Muhurta Test"), keeps its own data on the device, and never updates
+            itself: get newer test builds from the website's Testers page. It syncs
+            with your account like the real app, so sessions you time in it are real.
+      # Only the newest few test builds stay.
+      - name: Remove older test builds
+        run: |
+          gh release list --limit 100 --json tagName,isPrerelease,createdAt \
+            --jq '[.[] | select(.isPrerelease and (.tagName | startswith("test-v")))] | sort_by(.createdAt) | reverse | .[5:] | .[].tagName' |
+          while read -r tag; do
+            echo "removing $tag"
+            gh release delete "$tag" --cleanup-tag --yes
+          done
