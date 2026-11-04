@@ -36,6 +36,9 @@ jobs:
       - name: Shared time across devices
         run: python tests/test_shared_time.py
 
+      - name: Refresh one device, sync them all
+        run: python tests/test_devices.py
+
       - name: Phones
         env:
           PYTHON: python

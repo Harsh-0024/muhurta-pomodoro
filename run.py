@@ -520,9 +520,14 @@ def _wait_for_other_copy(data_dir: Path, seconds: float = 45) -> str | None:
 def _final_sync():
     """One last sync so a session finished just before closing is not left
     waiting for the next start. Bounded: closing must never hang."""
+    import devices
     import sync
 
-    final = threading.Thread(target=sync.run_once, daemon=True)
+    def last():
+        sync.run_once()
+        devices.closing()  # closed apps are not asked to sync from other devices
+
+    final = threading.Thread(target=last, daemon=True)
     final.start()
     final.join(timeout=20)
 
@@ -1057,9 +1062,11 @@ def main(argv: list[str]) -> int:
         )
 
     db.init_db()  # applies any pending migrations (with backup)
+    import devices  # noqa: E402
     import sync  # noqa: E402  (after the requirements check, like the app itself)
 
     sync.start()  # background cloud sync; does nothing until signed in
+    devices.start()  # refresh here, sync on every open device (devices.py)
 
     # --port: a restart for an update asks for the address it had, so the
     # open window (and what it keeps in localStorage) carries on there.
