@@ -34,6 +34,11 @@ def only(devices, text: str) -> dict:
 
 
 NOTES = {
+    "1.18.0": [
+        "Refreshing now syncs all your devices, not just the one in your hand: refresh on your phone and your laptop syncs too, as long as the app is open on it. A note says how it went.",
+        "If another device has the app open but no internet, the note says so: \"Refresh started but could not happen because your Mac is not connected to the internet.\" Devices with the app closed aren't waited for; they catch up when you open them.",
+        "With no internet on the device you refresh, it tells you straight away instead of trying.",
+    ],
     "1.17.2": [
         "If a rest is still running on one device while you work on another, the work now counts. Before, whichever clock started first got the shared minutes, so a forgotten rest could hide real work.",
         "In Settings, History, each day's total now matches the dashboard: time two devices both recorded is counted once.",
