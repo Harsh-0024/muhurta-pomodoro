@@ -16,6 +16,7 @@ from pathlib import Path
 
 from flask import Flask, Response, got_request_exception, jsonify, redirect, render_template, request, url_for
 
+import activities as acts
 import backup
 import cloud
 import db
@@ -1106,6 +1107,15 @@ def api_activity_segment():
     details = data.get("details")
     if details is not None and not isinstance(details, dict):
         return jsonify({"error": "Invalid details"}), 400
+    details = dict(details or {})
+    # What the session was spent on: what this device's picker shows now,
+    # unless the clock says (an explicit null is plain Focus).
+    if "activity" not in details:
+        stamp = db.current_activity_stamp()
+        if stamp:
+            details["activity"] = stamp
+    elif not isinstance(details.get("activity"), dict):
+        details.pop("activity", None)
     segment = db.add_activity_segment(
         {
             "day": day,
@@ -1236,6 +1246,42 @@ def api_activity_delete(segment_id: int):
     return "", 204
 
 
+@app.put("/api/activity/segment/<int:segment_id>/activity")
+def api_activity_relabel(segment_id: int):
+    data = request.get_json(silent=True) or {}
+    try:
+        segment = db.set_segment_activity(segment_id, str(data.get("id") or ""))
+    except acts.ActivityError as err:
+        return jsonify({"error": str(err)}), 400
+    if segment is None:
+        return jsonify({"error": "Not found"}), 404
+    return jsonify(segment)
+
+
+@app.get("/api/activities")
+def api_activities():
+    return jsonify(db.activities_state())
+
+
+@app.put("/api/activities")
+def api_activities_save():
+    data = request.get_json(silent=True) or {}
+    intro = data.get("intro_done")
+    try:
+        return jsonify(db.save_activities(data.get("activities"), None if intro is None else bool(intro)))
+    except acts.ActivityError as err:
+        return jsonify({"error": str(err)}), 400
+
+
+@app.put("/api/activities/current")
+def api_activities_current():
+    data = request.get_json(silent=True) or {}
+    state = db.set_current_activity(str(data.get("id") or ""))
+    if state is None:
+        return jsonify({"error": "Unknown activity"}), 400
+    return jsonify(state)
+
+
 @app.get("/api/dashboard")
 def api_dashboard():
     day = request.args.get("day")
@@ -1253,7 +1299,10 @@ def api_dashboard():
     except (TypeError, ValueError):
         days = 365
     timezone_name = request.args.get("tz")
-    return jsonify(db.dashboard_summary(day, days, parsed_year, timezone_name))
+    activity = request.args.get("activity") or None
+    if activity and not re.fullmatch(r"[a-z0-9-]{1,40}", activity):
+        return jsonify({"error": "Invalid activity"}), 400
+    return jsonify(db.dashboard_summary(day, days, parsed_year, timezone_name, activity))
 
 
 

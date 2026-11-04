@@ -32,7 +32,7 @@
   const PULL_OVERLAP_MS = 5 * 60 * 1000;
   const PAGE = 1000;
   const PUSH_CHUNK = 500;
-  const LOCAL_ONLY_SETTINGS = ["sound_volume", "notifications_enabled", "default_preset_id"];
+  const LOCAL_ONLY_SETTINGS = ["sound_volume", "notifications_enabled", "default_preset_id", "last_activity_id"];
   const NEVER = "1970-01-01T00:00:00.000Z";
   const DEVICE_REPORT_EVERY_MS = 6 * 60 * 60 * 1000;
   const SEGMENT_COLS = ["day", "kind", "started_at", "ended_at", "duration_sec", "productive_sec", "rest_sec",

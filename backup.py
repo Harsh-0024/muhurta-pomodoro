@@ -64,12 +64,24 @@ def sessions_csv() -> str:
     data = export()
     out = io.StringIO()
     w = csv.writer(out)
-    w.writerow(["Date", "Kind", "Started", "Ended", "Minutes", "Focus minutes", "Rest minutes", "Combination"])
+    w.writerow(["Date", "Kind", "Started", "Ended", "Minutes", "Focus minutes", "Rest minutes", "Combination",
+                "Activity"])
     for r in sorted(data["activity_segments"], key=lambda r: r["started_at"] or ""):
         w.writerow([r["day"], KIND_NAMES.get(r["kind"], r["kind"]), _local(r["started_at"]), _local(r["ended_at"]),
                     _minutes(r["duration_sec"]), _minutes(r["productive_sec"]), _minutes(r["rest_sec"]),
-                    r["preset_name"] or ""])
+                    r["preset_name"] or "", _activity_name(r)])
     return out.getvalue()
+
+
+def _activity_name(r: dict) -> str:
+    """Focus time is spent on an activity (plain Focus when none); rest isn't."""
+    if not float(r.get("productive_sec") or 0):
+        return ""
+    try:
+        act = json.loads(r.get("details_json") or "{}").get("activity")
+    except (ValueError, AttributeError):
+        act = None
+    return act.get("name") or "" if isinstance(act, dict) else "Focus"
 
 
 def _local(iso: str | None) -> str:

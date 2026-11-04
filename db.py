@@ -18,6 +18,7 @@ from alembic.script import ScriptDirectory
 from platformdirs import user_data_dir
 from sqlalchemy import create_engine
 
+import activities as acts
 from presets import BUILTINS
 
 DEFAULT_SETTINGS = {
@@ -46,6 +47,11 @@ DEFAULT_SETTINGS = {
     "default_preset_id": "builtin-shishya",
     "daily_focus_goal_minutes": 120,
     "theme": "system",
+    # What sessions are spent on (activities.py). The list syncs; what this
+    # device picked last does not (sync.LOCAL_ONLY_SETTINGS).
+    "activities": [],
+    "last_activity_id": "",
+    "activities_intro_done": False,
 }
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -397,6 +403,109 @@ def _activity_public(row: sqlite3.Row) -> dict:
     item = dict(row)
     item["details"] = json.loads(item.pop("details_json") or "{}")
     return item
+
+
+# --------------------------------------------------------------------------- #
+# activities (activities.py has the rules)
+# --------------------------------------------------------------------------- #
+def _labelled_rows(since_day: str) -> list[dict]:
+    """Focus sessions since a day that name an activity: enough for the
+    picker's order and to find activities the stored list lost."""
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    try:
+        rows = conn.execute(
+            """
+            SELECT day, productive_sec, details_json FROM activity_segments
+            WHERE day >= ? AND productive_sec > 0 AND details_json LIKE '%"activity"%'
+            """,
+            (since_day,),
+        ).fetchall()
+    finally:
+        conn.close()
+    out = []
+    for r in rows:
+        try:
+            details = json.loads(r["details_json"] or "{}")
+        except ValueError:
+            continue
+        out.append({"day": r["day"], "productive_sec": r["productive_sec"], "details": details})
+    return out
+
+
+def activities_state(today: date | None = None) -> dict:
+    today = today or datetime.now().date()
+    settings = load_settings()
+    rows = _labelled_rows((today - timedelta(days=400)).isoformat())
+    state = acts.picker(settings.get("activities"), rows, settings.get("last_activity_id") or "", today)
+    state["intro_done"] = bool(settings.get("activities_intro_done"))
+    return state
+
+
+def save_activities(raw, intro_done: bool | None = None) -> dict:
+    """Replace the account's list (Settings, the picker's "Add new", the
+    first-run card). Raises activities.ActivityError."""
+    settings = load_settings()
+    today = datetime.now().date()
+    cleaned = acts.clean_list(raw, settings.get("activities") or [], today)
+    patch: dict = {"activities": cleaned}
+    if intro_done is not None:
+        patch["activities_intro_done"] = bool(intro_done)
+    if settings.get("last_activity_id") and not acts.find(cleaned, settings["last_activity_id"]):
+        patch["last_activity_id"] = ""
+    save_settings(patch)
+    return activities_state(today)
+
+
+def set_current_activity(aid: str) -> dict | None:
+    """What this device's clocks label sessions with from now on ("" or
+    "focus": plain Focus). None when there is no such activity."""
+    aid = "" if aid in ("", acts.FOCUS_ID) else aid
+    state = activities_state()
+    if aid and not any(a["id"] == aid for a in state["activities"]):
+        return None
+    save_settings({"last_activity_id": aid})
+    return activities_state()
+
+
+def current_activity_stamp() -> dict | None:
+    """What a session saved now is labelled with, or None for Focus."""
+    if not load_settings().get("last_activity_id"):
+        return None
+    current = activities_state()["current"]
+    return acts.stamp(current) if current else None
+
+
+def set_segment_activity(sid: int, aid: str) -> dict | None:
+    """Relabel one logged session (History). "" or "focus" makes it plain Focus.
+    Raises activities.ActivityError for an unknown activity."""
+    aid = "" if aid in ("", acts.FOCUS_ID) else aid
+    stamp = None
+    if aid:
+        state = activities_state()
+        found = next((a for a in state["activities"] if a["id"] == aid), None)
+        if found is None:
+            raise acts.ActivityError("Unknown activity")
+        stamp = acts.stamp(found)
+    init_db()
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    try:
+        row = conn.execute(f"{_SEGMENT_SELECT} WHERE id = ?", (sid,)).fetchone()
+        if row is None:
+            return None
+        details = _activity_public(row)["details"]
+        if stamp:
+            details["activity"] = stamp
+        else:
+            details.pop("activity", None)
+        conn.execute("UPDATE activity_segments SET details_json = ? WHERE id = ?", (json.dumps(details), sid))
+        conn.commit()
+        row = conn.execute(f"{_SEGMENT_SELECT} WHERE id = ?", (sid,)).fetchone()
+        return _activity_public(row)
+    finally:
+        conn.close()
 
 
 def _count_shared_time_once(rows) -> list[tuple[dict, datetime, datetime]]:
@@ -1008,12 +1117,49 @@ def _compute_bell_curve(bout_durations_sec: list[float]) -> dict:
         "durations": [round(d, 2) for d in sorted_d],
     }
 
+def _activity_breakdown(by_activity, named, stored, start_day, end_day, calc_end_day, whole_year, year) -> dict:
+    """"Where your time went": focus per activity over the last 7 days, the
+    last 30 days, and the whole range, each ending on the last day counted."""
+    seen = {k: {**v, "day": ""} for k, v in named.items()}
+    known = [{"id": acts.FOCUS_ID, "name": acts.FOCUS_NAME, "color": acts.FOCUS_COLOR}]
+    known += [{"id": a["id"], "name": a["name"], "color": a["color"]} for a in acts.known_list(stored, seen)]
+    meta = {a["id"]: a for a in known}
+    spans = (
+        ("week", "Last 7 days", calc_end_day - timedelta(days=6)),
+        ("month", "Last 30 days", calc_end_day - timedelta(days=29)),
+        ("year", str(year) if whole_year else "Last 12 months", start_day),
+    )
+    periods = {}
+    for key, label, first in spans:
+        first_iso, last_iso = max(first, start_day).isoformat(), min(calc_end_day, end_day).isoformat()
+        items = []
+        for aid, days in by_activity.items():
+            sec = sum(b["productive_sec"] for d, b in days.items() if first_iso <= d <= last_iso)
+            if sec < 30:
+                continue
+            m = meta.get(aid) or {"id": aid, "name": "Activity", "color": acts.FOCUS_COLOR}
+            items.append({"id": aid, "name": m["name"], "color": m["color"], "minutes": round(sec / 60, 1)})
+        items.sort(key=lambda i: -i["minutes"])
+        periods[key] = {
+            "label": label,
+            "start": first_iso,
+            "end": last_iso,
+            "total_minutes": round(sum(i["minutes"] for i in items), 1),
+            "items": items,
+        }
+    return {"periods": periods, "known": known}
+
+
 def dashboard_summary(
     end_day_iso: str | None = None,
     days: int = 365,
     year: int | None = None,
     timezone_name: str | None = None,
+    only: str | None = None,
 ) -> dict:
+    """The dashboard. ``only`` narrows everything except the "Where your
+    time went" breakdown to one activity's focus ("focus": sessions with none);
+    without it, everything counts (All focus)."""
     init_db()
     tz = _dashboard_timezone(timezone_name)
     today = datetime.now(tz).date()
@@ -1078,6 +1224,8 @@ def dashboard_summary(
     settings = load_settings()
     goal_minutes = int(settings.get("daily_focus_goal_minutes") or 120)
     activity: dict[str, dict] = {}
+    by_activity: dict[str, dict[str, dict]] = {}  # activity -> day -> bucket
+    named: dict[str, dict] = {}  # what each activity's sessions call it
 
     current_bout_sec = 0.0
     current_bout_end: datetime | None = None
@@ -1097,6 +1245,19 @@ def dashboard_summary(
 
     for row, started_at, ended_at in _count_shared_time_once(segment_rows):
         productive_sec = max(0.0, float(row["productive_sec"] or 0))
+        if productive_sec > 0:
+            try:
+                details = json.loads(row.get("details_json") or "{}")
+            except ValueError:
+                details = {}
+            key = acts.key_of(details)
+            if key != acts.FOCUS_ID:
+                named[key] = details["activity"]
+            _credit_row_to_days(by_activity.setdefault(key, {}), row, started_at, ended_at, start_day, end_day, tz)
+            if only and key != only:
+                continue
+        elif only:
+            continue  # rest belongs to no activity
         if productive_sec > 0:
             # Use productive seconds, not wall-clock duration: a paused or
             # abandoned flow segment can span hours of clock time while only a
@@ -1188,8 +1349,16 @@ def dashboard_summary(
 
     bell_curve = _compute_bell_curve(bout_durations)
     sitting_trend = _compute_sitting_trend(bouts, tz, calc_end_day)
+    breakdown = _activity_breakdown(by_activity, named, settings.get("activities"), start_day, end_day,
+                                    calc_end_day, year is not None, selected_year)
+    shown = None
+    if only:
+        shown = next((a for a in breakdown["known"] if a["id"] == only), None) or {
+            "id": only, "name": acts.FOCUS_NAME if only == acts.FOCUS_ID else "Activity", "color": acts.FOCUS_COLOR}
 
     return {
+        "activity": shown,
+        "activities": breakdown["periods"],
         "range": {
             "start": start_iso,
             "end": end_iso,

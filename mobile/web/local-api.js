@@ -307,6 +307,221 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* activities (activities.py and the db.py functions that use it)      */
+  /* ------------------------------------------------------------------ */
+
+  const ACT = {
+    FOCUS_ID: "focus", FOCUS_NAME: "Focus", ALL_NAME: "All focus", FOCUS_COLOR: "#c9a962",
+    PALETTE: ["#6fb3a8", "#8fa8e0", "#d9906f", "#b79be0", "#a5c47e", "#e0a3b8", "#7fc4d9", "#d6c36a", "#c98f8f", "#8fc9a0"],
+    NAME_MAX: 40, MAX_ACTIVE: 30, MAX_KEPT: 80, MAIN_COUNT: 6, RECENT_DAYS: 30, OLDER_AFTER_DAYS: 60,
+  };
+  const ACT_RESERVED = new Set([ACT.FOCUS_NAME.toLowerCase(), ACT.ALL_NAME.toLowerCase()]);
+  const ACT_ID_RE = /^[a-z0-9-]{1,40}$/;
+  const ACT_COLOR_RE = /^#[0-9a-fA-F]{6}$/;
+  const isObj = (v) => v != null && typeof v === "object" && !Array.isArray(v);
+
+  function newActivityId() {
+    return "a-" + [...crypto.getRandomValues(new Uint8Array(4))].map((x) => x.toString(16).padStart(2, "0")).join("");
+  }
+  const cleanActivityName = (v) => String(v ?? "").split(/\s+/).filter(Boolean).join(" ").slice(0, ACT.NAME_MAX);
+  const activityColor = (i) => ACT.PALETTE[i % ACT.PALETTE.length];
+
+  function activityKey(details) {
+    const a = isObj(details) ? details.activity : null;
+    return isObj(a) && typeof a.id === "string" && ACT_ID_RE.test(a.id) ? a.id : ACT.FOCUS_ID;
+  }
+  const activityStamp = (a) => ({ id: a.id, name: a.name, color: a.color });
+
+  function cleanActivityList(raw, stored, today) {
+    if (!Array.isArray(raw)) throw new HttpError(400, "Invalid activities");
+    const known = new Map((stored || []).filter((a) => isObj(a) && a.id).map((a) => [a.id, a]));
+    const out = [];
+    const seenIds = new Set();
+    const seenNames = new Set();
+    const usedColors = new Set((stored || []).map((a) => a && a.color));
+    for (const item of raw) {
+      if (!isObj(item)) throw new HttpError(400, "Invalid activities");
+      const name = cleanActivityName(item.name);
+      const removed = !!item.removed;
+      if (!name) throw new HttpError(400, "Each activity needs a name");
+      if (ACT_RESERVED.has(name.toLowerCase())) throw new HttpError(400, `“${name}” is already there: it's the default`);
+      let id = String(item.id || "");
+      if (id && (!ACT_ID_RE.test(id) || id === ACT.FOCUS_ID)) throw new HttpError(400, "Invalid activity id");
+      if (!id || seenIds.has(id)) id = newActivityId();
+      if (!removed) {
+        if (seenNames.has(name.toLowerCase())) throw new HttpError(400, `“${name}” is in the list twice`);
+        seenNames.add(name.toLowerCase());
+      }
+      let color = String(item.color || "");
+      if (!ACT_COLOR_RE.test(color)) {
+        color = (known.get(id) || {}).color || ACT.PALETTE.find((c) => !usedColors.has(c)) || activityColor(out.length);
+      }
+      usedColors.add(color);
+      const entry = { id, name, color: color.toLowerCase(), created: (known.get(id) || {}).created || today };
+      if (removed) entry.removed = true;
+      seenIds.add(id);
+      out.push(entry);
+    }
+    if (out.filter((a) => !a.removed).length > ACT.MAX_ACTIVE) throw new HttpError(400, `At most ${ACT.MAX_ACTIVE} activities at once`);
+    if (out.length > ACT.MAX_KEPT) {
+      const drop = new Set(out.filter((a) => a.removed).slice(0, out.length - ACT.MAX_KEPT).map((a) => a.id));
+      return out.filter((a) => !drop.has(a.id));
+    }
+    return out;
+  }
+
+  function knownActivities(stored, seen) {
+    const out = (stored || []).filter((a) => isObj(a) && a.id && a.name).map((a) => ({ ...a }));
+    const have = new Set(out.map((a) => a.id));
+    for (const [id, act] of seen) {
+      if (have.has(id) || id === ACT.FOCUS_ID) continue;
+      const name = cleanActivityName(act.name);
+      if (!name || ACT_RESERVED.has(name.toLowerCase())) continue;
+      const color = ACT_COLOR_RE.test(String(act.color || "")) ? act.color : activityColor(out.length);
+      out.push({ id, name, color, created: act.day || "" });
+      have.add(id);
+    }
+    return out;
+  }
+
+  function activityUsage(rows, today) {
+    const recentFrom = localDay(addDays(dayFromIso(today), -(ACT.RECENT_DAYS - 1)));
+    const stats = new Map();
+    const seen = new Map();
+    for (const r of rows) {
+      if (!(Number(r.productive_sec) > 0)) continue;
+      const details = r.details || {};
+      const key = activityKey(details);
+      const day = String(r.day || "");
+      const s = stats.get(key) || { recent_sec: 0, last_day: null };
+      if (day >= recentFrom) s.recent_sec += Number(r.productive_sec);
+      if (!s.last_day || day > s.last_day) {
+        s.last_day = day;
+        if (key !== ACT.FOCUS_ID) seen.set(key, { ...details.activity, day });
+      }
+      stats.set(key, s);
+    }
+    return [stats, seen];
+  }
+
+  function activityPicker(stored, rows, currentId, today) {
+    const [stats, seen] = activityUsage(rows, today);
+    const everything = knownActivities(stored, seen);
+    const olderFrom = localDay(addDays(dayFromIso(today), -ACT.OLDER_AFTER_DAYS));
+    const active = [];
+    for (const a of everything) {
+      if (a.removed) continue;
+      const s = stats.get(a.id) || {};
+      const last = s.last_day || null;
+      active.push({
+        id: a.id, name: a.name, color: a.color,
+        recent_min: round((s.recent_sec || 0) / 60, 1),
+        last_day: last,
+        older: (last || a.created || "") < olderFrom,
+      });
+    }
+    const cmp = (x, y) => (x < y ? -1 : x > y ? 1 : 0);
+    active.sort((a, b) => cmp(a.older, b.older) || cmp(-a.recent_min, -b.recent_min)
+      || cmp(a.last_day == null, b.last_day == null) || cmp(b.last_day || "", a.last_day || "")
+      || cmp(a.name.toLowerCase(), b.name.toLowerCase()));
+    const main = new Set(active.filter((a) => !a.older).slice(0, ACT.MAIN_COUNT).map((a) => a.id));
+    for (const a of active) a.group = main.has(a.id) ? "main" : "more";
+    const current = active.find((a) => a.id === currentId);
+    return {
+      focus: { id: ACT.FOCUS_ID, name: ACT.FOCUS_NAME, color: ACT.FOCUS_COLOR },
+      activities: active,
+      all: everything.map((a) => ({ id: a.id, name: a.name, color: a.color, removed: !!a.removed })),
+      current: current ? { id: current.id, name: current.name, color: current.color } : null,
+    };
+  }
+
+  const findActivity = (stored, id) => (stored || []).find((a) => isObj(a) && a.id === id && !a.removed) || null;
+
+  function activitiesState() {
+    const today = localDay(new Date());
+    const settings = loadSettings();
+    const since = localDay(addDays(new Date(), -400));
+    const rows = [...S.segments.values()].filter((r) => r.day >= since && Number(r.productive_sec) > 0 && r.details && r.details.activity);
+    const state = activityPicker(settings.activities, rows, settings.last_activity_id || "", today);
+    state.intro_done = !!settings.activities_intro_done;
+    return state;
+  }
+
+  async function saveActivities(raw, introDone) {
+    const settings = loadSettings();
+    const cleaned = cleanActivityList(raw, settings.activities || [], localDay(new Date()));
+    const patch = { activities: cleaned };
+    if (introDone != null) patch.activities_intro_done = !!introDone;
+    if (settings.last_activity_id && !findActivity(cleaned, settings.last_activity_id)) patch.last_activity_id = "";
+    await saveSettings(patch);
+    return activitiesState();
+  }
+
+  async function setCurrentActivity(id) {
+    id = id === ACT.FOCUS_ID ? "" : id;
+    if (id && !activitiesState().activities.some((a) => a.id === id)) return null;
+    await saveSettings({ last_activity_id: id });
+    return activitiesState();
+  }
+
+  function currentActivityStamp() {
+    if (!loadSettings().last_activity_id) return null;
+    const current = activitiesState().current;
+    return current ? activityStamp(current) : null;
+  }
+
+  async function setSegmentActivity(id, actId) {
+    actId = actId === ACT.FOCUS_ID ? "" : actId;
+    let stamp = null;
+    if (actId) {
+      const found = activitiesState().activities.find((a) => a.id === actId);
+      if (!found) throw new HttpError(400, "Unknown activity");
+      stamp = activityStamp(found);
+    }
+    const row = S.segments.get(id);
+    if (!row) return null;
+    const details = JSON.parse(JSON.stringify(row.details || {}));
+    if (stamp) details.activity = stamp;
+    else delete details.activity;
+    const next = { ...row, details, updated_at: nowIso() };
+    await write([["segments", next]]);
+    return segmentPublic(next);
+  }
+
+  // "Where your time went" (db._activity_breakdown).
+  function activityBreakdown(byActivity, named, stored, startDay, endDay, calcEnd, wholeYear, year) {
+    const seen = new Map([...named].map(([k, v]) => [k, { ...v, day: "" }]));
+    const known = [{ id: ACT.FOCUS_ID, name: ACT.FOCUS_NAME, color: ACT.FOCUS_COLOR },
+      ...knownActivities(stored, seen).map((a) => ({ id: a.id, name: a.name, color: a.color }))];
+    const meta = new Map(known.map((a) => [a.id, a]));
+    const spans = [
+      ["week", "Last 7 days", addDays(calcEnd, -6)],
+      ["month", "Last 30 days", addDays(calcEnd, -29)],
+      ["year", wholeYear ? String(year) : "Last 12 months", startDay],
+    ];
+    const periods = {};
+    for (const [key, label, first] of spans) {
+      const firstIso = localDay(first > startDay ? first : startDay);
+      const lastIso = localDay(calcEnd < endDay ? calcEnd : endDay);
+      const items = [];
+      for (const [id, days] of byActivity) {
+        let sec = 0;
+        for (const [d, b] of days) if (d >= firstIso && d <= lastIso) sec += b.productive_sec;
+        if (sec < 30) continue;
+        const m = meta.get(id) || { id, name: "Activity", color: ACT.FOCUS_COLOR };
+        items.push({ id, name: m.name, color: m.color, minutes: round(sec / 60, 1) });
+      }
+      items.sort((a, b) => b.minutes - a.minutes);
+      periods[key] = {
+        label, start: firstIso, end: lastIso,
+        total_minutes: round(items.reduce((t, i) => t + i.minutes, 0), 1),
+        items,
+      };
+    }
+    return { periods, known };
+  }
+
+  /* ------------------------------------------------------------------ */
   /* levels (presets)                                                    */
   /* ------------------------------------------------------------------ */
 
@@ -702,7 +917,7 @@
     }
   }
 
-  function dashboard(endDayIso, days, year) {
+  function dashboard(endDayIso, days, year, only) {
     const today = dayFromIso(localDay(new Date()));
     let selectedYear = year;
     let startDay;
@@ -740,6 +955,8 @@
     const settings = loadSettings();
     const goal = Number(settings.daily_focus_goal_minutes) || 120;
     const activity = new Map();
+    const byActivity = new Map(); // activity -> day -> bucket
+    const named = new Map(); // what each activity's sessions call it
     let boutSec = 0;
     let boutEnd = null;
     let boutStart = null;
@@ -756,6 +973,15 @@
     };
     for (const [row, startMs, endMs] of countSharedTimeOnce(rows)) {
       const productive = Math.max(0, Number(row.productive_sec || 0));
+      if (productive > 0) {
+        const key = activityKey(row.details);
+        if (key !== ACT.FOCUS_ID) named.set(key, row.details.activity);
+        if (!byActivity.has(key)) byActivity.set(key, new Map());
+        creditToDays(byActivity.get(key), row, startMs, endMs, rangeStart, rangeEnd);
+        if (only && key !== only) continue;
+      } else if (only) {
+        continue; // rest belongs to no activity
+      }
       if (productive > 0) {
         const joins = boutSec > 0 && boutEnd != null && (startMs - boutEnd) / 1000 < RHYTHM_BOUT_GAP_SEC;
         if (boutSec > 0 && !joins) finalize();
@@ -821,7 +1047,15 @@
       }
     }
     const elapsed = Math.max(1, daysBetween(firstActive || startDay, calcEnd) + 1);
+    const breakdown = activityBreakdown(byActivity, named, settings.activities, startDay, endDay, calcEnd, year != null, selectedYear);
+    let shown = null;
+    if (only) {
+      shown = breakdown.known.find((a) => a.id === only)
+        || { id: only, name: only === ACT.FOCUS_ID ? ACT.FOCUS_NAME : "Activity", color: ACT.FOCUS_COLOR };
+    }
     return {
+      activity: shown,
+      activities: breakdown.periods,
       range: {
         start: localDay(startDay),
         end: localDay(endDay),
@@ -1103,8 +1337,17 @@
       phase = Number.parseInt(phase, 10);
       if (!Number.isFinite(phase)) throw new HttpError(400, "Invalid phase index");
     }
-    const details = body.details;
+    let details = body.details;
     if (details != null && (typeof details !== "object" || Array.isArray(details))) throw new HttpError(400, "Invalid details");
+    details = { ...(details || {}) };
+    // What the session was spent on: what this phone's picker shows now,
+    // unless the clock says (an explicit null is plain Focus).
+    if (!("activity" in details)) {
+      const stamp = currentActivityStamp();
+      if (stamp) details.activity = stamp;
+    } else if (!isObj(details.activity)) {
+      delete details.activity;
+    }
     const seg = await addSegment({
       day, kind, started_at, ended_at, duration_sec: duration,
       preset_id: String(body.preset_id || ""), preset_name: String(body.preset_name || ""),
@@ -1183,7 +1426,24 @@
       year = Number.parseInt(q.get("year"), 10);
       if (!Number.isFinite(year)) throw new HttpError(400, "Invalid year");
     }
-    return dashboard(day, Number.parseInt(q.get("days") || "365", 10) || 365, year);
+    const only = q.get("activity") || null;
+    if (only && !ACT_ID_RE.test(only)) throw new HttpError(400, "Invalid activity");
+    return dashboard(day, Number.parseInt(q.get("days") || "365", 10) || 365, year, only);
+  });
+
+  route("PUT", /^\/api\/activity\/segment\/(\d+)\/activity$/, async ({ body, m }) => {
+    const seg = await setSegmentActivity(Number(m[1]), String(body.id || ""));
+    if (!seg) throw new HttpError(404, "Not found");
+    return seg;
+  });
+
+  route("GET", /^\/api\/activities$/, () => activitiesState());
+  route("PUT", /^\/api\/activities$/, async ({ body }) =>
+    saveActivities(body.activities, body.intro_done == null ? null : !!body.intro_done));
+  route("PUT", /^\/api\/activities\/current$/, async ({ body }) => {
+    const state = await setCurrentActivity(String(body.id || ""));
+    if (!state) throw new HttpError(400, "Unknown activity");
+    return state;
   });
 
   /* ------------------------------------------------------------------ */

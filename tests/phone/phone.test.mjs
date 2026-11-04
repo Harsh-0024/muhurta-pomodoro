@@ -358,3 +358,87 @@ test("deleting the account, then restoring its backup into a new one", async () 
   await p.call("POST", "/api/cloud/sync-now");
   assert.deepEqual(serverPresets("asha@x.com"), ["Phone rhythm"]);
 });
+
+test("activities: picked on the clock, saved with each session, counted on the dashboard, synced", async () => {
+  const p = await phone();
+  await createAccount(p, "dev@x.com");
+  const empty = await p.call("GET", "/api/activities");
+  assert.deepEqual(empty.data.activities, []);
+  assert.equal(empty.data.current, null);
+  assert.equal(empty.data.intro_done, false);
+
+  // The first-run card: a few activities, and it isn't shown again.
+  let r = await p.call("PUT", "/api/activities", { activities: [{ name: "Work" }, { name: " Learning   Python " }], intro_done: true });
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  const ids = Object.fromEntries(r.data.activities.map((a) => [a.name, a.id]));
+  assert.ok(ids.Work && ids["Learning Python"]);
+  assert.equal(r.data.intro_done, true);
+  assert.equal((await p.call("PUT", "/api/activities", { activities: [{ name: "focus" }] })).status, 400);
+  assert.equal((await p.call("PUT", "/api/activities", { activities: [{ name: "A" }, { name: "a" }] })).status, 400);
+  assert.equal((await p.call("PUT", "/api/activities/current", { id: "a-nothere" })).status, 400);
+
+  const now = Date.now();
+  const iso = (ms) => new Date(ms).toISOString();
+  const day = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; })();
+  const seg = async (kind, agoMin, min, details) => (await p.call("POST", "/api/activity/segment", {
+    kind, day, started_at: iso(now - agoMin * 60000), ended_at: iso(now - (agoMin - min) * 60000), duration_sec: min * 60,
+    ...(details === undefined ? {} : { details }),
+  })).data;
+
+  // Whatever the picker shows when a session is saved is what it counts for.
+  await p.call("PUT", "/api/activities/current", { id: ids["Learning Python"] });
+  assert.equal((await seg("work", 300, 48)).details.activity.name, "Learning Python");
+  await p.call("PUT", "/api/activities/current", { id: ids.Work });
+  const work = await seg("timer", 200, 24);
+  assert.equal(work.details.activity.id, ids.Work);
+  await p.call("PUT", "/api/activities/current", { id: "focus" });
+  const plain = await seg("flow", 100, 30);
+  assert.equal(plain.details.activity, undefined);
+  assert.equal((await seg("timer", 50, 10, { activity: null })).details.activity, undefined);
+
+  // History: relabel one session.
+  r = await p.call("PUT", `/api/activity/segment/${plain.id}/activity`, { id: ids.Work });
+  assert.equal(r.data.details.activity.name, "Work");
+  r = await p.call("PUT", `/api/activity/segment/${plain.id}/activity`, { id: "focus" });
+  assert.equal(r.data.details.activity, undefined);
+
+  // The picker: most used lately first.
+  r = await p.call("GET", "/api/activities");
+  assert.deepEqual(r.data.activities.map((a) => [a.name, a.recent_min, a.group]), [["Learning Python", 48, "main"], ["Work", 24, "main"]]);
+  assert.equal(r.data.current, null);
+
+  // The dashboard: All focus, and each slice of it.
+  const year = new Date().getFullYear();
+  const dash = async (only) => (await p.call("GET", `/api/dashboard?year=${year}${only ? `&activity=${only}` : ""}`)).data;
+  const all = await dash();
+  assert.equal(all.summary.total_focus_minutes, 112);
+  assert.equal(all.activity, null);
+  assert.deepEqual(all.activities.week.items.map((i) => [i.name, i.minutes]), [["Learning Python", 48], ["Focus", 40], ["Work", 24]]);
+  assert.equal(all.activities.week.total_minutes, 112);
+  assert.equal((await dash(ids.Work)).summary.total_focus_minutes, 24);
+  assert.equal((await dash(ids.Work)).activity.name, "Work");
+  assert.equal((await dash("focus")).summary.total_focus_minutes, 40);
+  assert.equal((await p.call("GET", "/api/dashboard?activity=Bad!")).status, 400);
+
+  // The CSV names each focus session's activity.
+  const csv = (await p.call("GET", "/api/backup/sessions.csv")).data;
+  assert.match(csv, /,Learning Python\r\n/);
+  assert.match(csv, /,Focus\r\n/);
+
+  // The list syncs with the account; what this phone picked does not.
+  await p.call("PUT", "/api/activities/current", { id: ids.Work });
+  await p.call("POST", "/api/cloud/sync-now");
+  const uid = server.users.get("dev@x.com").id;
+  const shared = JSON.parse([...server.rows.get("app_settings").values()].find((x) => x.user_id === uid).json);
+  assert.deepEqual(shared.activities.map((a) => a.name), ["Work", "Learning Python"]);
+  assert.equal("last_activity_id" in shared, false);
+  assert.equal(shared.activities_intro_done, true);
+
+  // Taken out of the list: gone from the picker, its sessions keep the name.
+  const list = (await p.call("GET", "/api/activities")).data.all.map((a) => (a.id === ids.Work ? { ...a, removed: true } : a));
+  r = await p.call("PUT", "/api/activities", { activities: list });
+  assert.deepEqual(r.data.activities.map((a) => a.name), ["Learning Python"]);
+  assert.equal(r.data.current, null, "a removed activity is no longer picked");
+  assert.ok((await dash()).activities.week.items.some((i) => i.name === "Work"));
+  await p.call("POST", "/api/cloud/sign-out", { force: true });
+});

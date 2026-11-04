@@ -33,6 +33,9 @@ jobs:
       - name: Computer side
         run: python tests/test_sign_in.py
 
+      - name: Activities
+        run: python tests/test_activities.py
+
       - name: Phones
         env:
           PYTHON: python

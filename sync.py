@@ -40,8 +40,9 @@ PAGE = 1000  # Supabase returns at most 1000 rows per request
 PUSH_CHUNK = 500
 
 # Each computer keeps its own: volume and notification permission are
-# about this machine, and custom-preset ids differ between computers.
-LOCAL_ONLY_SETTINGS = ("sound_volume", "notifications_enabled", "default_preset_id")
+# about this machine, custom-preset ids differ between computers, and what
+# was picked last on the clocks is about what this machine is used for.
+LOCAL_ONLY_SETTINGS = ("sound_volume", "notifications_enabled", "default_preset_id", "last_activity_id")
 
 ROW_TABLES = {
     "activity_segments": (
