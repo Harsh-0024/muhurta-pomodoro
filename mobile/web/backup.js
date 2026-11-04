@@ -63,21 +63,25 @@
   const minutes = (sec) => ((Number(sec) || 0) / 60).toFixed(1);
 
   // Focus time is spent on an activity (plain Focus when none); rest isn't (backup.py _activity_name).
-  function activityName(r) {
+  // The list's current name wins over the one the session kept.
+  function activityName(r, names) {
     if (!Number(r.productive_sec)) return "";
     let act = null;
     try {
       act = (JSON.parse(r.details_json || "{}") || {}).activity;
     } catch (_) {}
-    return act && typeof act === "object" ? String(act.name || "") : "Focus";
+    if (!act || typeof act !== "object") return "Focus";
+    return String(names.get(act.id) || act.name || "");
   }
 
   function sessionsCsv() {
     const lines = [["Date", "Kind", "Started", "Ended", "Minutes", "Focus minutes", "Rest minutes", "Combination", "Activity"]];
-    const rows = exportData().activity_segments.sort((a, b) => String(a.started_at).localeCompare(String(b.started_at)));
+    const data = exportData();
+    const names = new Map(((data.settings || {}).activities || []).filter((a) => a && a.id).map((a) => [a.id, a.name]));
+    const rows = data.activity_segments.sort((a, b) => String(a.started_at).localeCompare(String(b.started_at)));
     for (const r of rows) {
       lines.push([r.day, KIND_NAMES[r.kind] || r.kind, localTime(r.started_at), localTime(r.ended_at),
-        minutes(r.duration_sec), minutes(r.productive_sec), minutes(r.rest_sec), r.preset_name || "", activityName(r)]);
+        minutes(r.duration_sec), minutes(r.productive_sec), minutes(r.rest_sec), r.preset_name || "", activityName(r, names)]);
     }
     return lines.map((l) => l.map(csvCell).join(",")).join("\r\n") + "\r\n";
   }

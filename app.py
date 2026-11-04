@@ -45,6 +45,8 @@ ASSET_VERSION_PATHS = (
     BASE_DIR / "static" / "js" / "sign-in.js",
     BASE_DIR / "static" / "js" / "admin.js",
     BASE_DIR / "static" / "js" / "feedback.js",
+    BASE_DIR / "static" / "js" / "activities.js",
+    BASE_DIR / "static" / "js" / "settings-activities.js",
     BASE_DIR / "static" / "css" / "app.css",
 )
 BUILTIN_QUOTES = [

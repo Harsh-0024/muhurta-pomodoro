@@ -5288,3 +5288,665 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* ------------------------------------------------------------------ */
+/* Activities: the picker above Start, and the first-run card          */
+/* (static/js/activities.js)                                           */
+/* ------------------------------------------------------------------ */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.act-picker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto 0.85rem;
+  z-index: 20;
+}
+
+.act-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.5rem;
+  max-width: min(20rem, 88vw);
+  padding: 0 1rem 0 0.9rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--control-bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.act-pill:hover,
+.act-picker.is-open .act-pill {
+  border-color: color-mix(in srgb, var(--gold) 55%, transparent);
+}
+
+.act-pill:focus-visible,
+.act-row:focus-visible,
+.act-more:focus-visible,
+.act-add:focus-visible,
+.act-chip:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
+  outline-offset: 2px;
+}
+
+.act-pill-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.act-caret {
+  width: 0.45rem;
+  height: 0.45rem;
+  margin-left: 0.1rem;
+  border-right: 1.5px solid var(--muted);
+  border-bottom: 1.5px solid var(--muted);
+  transform: translateY(-0.12rem) rotate(45deg);
+  transition: transform 0.2s ease;
+}
+
+.act-picker.is-open .act-caret {
+  transform: translateY(0.1rem) rotate(-135deg);
+}
+
+.act-dot {
+  flex: none;
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+}
+
+/* Opens upward, over the clock: the picker sits low on the page, by Start. */
+.act-menu {
+  position: absolute;
+  bottom: calc(100% + 0.5rem);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(19rem, 92vw);
+  max-height: min(26rem, 62vh);
+  overflow-y: auto;
+  padding: 0.5rem;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: var(--menu-bg-strong);
+  box-shadow: var(--menu-shadow);
+  text-align: left;
+}
+
+.act-menu.hidden {
+  display: none;
+}
+
+.act-menu-title {
+  margin: 0.4rem 0.65rem 0.45rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.act-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.act-row,
+.act-more,
+.act-add {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.75rem;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.act-row:hover,
+.act-more:hover,
+.act-add:hover {
+  background: var(--surface-strong);
+}
+
+.act-row.is-selected {
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+}
+
+.act-row-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.act-row-meta {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.act-check {
+  width: 0.4rem;
+  height: 0.75rem;
+  margin-right: 0.2rem;
+  border-right: 1.6px solid var(--gold);
+  border-bottom: 1.6px solid var(--gold);
+  transform: translateY(-0.1rem) rotate(45deg);
+}
+
+.act-row-more {
+  padding-left: 1.5rem;
+  min-height: 2.5rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.act-more {
+  justify-content: space-between;
+  min-height: 2.5rem;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.act-more-sign {
+  font-size: 1rem;
+}
+
+.act-rule {
+  height: 1px;
+  margin: 0.4rem 0.5rem;
+  background: var(--line);
+}
+
+.act-add {
+  color: var(--gold);
+}
+
+.act-add::before {
+  content: "+";
+  width: 0.62rem;
+  text-align: center;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.act-add-form {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.3rem 0.25rem 0.25rem;
+}
+
+.act-input {
+  flex: 1;
+  min-width: 0;
+  height: 2.5rem;
+  padding: 0 0.75rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--control-bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.act-input:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.act-add-form .btn {
+  min-height: 2.5rem;
+  padding: 0 1rem;
+}
+
+.act-notice {
+  margin: 0.55rem 0 0;
+  color: var(--gold2);
+  font-size: 0.8rem;
+}
+
+.act-notice.hidden {
+  display: none;
+}
+
+/* The first-run card */
+.act-intro-sheet {
+  width: min(34rem, 100%);
+}
+
+.act-intro .modal-title {
+  margin-bottom: 0.75rem;
+}
+
+.act-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+}
+
+.act-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  padding: 0 0.95rem;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.88rem;
+  cursor: pointer;
+}
+
+.act-chip.is-on {
+  border-color: color-mix(in srgb, var(--gold) 60%, transparent);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+  color: var(--ink);
+}
+
+.act-chip:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.act-chip-mark {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  border: 1px solid var(--muted);
+}
+
+.act-chip.is-on .act-chip-mark {
+  border-color: var(--gold);
+  background: var(--gold);
+}
+
+.act-intro-add {
+  padding: 0;
+}
+
+.act-count {
+  margin: 0.65rem 0 1.1rem;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.act-count.is-full {
+  color: var(--gold2);
+}
+
+.act-error {
+  margin: -0.5rem 0 1rem;
+  font-size: 0.82rem;
+  color: var(--danger-ink);
+}
+
+.act-error.hidden {
+  display: none;
+}
+
+.act-intro-actions {
+  justify-content: space-between;
+}
+
+/* On a phone the list rises from the bottom, within reach of a thumb. */
+body.is-mobile .act-menu {
+  position: fixed;
+  top: auto;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  transform: none;
+  width: auto;
+  max-height: 75vh;
+  padding: 0.75rem 1rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  border-radius: 22px 22px 0 0;
+  background: var(--bg1);
+  z-index: 120;
+}
+
+body.is-mobile .act-menu::before {
+  content: "";
+  display: block;
+  width: 2.5rem;
+  height: 0.3rem;
+  margin: 0 auto 0.6rem;
+  border-radius: 3px;
+  background: var(--faint);
+}
+
+body.is-mobile .act-menu-title {
+  font-family: var(--font-serif);
+  font-size: 1.3rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--gold2);
+}
+
+body.is-mobile .act-row,
+body.is-mobile .act-add {
+  min-height: 3.1rem;
+  font-size: 1rem;
+}
+
+body.is-mobile .act-input {
+  height: 2.9rem;
+  font-size: 1rem; /* 16px: iOS doesn't zoom in */
+}
+
+.act-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.act-backdrop.hidden {
+  display: none;
+}
+
+/* Dashboard: where your time went (static/js/dashboard.js renderActivities) */
+.act-breakdown {
+  margin-bottom: 1rem;
+}
+
+.act-periods {
+  display: inline-flex;
+  width: fit-content;
+  padding: 3px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--control-bg);
+}
+
+.act-period {
+  min-height: 2rem;
+  padding: 0 0.95rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.act-period[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--gold) 18%, transparent);
+  color: var(--gold2);
+}
+
+.act-period:focus-visible,
+.act-stat:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
+  outline-offset: 2px;
+}
+
+.act-bar {
+  display: flex;
+  gap: 2px;
+  height: 0.75rem;
+  margin: 1rem 0 0.9rem;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--faint);
+}
+
+.act-bar span {
+  min-width: 3px;
+  transition: opacity 0.2s ease;
+}
+
+.act-bar span.is-dim {
+  opacity: 0.3;
+}
+
+.act-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.act-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  min-height: 2.75rem;
+  padding: 0 0.8rem;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.88rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.act-stat:hover {
+  background: var(--surface-strong);
+}
+
+.act-stat.is-selected {
+  border-color: color-mix(in srgb, var(--gold) 50%, transparent);
+}
+
+.act-stat-all {
+  min-height: 3rem;
+  background: color-mix(in srgb, var(--gold) 7%, transparent);
+  font-size: 0.95rem;
+}
+
+.act-stat-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.act-stat-all .act-stat-name {
+  font-weight: 500;
+}
+
+.act-stat-note {
+  flex: 1;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.act-stat:not(.act-stat-all) .act-stat-name {
+  flex: 1;
+}
+
+.act-stat-share {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.act-stat-value {
+  min-width: 4rem;
+  text-align: right;
+  font-weight: 500;
+}
+
+.act-stat-all .act-stat-value {
+  color: var(--gold2);
+}
+
+.act-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 1.5rem;
+  row-gap: 0.15rem;
+  padding-left: 1.4rem;
+}
+
+.act-empty {
+  grid-column: 1 / -1;
+  margin: 0.4rem 0;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  .act-stat-grid {
+    grid-template-columns: minmax(0, 1fr);
+    padding-left: 0.9rem;
+  }
+
+  .act-breakdown .panel-head {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+}
+
+/* History: each focus session's activity */
+.history-act {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.history-act .act-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+select.history-activity {
+  appearance: auto;
+}
+
+/* Settings → Activities (static/js/settings-activities.js) */
+.act-manage {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.act-manage-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.act-manage-item.is-focus {
+  min-height: 3.2rem;
+}
+
+.act-manage-fixed {
+  font-weight: 500;
+}
+
+.act-manage-note {
+  flex: 1;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.act-manage-item .act-name {
+  flex: 1;
+  min-width: 0;
+}
+
+.act-color {
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.act-color::-webkit-color-swatch-wrapper {
+  padding: 0.25rem;
+}
+
+.act-color::-webkit-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.act-color::-moz-color-swatch {
+  border: 0;
+  border-radius: 50%;
+}
+
+.act-manage-add {
+  padding: 0.9rem 0 0.4rem;
+}
+
+.act-manage-add .input {
+  flex: 1;
+  min-width: 0;
+}
+
+.act-removed {
+  padding: 0.6rem 0 0.2rem;
+}
+
+.act-removed.hidden {
+  display: none;
+}
+
+.act-removed-title {
+  margin: 0 0 0.3rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.act-removed-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.6rem;
+  color: var(--muted);
+}
+
+.act-removed-name {
+  flex: 1;
+}
+
+.act-manage-status {
+  min-height: 1.2rem;
+  margin: 0.3rem 0 0.9rem;
+  font-size: 0.82rem;
+  color: var(--gold2);
+}
+
+.act-manage-status.is-error {
+  color: var(--danger-ink);
+}

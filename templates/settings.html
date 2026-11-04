@@ -16,6 +16,7 @@
     <a href="#appearance" class="settings-nav-link">Appearance</a>
     <a href="#notifications" class="settings-nav-link">Notifications</a>
     <a href="#combinations" class="settings-nav-link">Combinations</a>
+    <a href="#activities" class="settings-nav-link">Activities</a>
     <a href="#history" class="settings-nav-link">History</a>
     <a href="#sync" class="settings-nav-link">Account</a>
     <a href="#keyboard" class="settings-nav-link">Keyboard</a>
@@ -202,6 +203,23 @@
           </div>
         </form>
         <ul class="custom-list" id="customList"></ul>
+      </div>
+    </section>
+
+    <section class="pref-section" id="activities" aria-labelledby="activitiesTitle">
+      <header class="pref-head">
+        <h2 class="card-title" id="activitiesTitle">Activities</h2>
+        <p class="card-lede">What your focus time goes to. Pick one above Start, and the dashboard shows where your hours went. Focus is always there as the default.</p>
+      </header>
+      <div class="pref-group act-manage-group">
+        <ul class="act-manage" id="activityList"></ul>
+        <form class="act-add-form act-manage-add" id="activityAddForm" novalidate>
+          <label class="visually-hidden" for="activityNew">New activity name</label>
+          <input type="text" class="input" id="activityNew" maxlength="40" placeholder="Add an activity, e.g. Learning Spanish" autocomplete="off" />
+          <button type="submit" class="btn btn-quiet">Add</button>
+        </form>
+        <div class="act-removed hidden" id="activityRemoved"></div>
+        <p class="act-manage-status" id="activityStatus" role="status" aria-live="polite"></p>
       </div>
     </section>
 
@@ -411,4 +429,5 @@
 {% block scripts %}
 <script src="{{ url_for('static', filename='js/settings.js') }}?v={{ asset_version }}" defer></script>
 <script src="{{ url_for('static', filename='js/feedback.js') }}?v={{ asset_version }}" defer></script>
+<script src="{{ url_for('static', filename='js/settings-activities.js') }}?v={{ asset_version }}" defer></script>
 {% endblock %}

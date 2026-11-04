@@ -3,6 +3,22 @@
 {% block body_class %}page-dashboard{% endblock %}
 {% block page_id %}dashboard{% endblock %}
 {% block content %}
+<section class="dashboard-panel act-breakdown" id="activityPanel" aria-labelledby="activityTitle">
+  <div class="panel-head">
+    <div>
+      <h2 class="card-title" id="activityTitle">Where your time went</h2>
+      <p class="card-lede" id="activityLede">Focus by activity. Rest isn't counted.</p>
+    </div>
+    <div class="act-periods" role="group" aria-label="Period">
+      <button type="button" class="act-period" data-period="week" aria-pressed="true">Week</button>
+      <button type="button" class="act-period" data-period="month" aria-pressed="false">Month</button>
+      <button type="button" class="act-period" data-period="year" aria-pressed="false">Year</button>
+    </div>
+  </div>
+  <div class="act-bar" id="activityBar" aria-hidden="true"></div>
+  <div class="act-rows" id="activityRows"></div>
+</section>
+
 <section class="dashboard-stats" aria-label="Focus summary">
   <article class="metric-card metric-card-primary">
     <span class="metric-label" id="totalFocusLabel">Focus this year</span>

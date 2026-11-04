@@ -5,6 +5,13 @@
   const dayFormatter = new Intl.DateTimeFormat(undefined, { month: "short", day: "numeric" });
   const fullDayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
   let selectedYear = Number(new URLSearchParams(window.location.search).get("year")) || new Date().getFullYear();
+  // One activity's focus only ("focus": sessions with none), or "" for All focus.
+  let selectedActivity = new URLSearchParams(window.location.search).get("activity") || "";
+  const PERIOD_KEY = "muhurta-activity-period";
+  let activityPeriod = "week";
+  try {
+    activityPeriod = ["week", "month", "year"].includes(localStorage.getItem(PERIOD_KEY)) ? localStorage.getItem(PERIOD_KEY) : "week";
+  } catch (_) {}
   let currentDashboardData = null;
   const cardStates = {
     streakCard: 0,
@@ -104,12 +111,22 @@
     };
   }
 
-  const heatStops = [
+  const GROWTH_STOPS = [
     [207, 227, 197],
     [135, 187, 120],
     [63, 138, 80],
     [20, 83, 52],
   ];
+  let heatStops = GROWTH_STOPS;
+
+  // One activity's heatmap in its own color: pale to deep, like the green.
+  function rampFrom(hex) {
+    const n = parseInt(String(hex).slice(1), 16);
+    if (!Number.isFinite(n)) return GROWTH_STOPS;
+    const c = [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    const mix = (to, t) => c.map((v, i) => Math.round(v + (to[i] - v) * t));
+    return [mix([255, 255, 255], 0.6), mix([255, 255, 255], 0.2), mix([0, 0, 0], 0.2), mix([0, 0, 0], 0.55)];
+  }
 
   function levelFor(day, goal) {
     const minutes = Number(day.focus_minutes || 0);
@@ -142,7 +159,8 @@
     const year = data.range?.year || selectedYear;
     const states = summaryCardStates(data);
     setText("goalValue", formatMinutes(goal));
-    setText("totalFocusLabel", `Focus in ${year}`);
+    const what = data.activity ? data.activity.name : "Focus";
+    setText("totalFocusLabel", `${what} in ${year}`);
     setText("totalFocus", formatMinutes(s.total_focus_minutes));
     setText("activeDays", `${formatDays(s.active_days)} active`);
     updateToggleCard("streakCard", states.streakCard);
@@ -151,8 +169,99 @@
     setText("consistencyNote", `${s.active_days || 0} of ${s.days_elapsed || 0} days`);
     setText(
       "heatmapSubtitle",
-      `${formatMinutes(s.total_focus_minutes)} across ${formatDays(s.active_days)} in ${year}.`
+      `${data.activity ? `${data.activity.name}: ` : ""}${formatMinutes(s.total_focus_minutes)} across ${formatDays(s.active_days)} in ${year}.`
     );
+  }
+
+  // "Where your time went": All focus on top, each activity a slice of it.
+  // Choosing one narrows the whole page to it; the heatmap takes its color.
+  function renderActivities(data) {
+    const periods = data.activities || {};
+    const period = periods[activityPeriod] || periods.week;
+    const rows = byId("activityRows");
+    const bar = byId("activityBar");
+    if (!rows || !bar || !period) return;
+    document.querySelectorAll(".act-period").forEach((b) => {
+      b.setAttribute("aria-pressed", b.dataset.period === activityPeriod ? "true" : "false");
+    });
+    const total = Number(period.total_minutes || 0);
+    const items = period.items || [];
+    const range = period.start && period.end
+      ? `${dayFormatter.format(parseDay(period.start))} – ${dayFormatter.format(parseDay(period.end))}`
+      : period.label;
+    setText("activityLede", `${activityPeriod === "year" ? period.label : range} · rest isn't counted.`);
+
+    bar.replaceChildren();
+    items.forEach((it) => {
+      const part = document.createElement("span");
+      part.style.flexGrow = String(it.minutes);
+      part.style.background = it.color;
+      if (selectedActivity && it.id !== selectedActivity) part.classList.add("is-dim");
+      bar.appendChild(part);
+    });
+    bar.classList.toggle("is-empty", !items.length);
+
+    rows.replaceChildren();
+    const row = (id, name, color, minutes, cls) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "act-stat" + (cls ? ` ${cls}` : "");
+      const on = id === selectedActivity;
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+      if (on) b.classList.add("is-selected");
+      const dot = document.createElement("span");
+      dot.className = "act-dot";
+      dot.style.background = color;
+      const label = document.createElement("span");
+      label.className = "act-stat-name";
+      label.textContent = name;
+      const share = document.createElement("span");
+      share.className = "act-stat-share";
+      share.textContent = id && total ? `${Math.round((minutes / total) * 100)}%` : "";
+      const value = document.createElement("strong");
+      value.className = "act-stat-value";
+      value.textContent = formatMinutes(minutes);
+      b.append(dot, label, share, value);
+      b.addEventListener("click", () => setActivity(on && id ? "" : id));
+      return b;
+    };
+    const all = row("", "All focus", "var(--gold)", total, "act-stat-all");
+    const note = document.createElement("span");
+    note.className = "act-stat-note";
+    note.textContent = "everything together";
+    all.insertBefore(note, all.querySelector(".act-stat-share"));
+    rows.appendChild(all);
+    const grid = document.createElement("div");
+    grid.className = "act-stat-grid";
+    items.forEach((it) => grid.appendChild(row(it.id, it.name, it.color, it.minutes)));
+    if (!items.length) {
+      const empty = document.createElement("p");
+      empty.className = "act-empty";
+      empty.textContent = "No focus in this stretch yet. Pick what you're working on above Start, and it shows here.";
+      grid.appendChild(empty);
+    }
+    rows.appendChild(grid);
+
+    const panel = document.querySelector(".heatmap-panel");
+    const color = data.activity && data.activity.id !== "focus" ? data.activity.color : "";
+    heatStops = color ? rampFrom(color) : GROWTH_STOPS;
+    if (panel) {
+      heatStops.forEach((rgb, i) => {
+        if (color) panel.style.setProperty(`--growth-${i + 1}`, `rgb(${rgb.join(", ")})`);
+        else panel.style.removeProperty(`--growth-${i + 1}`);
+      });
+    }
+    setText("heatmapTitle", data.activity ? `${data.activity.name}: yearly consistency` : "Yearly consistency");
+  }
+
+  function setActivity(id) {
+    if (id === selectedActivity) return;
+    selectedActivity = id;
+    const url = new URL(window.location.href);
+    if (id) url.searchParams.set("activity", id);
+    else url.searchParams.delete("activity");
+    window.history.pushState({ year: selectedYear, activity: id }, "", url);
+    loadDashboard(selectedYear);
   }
 
   function renderYears(data) {
@@ -178,7 +287,7 @@
         selectedYear = year;
         const url = new URL(window.location.href);
         url.searchParams.set("year", String(year));
-        window.history.pushState({ year }, "", url);
+        window.history.pushState({ year, activity: selectedActivity }, "", url);
         loadDashboard(year);
       });
       item.appendChild(link);
@@ -647,9 +756,11 @@
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
       const params = new URLSearchParams({ year: String(year) });
       if (tz) params.set("tz", tz);
+      if (selectedActivity) params.set("activity", selectedActivity);
       const data = await api(`/api/dashboard?${params.toString()}`);
       currentDashboardData = data;
       selectedYear = Number(data.range?.year || year);
+      renderActivities(data);
       renderSummary(data);
       renderYears(data);
       renderHeatmap(data);
@@ -680,7 +791,17 @@
     });
     window.addEventListener("popstate", () => {
       selectedYear = Number(new URLSearchParams(window.location.search).get("year")) || new Date().getFullYear();
+      selectedActivity = new URLSearchParams(window.location.search).get("activity") || "";
       loadDashboard(selectedYear);
+    });
+    document.querySelectorAll(".act-period").forEach((b) => {
+      b.addEventListener("click", () => {
+        activityPeriod = b.dataset.period;
+        try {
+          localStorage.setItem(PERIOD_KEY, activityPeriod);
+        } catch (_) {}
+        if (currentDashboardData) renderActivities(currentDashboardData);
+      });
     });
     loadDashboard(selectedYear);
   }

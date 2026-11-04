@@ -131,14 +131,22 @@ csv = c.get("/api/backup/sessions.csv").get_data(as_text=True)
 check(csv.splitlines()[0].endswith(",Activity"), "an Activity column")
 check(",Learning Python\r\n" in csv and ",Focus\r\n" in csv, "focus sessions are named")
 
+print("-- renaming")
+lst = [dict(a, name="Python") if a["id"] == ids["Learning Python"] else a for a in c.get("/api/activities").json["all"]]
+check(c.put("/api/activities", json={"activities": lst}).status_code == 200, "rename")
+check(any(i["name"] == "Python" for i in dash()["activities"]["week"]["items"]), "the dashboard shows the new name")
+csv = c.get("/api/backup/sessions.csv").get_data(as_text=True)
+check(",Python\r\n" in csv and "Learning Python" not in csv, "so does the CSV")
+
 print("-- removing, and a lost list")
 pick(ids["Work"])
 lst = [dict(a, removed=a["id"] == ids["Work"]) for a in c.get("/api/activities").json["all"]]
 r = c.put("/api/activities", json={"activities": lst}).json
-check([a["name"] for a in r["activities"]] == ["Learning Python"], "removed: gone from the picker")
+check([a["name"] for a in r["activities"]] == ["Python"], "removed: gone from the picker")
 check(r["current"] is None, "and no longer picked")
 check(any(i["name"] == "Work" for i in dash()["activities"]["week"]["items"]), "its sessions keep the name")
 db.save_settings({"activities": []})  # what an older version on another device can do
+# The rename was in the lost list too, so the sessions' own name comes back.
 check({a["name"] for a in c.get("/api/activities").json["activities"]} == {"Learning Python", "Work"},
       "a lost list comes back from the sessions")
 check("last_activity_id" in sync.LOCAL_ONLY_SETTINGS, "what was picked stays on this computer")

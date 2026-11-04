@@ -425,19 +425,27 @@ test("activities: picked on the clock, saved with each session, counted on the d
   assert.match(csv, /,Learning Python\r\n/);
   assert.match(csv, /,Focus\r\n/);
 
+  // Renamed: the dashboard and the CSV use the new name.
+  const renamed = (await p.call("GET", "/api/activities")).data.all.map((a) => (a.id === ids["Learning Python"] ? { ...a, name: "Python" } : a));
+  assert.equal((await p.call("PUT", "/api/activities", { activities: renamed })).status, 200);
+  assert.ok((await dash()).activities.week.items.some((i) => i.name === "Python"));
+  const csv2 = (await p.call("GET", "/api/backup/sessions.csv")).data;
+  assert.match(csv2, /,Python\r\n/);
+  assert.doesNotMatch(csv2, /Learning Python/);
+
   // The list syncs with the account; what this phone picked does not.
   await p.call("PUT", "/api/activities/current", { id: ids.Work });
   await p.call("POST", "/api/cloud/sync-now");
   const uid = server.users.get("dev@x.com").id;
   const shared = JSON.parse([...server.rows.get("app_settings").values()].find((x) => x.user_id === uid).json);
-  assert.deepEqual(shared.activities.map((a) => a.name), ["Work", "Learning Python"]);
+  assert.deepEqual(shared.activities.map((a) => a.name), ["Work", "Python"]);
   assert.equal("last_activity_id" in shared, false);
   assert.equal(shared.activities_intro_done, true);
 
   // Taken out of the list: gone from the picker, its sessions keep the name.
   const list = (await p.call("GET", "/api/activities")).data.all.map((a) => (a.id === ids.Work ? { ...a, removed: true } : a));
   r = await p.call("PUT", "/api/activities", { activities: list });
-  assert.deepEqual(r.data.activities.map((a) => a.name), ["Learning Python"]);
+  assert.deepEqual(r.data.activities.map((a) => a.name), ["Python"]);
   assert.equal(r.data.current, null, "a removed activity is no longer picked");
   assert.ok((await dash()).activities.week.items.some((i) => i.name === "Work"));
   await p.call("POST", "/api/cloud/sign-out", { force: true });

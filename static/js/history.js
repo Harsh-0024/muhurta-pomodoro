@@ -29,6 +29,7 @@
 
   // The open editor: { segment } when editing, { segment: null } when adding.
   let editing = null;
+  let activities = null; // GET /api/activities, for the editor's Activity field
   let lastFocus = null;
 
   /* ---------- helpers ---------- */
@@ -237,6 +238,14 @@
       ? `<span class="history-was">was ${formatDuration(edit.original.duration_sec)}</span>`
       : "";
     const preset = seg.preset_name && !manual && seg.preset_name !== kind.label ? ` · ${escapeHtml(seg.preset_name)}` : "";
+    // Focus time is spent on an activity (activities.py); rest isn't.
+    // The list's current name and color win over what the session kept.
+    const kept = kind.focus ? seg.details?.activity : null;
+    const known = kept && activities && activities.all ? activities.all.find((a) => a.id === kept.id) : null;
+    const act = known || kept;
+    const activity = kind.focus
+      ? ` · <span class="history-act"><span class="act-dot" style="background:${escapeHtml(act?.color || "#c9a962")}"></span>${escapeHtml(act?.name || "Focus")}</span>`
+      : "";
     return `
       <li class="history-item${isLong(seg) ? " is-long" : ""}" data-id="${seg.id}">
         <span class="history-kind ${kind.focus ? "is-focus" : "is-rest"}" aria-hidden="true"></span>
@@ -245,7 +254,7 @@
             <strong class="history-range">${formatRange(startOf(seg), endOf(seg))}</strong>
             ${badges}
           </div>
-          <span class="history-meta">${escapeHtml(kind.label)}${preset}</span>
+          <span class="history-meta">${escapeHtml(kind.label)}${preset}${activity}</span>
         </div>
         <div class="history-length">
           <strong>${formatDuration(seg.duration_sec)}</strong>
@@ -411,6 +420,7 @@
       : "Something the timer missed";
     $("kindField").classList.toggle("hidden", Boolean(seg));
     setSegmented("kindPicker", "work");
+    fillActivities(seg);
 
     const recorded = $("sessionRecorded");
     const original = seg?.details?.edit?.original;
@@ -439,6 +449,32 @@
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
     $("fieldStart").focus();
+  }
+
+  // Focus (no activity) first, then the list in the picker's order. A session
+  // whose activity was taken out of the list keeps it until changed.
+  function fillActivities(seg) {
+    const select = $("fieldActivity");
+    const field = $("activityField");
+    if (!select || !field) return;
+    const mine = seg?.details?.activity || null;
+    const options = [{ id: "focus", name: "Focus" }, ...((activities && activities.activities) || [])];
+    if (mine && !options.some((a) => a.id === mine.id)) options.push({ id: mine.id, name: `${mine.name} (removed)` });
+    select.replaceChildren(...options.map((a) => {
+      const o = document.createElement("option");
+      o.value = a.id;
+      o.textContent = a.name;
+      return o;
+    }));
+    select.value = mine ? mine.id : seg ? "focus" : (activities && activities.current ? activities.current.id : "focus");
+    editing.initialActivity = seg ? select.value : "focus";
+    showActivityField();
+  }
+
+  function showActivityField() {
+    const seg = editing && editing.segment;
+    const focus = seg ? kindOf(seg).focus : segmentedValue("kindPicker") === "work";
+    $("activityField")?.classList.toggle("hidden", !focus);
   }
 
   function closeEditor() {
@@ -522,7 +558,16 @@
       started_at: new Date(times.startMs).toISOString(),
       ended_at: new Date(times.endMs).toISOString(),
     };
-    await persist(seg, body, seg ? "Session updated" : "Session added");
+    await persist(seg, body, seg ? "Session updated" : "Session added", chosenActivity());
+  }
+
+  // The Activity field's choice when it differs from what the session has
+  // (undefined: leave it).
+  function chosenActivity() {
+    const field = $("activityField");
+    if (!field || field.classList.contains("hidden")) return undefined;
+    const value = $("fieldActivity").value;
+    return value !== editing.initialActivity ? value : undefined;
   }
 
   async function revertEditor() {
@@ -535,16 +580,23 @@
     );
   }
 
-  async function persist(seg, body, message) {
+  async function persist(seg, body, message, activity) {
     const btn = $("sessionSave");
     btn.disabled = true;
     try {
-      const saved = seg
-        ? await api(`/api/activity/segment/${seg.id}`, { method: "PUT", body: JSON.stringify(body) })
+      const sameTimes = seg && body.started_at && Date.parse(body.started_at) === startOf(seg)
+        && Date.parse(body.ended_at) === endOf(seg);
+      let saved = seg
+        ? (sameTimes && activity !== undefined
+          ? seg
+          : await api(`/api/activity/segment/${seg.id}`, { method: "PUT", body: JSON.stringify(body) }))
         : await api("/api/activity/manual", {
             method: "POST",
             body: JSON.stringify({ ...body, kind: segmentedValue("kindPicker") }),
           });
+      if (activity !== undefined) {
+        saved = await api(`/api/activity/segment/${saved.id}/activity`, { method: "PUT", body: JSON.stringify({ id: activity }) });
+      }
       closeEditor();
       await afterChange(saved);
       toast(message);
@@ -640,6 +692,7 @@
       const b = e.target.closest(".segment");
       if (!b) return;
       setSegmented("kindPicker", b.dataset.value);
+      showActivityField();
       updatePreview();
     });
     $("quickDurations")?.addEventListener("click", (e) => {
@@ -663,10 +716,11 @@
   async function init() {
     if (window.__PAGE__ !== "history") return;
     wire();
+    const acts = api("/api/activities").then((a) => { activities = a; }).catch(() => {});
     const list = $("historyList");
     if (list) list.innerHTML = `<p class="history-loading">Gathering your sessions…</p>`;
     try {
-      const [segs] = await Promise.all([loadRecent(localDayISO(Date.now())), loadLong()]);
+      const [segs] = await Promise.all([loadRecent(localDayISO(Date.now())), loadLong(), acts]);
       mergeRecent(segs);
       if (new URLSearchParams(location.search).get("view") === "long" || location.hash === "#long") view = "long";
       setView(view);

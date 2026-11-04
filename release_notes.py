@@ -34,6 +34,11 @@ def only(devices, text: str) -> dict:
 
 
 NOTES = {
+    "1.18.0": [
+        'Name what you\'re working on: pick "Learning Python", "Work" or anything you add from the new button above Start on Rhythm, Timer and Flow. It remembers your last choice, and Focus stays the default.',
+        'The dashboard shows where your time went, by week, month and year. "All focus" is everything together; tap an activity to see its own heatmap and streak.',
+        "Change a session's activity in Settings, History, and rename, recolor or remove activities in Settings, Activities. The CSV export has an Activity column.",
+    ],
     "1.17.1": [
         only(MAC, "Clicking the clock in the menu bar now opens the page of the clock that's running, not the last page you had open."),
         only(PHONES, "Tapping a notification about a running clock, or one saying focus or time is up, opens that clock's page."),

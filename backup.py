@@ -62,6 +62,7 @@ def export() -> dict:
 
 def sessions_csv() -> str:
     data = export()
+    names = {a.get("id"): a.get("name") for a in (data.get("settings") or {}).get("activities") or [] if isinstance(a, dict)}
     out = io.StringIO()
     w = csv.writer(out)
     w.writerow(["Date", "Kind", "Started", "Ended", "Minutes", "Focus minutes", "Rest minutes", "Combination",
@@ -69,19 +70,22 @@ def sessions_csv() -> str:
     for r in sorted(data["activity_segments"], key=lambda r: r["started_at"] or ""):
         w.writerow([r["day"], KIND_NAMES.get(r["kind"], r["kind"]), _local(r["started_at"]), _local(r["ended_at"]),
                     _minutes(r["duration_sec"]), _minutes(r["productive_sec"]), _minutes(r["rest_sec"]),
-                    r["preset_name"] or "", _activity_name(r)])
+                    r["preset_name"] or "", _activity_name(r, names)])
     return out.getvalue()
 
 
-def _activity_name(r: dict) -> str:
-    """Focus time is spent on an activity (plain Focus when none); rest isn't."""
+def _activity_name(r: dict, names: dict[str, str]) -> str:
+    """Focus time is spent on an activity (plain Focus when none); rest isn't.
+    The list's current name wins over the one the session kept."""
     if not float(r.get("productive_sec") or 0):
         return ""
     try:
         act = json.loads(r.get("details_json") or "{}").get("activity")
     except (ValueError, AttributeError):
         act = None
-    return act.get("name") or "" if isinstance(act, dict) else "Focus"
+    if not isinstance(act, dict):
+        return "Focus"
+    return names.get(act.get("id")) or act.get("name") or ""
 
 
 def _local(iso: str | None) -> str:
