@@ -19,6 +19,7 @@ from flask import Flask, Response, got_request_exception, jsonify, redirect, ren
 import backup
 import cloud
 import db
+import devices
 import errors
 import presence
 import release_notes
@@ -532,8 +533,25 @@ def api_cloud_status():
 
 @app.post("/api/cloud/sync-now")
 def api_cloud_sync_now():
+    """Sync now. With {"everywhere": true} (a refresh), every other device
+    with the app open syncs too, and the answer says which could not
+    (devices.py)."""
+    body = request.get_json(silent=True) or {}
     sync.run_once()
-    return jsonify(_cloud_status())
+    st = _cloud_status()
+    if body.get("everywhere") and st["signed_in"] and st["sync"] and not st["sync"]["error"]:
+        report = devices.sync_everywhere()
+        if report["synced"]:
+            sync.run_once()  # what they uploaded just now
+            st = _cloud_status()
+        st["devices"] = report
+    return jsonify(st)
+
+
+@app.get("/api/cloud/remote-sync")
+def api_cloud_remote_sync():
+    """The last refresh made on another device that synced this one too."""
+    return jsonify(devices.remote_sync())
 
 
 @app.post("/api/cloud/sign-in")
@@ -662,6 +680,7 @@ def api_cloud_cancel():
 @app.post("/api/cloud/sign-out")
 def api_cloud_sign_out():
     body = request.get_json(silent=True) or {}
+    devices.leaving()
     try:
         return jsonify(sync.leave_account(force=bool(body.get("force"))))
     except sync.UnsyncedChanges as exc:
@@ -1261,4 +1280,5 @@ if __name__ == "__main__":
     # With the debug reloader, only the child process that serves requests syncs.
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
         sync.start()
+        devices.start()
     app.run(port=8000, debug=True)

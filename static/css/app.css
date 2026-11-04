@@ -2416,6 +2416,8 @@ body.mode-cumulative .phase-label {
   color: var(--gold2);
   font-size: 0.85rem;
   white-space: nowrap;
+  max-width: calc(100vw - 2rem);
+  box-sizing: border-box;
   opacity: 0;
   pointer-events: none;
   transform: translate(-50%, -0.75rem);
@@ -2443,6 +2445,25 @@ body.mode-cumulative .phase-label {
 
 .refresh-sync.is-ready {
   color: var(--gold);
+}
+
+.refresh-sync svg {
+  flex: none;
+}
+
+/* A longer note (another device not connected, no internet here): wraps,
+   and reads as a warning. */
+.refresh-sync.is-long {
+  white-space: normal;
+  width: max-content;
+  max-width: min(26rem, calc(100vw - 2rem));
+  border-radius: 1rem;
+  line-height: 1.35;
+}
+
+.refresh-sync.is-warn {
+  color: var(--danger-ink);
+  border-color: var(--danger-line);
 }
 
 .refresh-sync.is-syncing svg {

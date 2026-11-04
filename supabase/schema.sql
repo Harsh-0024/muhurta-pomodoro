@@ -230,6 +230,29 @@ order by d.last_seen desc;
 revoke all on public.devices_overview from anon, authenticated;
 
 -- --------------------------------------------------------------------------
+-- refresh one device, sync them all (devices.py, mobile/web/devices.js)
+-- --------------------------------------------------------------------------
+-- Whether the app is open on a device right now: set when it connects,
+-- cleared when it closes (a phone: when the app goes to the background).
+-- Closed apps are not asked to sync; an open one that does not answer is
+-- reported as not connected to the internet.
+alter table public.app_devices add column if not exists app_open boolean not null default false;
+
+-- Each account's own live channel, "muhurta-devices:<user id>" (Supabase
+-- Realtime, private channels): only that account's devices can listen on it
+-- or send on it.
+drop policy if exists muhurta_devices_listen on realtime.messages;
+create policy muhurta_devices_listen on realtime.messages
+    for select to authenticated
+    using (realtime.topic() = 'muhurta-devices:' || (select auth.uid())::text
+           and realtime.messages.extension in ('broadcast', 'presence'));
+drop policy if exists muhurta_devices_send on realtime.messages;
+create policy muhurta_devices_send on realtime.messages
+    for insert to authenticated
+    with check (realtime.topic() = 'muhurta-devices:' || (select auth.uid())::text
+                and realtime.messages.extension in ('broadcast', 'presence'));
+
+-- --------------------------------------------------------------------------
 -- admin: the owner's view inside the app (added with the Admin tab)
 -- --------------------------------------------------------------------------
 -- Who is an admin. Not reachable through the API at all (no policies); only

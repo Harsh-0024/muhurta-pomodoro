@@ -115,6 +115,20 @@ function supabase(method, url, body, token) {
   }
   const table = p.split("/").pop();
   if (!(table in KEYS)) return [404, { code: "PGRST205" }];
+  if (table === "app_devices" && (q.has("app_open") || method === "PATCH")) {
+    // devices.js: which devices have the app open; marking this one closed
+    const store = server.rows.get(table) || server.rows.set(table, new Map()).get(table);
+    const mine = [...store.values()].filter((r) => r.user_id === me.id);
+    if (method === "GET") {
+      const since = q.get("last_seen").slice(4);
+      const not = q.get("device_id").slice(4);
+      return [200, mine.filter((r) => r.app_open && r.last_seen >= since && r.device_id !== not)
+        .map((r) => ({ device_id: r.device_id, platform: r.platform }))];
+    }
+    const before = (q.get("last_seen") || "").slice(3);
+    for (const r of mine) if (r.device_id === q.get("device_id").slice(3) && (!before || r.last_seen < before)) Object.assign(r, body);
+    return [204, null];
+  }
   if (twoStepBlocks(token)) return [403, { code: "42501" }];
   const store = server.rows.get(table) || server.rows.set(table, new Map()).get(table);
   const key = (r) => [me.id, ...KEYS[table].map((k) => r[k])].join("|");
@@ -145,6 +159,74 @@ function supabase(method, url, body, token) {
   }
   return [405, null];
 }
+
+/* ---------------------------------------------------------------------- */
+/* the stand-in Realtime channel (like the one in tests/test_devices.py)    */
+/* ---------------------------------------------------------------------- */
+const hub = { members: new Set(), joins: 0 };
+function hubSend(sock, msg) {
+  setTimeout(() => sock.onmessage && sock.onmessage({ data: JSON.stringify(msg) }), 0);
+}
+function hubReceive(sock, text) {
+  const msg = JSON.parse(text);
+  if (msg.event === "heartbeat") return hubSend(sock, { topic: "phoenix", event: "phx_reply", ref: msg.ref, payload: { status: "ok" } });
+  if (msg.event === "phx_join") {
+    hub.joins++;
+    const ok = msg.payload.config.private === true && msg.topic === `realtime:muhurta-devices:${claims(msg.payload.access_token).sub}`;
+    if (ok) {
+      sock.topic = msg.topic;
+      hub.members.add(sock);
+    }
+    return hubSend(sock, { topic: msg.topic, event: "phx_reply", ref: msg.ref, payload: { status: ok ? "ok" : "error" } });
+  }
+  if (msg.event === "broadcast") {
+    for (const other of hub.members) if (other !== sock && other.topic === msg.topic) hubSend(other, { topic: msg.topic, event: "broadcast", ref: null, payload: msg.payload });
+  }
+}
+class FakeWebSocket {
+  constructor(url) {
+    assert.match(url, /^wss:\/\/.*\/realtime\/v1\/websocket\?apikey=/);
+    this.readyState = 0;
+    setTimeout(() => {
+      this.readyState = 1;
+      this.onopen && this.onopen();
+    }, 0);
+  }
+  send(text) {
+    assert.equal(this.readyState, 1, "sent before the socket opened");
+    hubReceive(this, text);
+  }
+  close() {
+    this.readyState = 3;
+    hub.members.delete(this);
+  }
+}
+// Another device of the account (a Mac, say), answering like devices.py.
+function peer(uid, device, name) {
+  const sock = { got: [], readyState: 1 };
+  const topic = `realtime:muhurta-devices:${uid}`;
+  const say = (data) => hubReceive(sock, JSON.stringify({ topic, event: "broadcast", payload: { type: "broadcast", event: "muhurta", payload: data } }));
+  sock.onmessage = (ev) => {
+    const msg = JSON.parse(ev.data);
+    if (msg.event !== "broadcast") return;
+    const data = msg.payload.payload;
+    sock.got.push(data);
+    if (data.kind === "sync") {
+      say({ kind: "heard", id: data.id, to: data.device, device, name });
+      setTimeout(() => say({ kind: "synced", id: data.id, to: data.device, ok: true, device, name }), 50);
+    }
+  };
+  hubReceive(sock, JSON.stringify({ topic, event: "phx_join", ref: "1", payload: { config: { private: true }, access_token: `h.${b64(JSON.stringify({ sub: uid }))}.s` } }));
+  return { sock, say, close: () => hub.members.delete(sock) };
+}
+const until = async (test, ms = 3000) => {
+  const end = Date.now() + ms;
+  while (Date.now() < end) {
+    if (test()) return true;
+    await new Promise((r) => setTimeout(r, 10));
+  }
+  return test();
+};
 
 /* ---------------------------------------------------------------------- */
 /* a phone: the scripts, in a window of their own                          */
@@ -192,8 +274,10 @@ function fakeIndexedDB() {
   };
 }
 
-async function phone() {
+async function phone(opts = {}) {
   const storage = new Map();
+  const listeners = { document: {}, window: {} };
+  const on = (where) => (type, fn) => (listeners[where][type] = listeners[where][type] || []).push(fn);
   const ctx = {
     console, URL, Response, Request, Headers, File, Blob, AbortController, TextEncoder, TextDecoder, crypto,
     atob, btoa, structuredClone, Promise, JSON, Math, Date,
@@ -203,14 +287,15 @@ async function phone() {
     localStorage: { getItem: (k) => storage.get(k) ?? null, setItem: (k, v) => storage.set(k, String(v)), removeItem: (k) => storage.delete(k) },
     location: { href: "http://localhost/sign-in.html", origin: "http://localhost", pathname: "/sign-in.html", search: "", replace() {} },
     navigator: {},
-    document: { body: { dataset: {} }, documentElement: {}, getElementById: () => null, addEventListener() {}, visibilityState: "visible" },
+    document: { body: { dataset: {} }, documentElement: {}, getElementById: () => null, addEventListener: on("document"), visibilityState: "visible" },
     MutationObserver: class { observe() {} disconnect() {} },
     CustomEvent: class { constructor(type, init) { this.type = type; this.detail = init?.detail; } },
-    addEventListener() {},
+    addEventListener: on("window"),
     dispatchEvent() {},
     fetch: () => Promise.reject(new Error("the phone code went to the real network")),
   };
   ctx.window = ctx;
+  if (opts.ws) ctx.WebSocket = FakeWebSocket;
   ctx.Capacitor = { Plugins: { CapacitorHttp: {
     async request({ method, url, data, headers }) {
       const token = (headers.Authorization || "").replace(/^Bearer /, "") || null;
@@ -219,7 +304,7 @@ async function phone() {
     },
   } } };
   vm.createContext(ctx);
-  for (const name of ["mobile-data.js", "local-api.js", "account.js", "backup.js"]) {
+  for (const name of ["mobile-data.js", "local-api.js", "account.js", "backup.js", "devices.js"]) {
     vm.runInContext(readFileSync(join(ROOT, "mobile/www", name), "utf8"), ctx, { filename: name });
   }
   await ctx.__MUHURTA_LOCAL__.ready;
@@ -232,7 +317,8 @@ async function phone() {
     } catch (_) {}
     return { status: res.status, data, headers: res.headers };
   };
-  return { ctx, call, stores: ctx.__MUHURTA_LOCAL__.stores };
+  const fire = (where, type) => (listeners[where][type] || []).forEach((fn) => fn({ type }));
+  return { ctx, call, fire, stores: ctx.__MUHURTA_LOCAL__.stores };
 }
 
 const GOOD = "Correct-horse9";
@@ -391,4 +477,64 @@ test("time two devices both recorded is counted once, and work beats rest", asyn
     const record = dash.days.find((d) => d.day === c.day);
     assert.deepEqual([record.focus_minutes, record.rest_minutes], [c.focus, c.rest], `${c.name}: the dashboard`);
   }
+});
+
+test("refresh one device, sync them all: asks the open ones, reports the offline one, answers others", async () => {
+  const p = await phone({ ws: true });
+  await createAccount(p, "devi@x.com");
+  const uid = server.users.get("devi@x.com").id;
+  const devs = () => server.rows.get("app_devices") || new Map();
+  const row = (device) => [...devs().values()].find((r) => r.user_id === uid && r.device_id === device);
+  const myId = p.ctx.__MUHURTA_LOCAL__.deviceId();
+  assert.ok(await until(() => p.ctx.__MUHURTA_DEVICES__.connected()), "the phone joins its account's channel");
+  assert.ok(await until(() => row(myId)?.app_open === true), "and marks itself open");
+
+  // A stranger's channel is not this account's.
+  const strangerJoins = hub.joins;
+  peer("someone-else", "x", "your Mac");
+  assert.equal(hub.joins, strangerJoins + 1);
+
+  // The Mac is open and online; the Windows PC is open but offline; the iPad's app is closed.
+  const now = new Date().toISOString();
+  const put = (device, platform, open) => devs().set(`${uid}|${device}`, { user_id: uid, device_id: device, platform, app_open: open, last_seen: now, app_version: "1", server_updated_at: now });
+  put("mac-1", "darwin", true);
+  put("win-1", "win32", true);
+  put("ipad-1", "ios", false);
+  const mac = peer(uid, "mac-1", "your Mac");
+  // The phone's own timers do not keep Node running (they are unref'd), and
+  // this waits a few seconds for the PC that never answers.
+  const keepAlive = setInterval(() => {}, 100);
+  const r = await p.call("POST", "/api/cloud/sync-now", { everywhere: true }).finally(() => clearInterval(keepAlive));
+  assert.equal(r.status, 200, JSON.stringify(r.data));
+  assert.deepEqual(r.data.devices.synced, ["your Mac"]);
+  assert.deepEqual(r.data.devices.missing, ["your Windows PC"], "the open one without internet is reported");
+  assert.equal(r.data.devices.asked, 2, "the closed app is not asked or waited for");
+  const asked = mac.sock.got.find((m) => m.kind === "sync");
+  assert.equal(asked.device, myId);
+  assert.equal(asked.name, "your Android phone");
+  assert.ok(!("devices" in (await p.call("POST", "/api/cloud/sync-now")).data), "Settings' Sync now stays on this phone");
+
+  // The Mac is refreshed: this phone hears, syncs, says so, and the page can tell.
+  mac.sock.got.length = 0;
+  mac.say({ kind: "sync", id: "m1", device: "mac-1", name: "your Mac" });
+  assert.ok(await until(() => mac.sock.got.some((m) => m.kind === "heard" && m.id === "m1" && m.to === "mac-1")), "heard");
+  assert.ok(await until(() => mac.sock.got.some((m) => m.kind === "synced" && m.id === "m1" && m.ok)), "synced");
+  const rs = (await p.call("GET", "/api/cloud/remote-sync")).data;
+  assert.equal(rs.from, "your Mac");
+  assert.ok(rs.done && rs.seq > 0);
+
+  // Into the background: counts as closed, off the channel; back: open again.
+  p.ctx.document.visibilityState = "hidden";
+  p.fire("document", "visibilitychange");
+  assert.ok(await until(() => row(myId)?.app_open === false), "in the background it is marked closed");
+  assert.ok(!p.ctx.__MUHURTA_DEVICES__.connected(), "and leaves the channel");
+  p.ctx.document.visibilityState = "visible";
+  p.fire("document", "visibilitychange");
+  assert.ok(await until(() => p.ctx.__MUHURTA_DEVICES__.connected() && row(myId)?.app_open === true), "back on screen: open and connected");
+
+  // Signing out: closed and off the channel.
+  await p.call("POST", "/api/cloud/sign-out", { force: true });
+  assert.equal(row(myId).app_open, false);
+  assert.ok(!p.ctx.__MUHURTA_DEVICES__.connected());
+  mac.close();
 });

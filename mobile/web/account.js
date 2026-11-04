@@ -689,9 +689,21 @@
 
   route("GET", /^\/api\/cloud\/status$/, () => fullStatus());
 
-  route("POST", /^\/api\/cloud\/sync-now$/, async () => {
+  // {everywhere: true} (a refresh): every other device with the app open
+  // syncs too, and the answer says which could not (devices.js).
+  route("POST", /^\/api\/cloud\/sync-now$/, async ({ body }) => {
     await runOnce();
-    return fullStatus();
+    let st = fullStatus();
+    const devices = window.__MUHURTA_DEVICES__;
+    if (body.everywhere && devices && st.signed_in && st.sync && !st.sync.error) {
+      const report = await devices.syncEverywhere();
+      if (report.synced.length) {
+        await runOnce(); // what they uploaded just now
+        st = fullStatus();
+      }
+      st.devices = report;
+    }
+    return st;
   });
 
   route("POST", /^\/api\/cloud\/sign-in$/, async ({ body }) => {
@@ -787,6 +799,7 @@
   });
 
   route("POST", /^\/api\/cloud\/sign-out$/, async ({ body }) => {
+    if (window.__MUHURTA_DEVICES__) await window.__MUHURTA_DEVICES__.leaving();
     if (status().signed_in) await runOnce();
     if (status().signed_in && !body.force) {
       const pending = pendingChanges();
@@ -1125,7 +1138,15 @@
     return [201, Array.isArray(rows) && rows[0] ? rows[0] : {}];
   });
 
-  window.__MUHURTA_ACCOUNT__ = { signedIn: () => !CONFIGURED || status().signed_in, nudge, runOnce, status: fullStatus };
+  window.__MUHURTA_ACCOUNT__ = {
+    signedIn: () => !CONFIGURED || status().signed_in, nudge, runOnce, status: fullStatus,
+    // devices.js: the account's live channel
+    configured: CONFIGURED, request, accessToken, url: URL_BASE, key: KEY,
+    userId: () => {
+      const s = session();
+      return s && !s.password_pending && !s.mfa_pending ? s.user_id : null;
+    },
+  };
   L.cloudConfigured = CONFIGURED;
   // backup.js reads and writes rows in the server's shape, like sync does.
   L.syncRows = { TABLES, LOCAL_ONLY_SETTINGS, hasOwnSettings, settingsRow, nextId, email: () => status().email };
