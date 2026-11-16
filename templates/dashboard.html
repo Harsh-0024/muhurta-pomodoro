@@ -139,7 +139,35 @@
     <div class="bar-chart" id="monthChart"></div>
   </section>
 </div>
+<div id="dayModal" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="dayTitle" aria-hidden="true">
+  <div class="modal-backdrop" tabindex="-1" aria-hidden="true"></div>
+  <div class="modal-sheet day-sheet">
+    <button type="button" class="modal-close" id="dayClose" aria-label="Close">×</button>
+    <p class="modal-kicker" id="dayKicker"></p>
+    <h2 class="modal-title" id="dayTitle"></h2>
+    <dl class="day-totals">
+      <div><dt>Focus</dt><dd id="dayFocus">--</dd></div>
+      <div><dt>Rest</dt><dd id="dayRest">--</dd></div>
+      <div><dt>Sittings</dt><dd id="daySittings">--</dd></div>
+    </dl>
+    <div id="dayBody">
+      <div class="day-strip" id="dayStrip" role="img"></div>
+      <div class="day-hours" id="dayHours" aria-hidden="true"></div>
+      <p class="day-key" aria-hidden="true"><span><i></i>Focus</span><span><i class="is-rest"></i>Rest</span></p>
+    </div>
+    <ol class="day-list" id="dayList"></ol>
+    <p class="day-empty hidden" id="dayEmpty">Nothing was timed on this day.</p>
+    <div class="day-actions">
+      <a href="{{ url_for('history_page') }}">Edit in History</a>
+      <span class="day-nav">
+        <button type="button" class="btn btn-quiet btn-small" id="dayPrev" aria-label="The day before">←</button>
+        <button type="button" class="btn btn-quiet btn-small" id="dayNext" aria-label="The day after">→</button>
+      </span>
+    </div>
+  </div>
+</div>
 {% endblock %}
 {% block scripts %}
+<script src="{{ url_for('static', filename='js/day-view.js') }}?v={{ asset_version }}" defer></script>
 <script src="{{ url_for('static', filename='js/dashboard.js') }}?v={{ asset_version }}" defer></script>
 {% endblock %}

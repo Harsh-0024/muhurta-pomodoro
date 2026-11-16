@@ -50,7 +50,8 @@
     document.addEventListener("keydown", (e) => {
       if (modal.classList.contains("hidden")) return;
       if (e.key === "Escape") close(false);
-      if (e.key === "Enter") close(true);
+      // Enter accepts, except on Cancel: there the key presses the button it is on.
+      if (e.key === "Enter" && document.activeElement?.id !== "confirmCancel") close(true);
     });
   }
 

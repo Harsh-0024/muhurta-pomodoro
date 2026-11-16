@@ -284,13 +284,38 @@
         cell.addEventListener("mousemove", moveTooltip);
         cell.addEventListener("mouseleave", hideTooltip);
         cell.addEventListener("pointerleave", hideTooltip);
-        cell.addEventListener("click", (event) => showTooltip(event, details));
+        cell.setAttribute("role", "button");
+        cell.addEventListener("click", () => openDay(day.day));
+        cell.addEventListener("keydown", (event) => {
+          if (event.key !== "Enter" && event.key !== " ") return;
+          event.preventDefault();
+          openDay(day.day);
+        });
         cell.addEventListener("focus", (event) => showTooltip(event, details));
         cell.addEventListener("blur", hideTooltip);
       } else {
         cell.setAttribute("aria-hidden", "true");
       }
       grid.appendChild(cell);
+    });
+  }
+
+  // The day's own view (day-view.js): when the focus happened, and its sittings.
+  function openDay(day) {
+    hideTooltip();
+    window.MuhurtaDayView?.open(day);
+  }
+
+  function makeDayButton(el, day, label) {
+    el.classList.add("is-open");
+    el.tabIndex = 0;
+    el.setAttribute("role", "button");
+    el.setAttribute("aria-label", label);
+    el.addEventListener("click", () => openDay(day));
+    el.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      openDay(day);
     });
   }
 
@@ -315,6 +340,7 @@
           <span>${formatMinutes(day.rest_minutes)} rest</span>
         </div>
       `;
+      makeDayButton(row, day.day, tooltipText(day, parseDay(day.day)));
       list.appendChild(row);
     });
   }
@@ -340,7 +366,7 @@
     const top = Math.max(...bars.map((b) => Number(b.minutes || 0)), goal, 1);
     el.innerHTML = "";
     el.style.setProperty("--bar-count", String(bars.length));
-    el.setAttribute("role", "img");
+    el.setAttribute("role", bars.some((b) => b.day) ? "group" : "img");
     el.setAttribute("aria-label", options?.label || "");
 
     const values = document.createElement("div");
@@ -362,6 +388,7 @@
       // A sliver for any focus at all, so a short day is not shown as none.
       fill.style.height = minutes > 0 ? `${Math.max(3, (minutes / top) * 100)}%` : "0";
       track.appendChild(fill);
+      if (bar.day) makeDayButton(track, bar.day, bar.title || bar.label);
       const label = document.createElement("span");
       label.textContent = bar.label;
       [value, track, label].forEach((node) => {
@@ -430,6 +457,7 @@
           label: i === last7.length - 1 ? "Today" : weekdayFormatter.format(date),
           minutes,
           title: tooltipText(d, date),
+          day: d.day,
           current: i === last7.length - 1,
           met: goal > 0 && minutes >= goal,
         };

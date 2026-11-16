@@ -826,7 +826,7 @@ body.modal-open {
   overflow: hidden;
 }
 
-.choice-actions /* Keyboard focus: the app's own soft gold ring, not the browser's default. */
+/* Keyboard focus: the app's own soft gold ring, not the browser's default. */
 .btn:focus-visible,
 .modal-close:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
@@ -2613,6 +2613,11 @@ body[data-theme="light"].page-home.rest-long {
 
 .page-dashboard .main {
   max-width: 1180px;
+}
+
+/* The day sheet is moved out of .main (day-view.js), so it is named too. */
+.page-dashboard .main,
+.page-dashboard .day-sheet {
   --growth-0: rgba(255, 255, 255, 0.045);
   --growth-1: #b9d7aa;
   --growth-2: #73af72;
@@ -2624,7 +2629,8 @@ body[data-theme="light"].page-home.rest-long {
   --growth-bar: linear-gradient(90deg, #b9d7aa, #0f4f32);
 }
 
-body[data-theme="light"] .page-dashboard .main {
+body[data-theme="light"].page-dashboard .main,
+body[data-theme="light"].page-dashboard .day-sheet {
   --growth-0: rgba(37, 57, 36, 0.075);
   --growth-1: #cfe3c5;
   --growth-2: #87bb78;
@@ -2637,7 +2643,8 @@ body[data-theme="light"] .page-dashboard .main {
 }
 
 @media (prefers-color-scheme: light) {
-  body[data-theme="system"] .page-dashboard .main {
+  body[data-theme="system"].page-dashboard .main,
+  body[data-theme="system"].page-dashboard .day-sheet {
     --growth-0: rgba(37, 57, 36, 0.075);
     --growth-1: #cfe3c5;
     --growth-2: #87bb78;
@@ -5567,4 +5574,189 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   .bar-chart-dense .bar-values span {
     font-size: 0;
   }
+}
+
+/* ---- Dashboard: one day, opened from a square, a bar or a recent day ---- */
+
+.heat-cell.heat-active,
+.bar-track.is-open,
+.recent-row.is-open {
+  cursor: pointer;
+}
+
+.bar-track.is-open:hover,
+.bar-track.is-open:focus-visible {
+  outline: 2px solid var(--growth-line);
+  outline-offset: 2px;
+}
+
+.recent-row.is-open:hover .recent-date strong,
+.recent-row.is-open:focus-visible .recent-date strong {
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.day-sheet {
+  display: flex;
+  flex-direction: column;
+  width: min(540px, 100%);
+  max-height: min(640px, calc(100vh - 3rem));
+  max-height: min(640px, calc(100dvh - 3rem));
+}
+
+.day-sheet .modal-title {
+  margin-bottom: 0.9rem;
+  padding-right: 1.5rem;
+}
+
+.day-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0 0 1.1rem;
+}
+
+.day-totals dt {
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.day-totals dd {
+  margin: 0.2rem 0 0;
+  font-family: var(--font-serif);
+  font-size: 1.45rem;
+  line-height: 1.1;
+  color: var(--ink);
+}
+
+.day-strip {
+  position: relative;
+  height: 2.1rem;
+  border-radius: 0.5rem;
+  background: var(--growth-track);
+  overflow: hidden;
+}
+
+.day-strip span {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  min-width: 2px;
+}
+
+.day-strip .is-focus {
+  background: var(--growth-3);
+}
+
+.day-strip .is-rest {
+  top: 35%;
+  bottom: 35%;
+  background: var(--growth-2);
+  opacity: 0.5;
+}
+
+.day-hours {
+  position: relative;
+  height: 1.1rem;
+  margin: 0.3rem 0 0.9rem;
+  font-size: 0.66rem;
+  color: var(--muted);
+}
+
+.day-hours span {
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.day-hours span:first-child {
+  transform: none;
+}
+
+.day-hours span:last-child {
+  transform: translateX(-100%);
+}
+
+.day-key {
+  display: flex;
+  gap: 1rem;
+  margin: 0 0 0.75rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.day-key i {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  margin-right: 0.35rem;
+  border-radius: 0.2rem;
+  vertical-align: -0.05rem;
+  background: var(--growth-3);
+}
+
+.day-key i.is-rest {
+  background: var(--growth-2);
+  opacity: 0.5;
+}
+
+.day-list {
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+}
+
+.day-list li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-top: 1px solid var(--line);
+  font-size: 0.86rem;
+}
+
+.day-list .day-when {
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+
+.day-list .day-what {
+  color: var(--muted);
+  font-weight: 300;
+  text-align: right;
+}
+
+.day-list .day-what b {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.day-empty {
+  margin: 0.5rem 0 0;
+  color: var(--muted);
+}
+
+.day-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.day-nav {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.day-actions a {
+  color: var(--muted);
+  font-size: 0.82rem;
 }

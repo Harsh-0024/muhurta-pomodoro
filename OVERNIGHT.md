@@ -21,6 +21,22 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
    "Recent days" list is hidden, since the bars show the same days.
    Checked: desktop browser (dark), iPhone simulator (light).
 
+2. **Dashboard: open a day.** Click (or tap) a square of the year, a bar of the last 7 days or
+   a row of Recent days: a sheet shows that day's focus, rest and number of sittings, a strip
+   of when in the day they happened, and each sitting with its times and which clock it was.
+   Arrow buttons (and the left and right keys) step to the day before or after; Escape closes.
+   Uses `/api/activity/day`, which computers and phones both already answer.
+   Checked: desktop (dark and light), iPhone simulator.
+
+3. **Fixes found on the way**
+   - Keyboard focus ring: a stray `.choice-actions` in front of the rule meant the gold ring
+     only showed on buttons inside a choice row. Now every button and dialog close shows it.
+   - Light theme on the dashboard: the rule for the light green palette was written as
+     `body[data-theme="light"] .page-dashboard` (the body *is* `.page-dashboard`), so it never
+     matched and light mode drew with the dark palette. Fixed for "light" and "system".
+   - "Are you sure?" dialog: Enter pressed while the Cancel button had focus chose Continue.
+     Enter on Cancel now cancels.
+
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
