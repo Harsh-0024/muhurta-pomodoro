@@ -688,3 +688,19 @@ body.is-mobile .update-required-text {
 body.is-mobile .timer-alarm a.btn {
   display: none;
 }
+
+/* ---- Dashboard: the week and the weekday and month bars, calm ---- */
+
+body.is-mobile .dashboard-patterns {
+  margin-top: 0;
+  gap: 0;
+}
+
+body.is-mobile .bar-tracks {
+  height: 5.5rem;
+}
+
+/* The last 7 days are drawn as bars above, so the same days as a list go. */
+body.is-mobile .dashboard-panel:has(> .recent-list) {
+  display: none;
+}

@@ -26,6 +26,31 @@
   </article>
 </section>
 
+<section class="dashboard-panel week-panel" aria-labelledby="weekTitle">
+  <div class="week-today">
+    <div class="goal-ring" id="goalRing" role="img" aria-label="Today's focus">
+      <svg viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="goal-ring-track" cx="60" cy="60" r="52"></circle>
+        <circle class="goal-ring-fill" id="goalRingFill" cx="60" cy="60" r="52" pathLength="100" stroke-dasharray="0 100"></circle>
+      </svg>
+      <div class="goal-ring-text">
+        <span class="metric-label">Today</span>
+        <strong id="todayFocus">--</strong>
+      </div>
+    </div>
+    <p class="week-today-note" id="todayNote"></p>
+  </div>
+  <div class="week-main">
+    <div class="panel-head week-head">
+      <div>
+        <h2 class="card-title" id="weekTitle">Last 7 days</h2>
+        <p class="card-lede" id="weekSubtitle"></p>
+      </div>
+    </div>
+    <div class="bar-chart" id="weekChart"></div>
+  </div>
+</section>
+
 <section class="dashboard-panel heatmap-panel" aria-labelledby="heatmapTitle">
   <div class="panel-head">
     <div>
@@ -92,6 +117,26 @@
     </div>
     <div class="bell-curve-container" id="bellCurveContainer"></div>
     <div class="bell-curve-stats" id="bellCurveStats"></div>
+  </section>
+</div>
+<div class="dashboard-patterns">
+  <section class="dashboard-panel" aria-labelledby="weekdayTitle">
+    <div class="panel-head">
+      <div>
+        <h2 class="card-title" id="weekdayTitle">By weekday</h2>
+        <p class="card-lede" id="weekdaySubtitle"></p>
+      </div>
+    </div>
+    <div class="bar-chart" id="weekdayChart"></div>
+  </section>
+  <section class="dashboard-panel" aria-labelledby="monthTitle">
+    <div class="panel-head">
+      <div>
+        <h2 class="card-title" id="monthTitle">By month</h2>
+        <p class="card-lede" id="monthSubtitle"></p>
+      </div>
+    </div>
+    <div class="bar-chart" id="monthChart"></div>
   </section>
 </div>
 {% endblock %}

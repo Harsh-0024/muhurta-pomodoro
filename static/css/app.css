@@ -5309,3 +5309,262 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* ---- Dashboard: today against the goal, the last 7 days, weekdays and months ---- */
+
+.week-panel {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 1.75rem;
+  margin-bottom: 1rem;
+}
+
+.week-today {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  width: 10.5rem;
+  text-align: center;
+}
+
+.goal-ring {
+  position: relative;
+  width: 8.25rem;
+  height: 8.25rem;
+}
+
+.goal-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.goal-ring circle {
+  fill: none;
+  stroke-width: 7;
+}
+
+.goal-ring-track {
+  stroke: var(--growth-track);
+}
+
+.goal-ring-fill {
+  stroke: var(--growth-2);
+  stroke-linecap: round;
+  transition: stroke-dasharray 600ms ease;
+}
+
+.goal-ring.is-met .goal-ring-fill {
+  stroke: var(--growth-3);
+}
+
+.goal-ring-text {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+}
+
+.goal-ring-text strong {
+  font-family: var(--font-serif);
+  font-size: 1.7rem;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.week-today-note {
+  margin: 0;
+  min-height: 1.1em;
+  font-size: 0.8rem;
+  font-weight: 300;
+  line-height: 1.35;
+  color: var(--muted);
+}
+
+.week-main {
+  min-width: 0;
+}
+
+.week-head {
+  display: block;
+  margin-bottom: 0.6rem;
+}
+
+.dashboard-patterns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.dashboard-patterns .panel-head {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.bar-chart {
+  --bar-count: 7;
+  --bar-gap: 0.6rem;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.bar-chart-dense {
+  --bar-gap: 0.35rem;
+}
+
+.bar-values,
+.bar-tracks,
+.bar-labels {
+  display: grid;
+  grid-template-columns: repeat(var(--bar-count), minmax(0, 1fr));
+  gap: var(--bar-gap);
+}
+
+.bar-values span,
+.bar-labels span {
+  overflow: hidden;
+  text-align: center;
+  white-space: nowrap;
+  font-size: 0.7rem;
+  color: var(--muted);
+}
+
+.bar-values span {
+  min-height: 1.1em;
+  font-variant-numeric: tabular-nums;
+}
+
+.bar-chart-dense .bar-values span {
+  font-size: 0.62rem;
+  letter-spacing: -0.01em;
+}
+
+.bar-values .is-current,
+.bar-labels .is-current {
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.bar-tracks {
+  position: relative;
+  height: 6.5rem;
+}
+
+.bar-track {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  border-radius: 0.45rem;
+  background: var(--growth-track);
+  overflow: hidden;
+}
+
+.bar-fill {
+  display: block;
+  width: 100%;
+  border-radius: 0.45rem;
+  background: var(--growth-2);
+  opacity: 0.55;
+  transition: height 500ms ease;
+}
+
+.bar-track.is-met .bar-fill {
+  opacity: 0.8;
+}
+
+.bar-track.is-current .bar-fill {
+  background: var(--growth-3);
+  opacity: 1;
+}
+
+.bar-goal {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px dashed var(--muted);
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+/* The goal's label sits in a gutter to the right of the bars, on its line. */
+.bar-chart.has-goal {
+  padding-right: 3.6rem;
+}
+
+.bar-goal::after {
+  content: attr(data-label);
+  position: absolute;
+  left: 100%;
+  top: 0;
+  width: 3.6rem;
+  padding-left: 0.4rem;
+  transform: translateY(-50%);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  color: var(--ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .goal-ring-fill,
+  .bar-fill {
+    transition: none;
+  }
+}
+
+@media (max-width: 840px) {
+  .dashboard-patterns {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .week-panel {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+
+  .week-today {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 1rem;
+    width: auto;
+    text-align: left;
+  }
+
+  .goal-ring {
+    flex: none;
+    width: 6.5rem;
+    height: 6.5rem;
+  }
+
+  .goal-ring-text strong {
+    font-size: 1.4rem;
+  }
+
+  .bar-chart {
+    --bar-gap: 0.4rem;
+  }
+
+  .bar-values span {
+    font-size: 0.6rem;
+    letter-spacing: -0.01em;
+  }
+
+  .bar-chart-dense {
+    --bar-gap: 0.2rem;
+  }
+
+  .bar-chart-dense .bar-values span {
+    font-size: 0;
+  }
+}

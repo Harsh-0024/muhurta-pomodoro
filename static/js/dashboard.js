@@ -319,6 +319,186 @@
     });
   }
 
+  // ── Bars: the last 7 days, weekdays and months ───────────────────
+
+  const weekdayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "short" });
+  const longWeekdayFormatter = new Intl.DateTimeFormat(undefined, { weekday: "long" });
+  const longMonthFormatter = new Intl.DateTimeFormat(undefined, { month: "long" });
+
+  function localDayKey(date) {
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
+  }
+
+  // bars: [{ label, minutes, title, current, met }]. goal (minutes) draws a
+  // dashed line across the chart when it fits under the tallest bar's scale.
+  function renderBars(el, bars, options) {
+    if (!el) return;
+    const goal = Number(options?.goal || 0);
+    const top = Math.max(...bars.map((b) => Number(b.minutes || 0)), goal, 1);
+    el.innerHTML = "";
+    el.style.setProperty("--bar-count", String(bars.length));
+    el.setAttribute("role", "img");
+    el.setAttribute("aria-label", options?.label || "");
+
+    const values = document.createElement("div");
+    values.className = "bar-values";
+    const tracks = document.createElement("div");
+    tracks.className = "bar-tracks";
+    const labels = document.createElement("div");
+    labels.className = "bar-labels";
+
+    bars.forEach((bar) => {
+      const minutes = Number(bar.minutes || 0);
+      const value = document.createElement("span");
+      value.textContent = minutes <= 0 ? "" : options?.compact && minutes >= 60 ? `${Math.round(minutes / 60)}h` : formatMinutes(minutes);
+      const track = document.createElement("div");
+      track.className = "bar-track";
+      track.title = bar.title || "";
+      const fill = document.createElement("span");
+      fill.className = "bar-fill";
+      // A sliver for any focus at all, so a short day is not shown as none.
+      fill.style.height = minutes > 0 ? `${Math.max(3, (minutes / top) * 100)}%` : "0";
+      track.appendChild(fill);
+      const label = document.createElement("span");
+      label.textContent = bar.label;
+      [value, track, label].forEach((node) => {
+        if (bar.current) node.classList.add("is-current");
+        if (bar.met) node.classList.add("is-met");
+      });
+      values.appendChild(value);
+      tracks.appendChild(track);
+      labels.appendChild(label);
+    });
+
+    el.classList.toggle("has-goal", goal > 0);
+    if (goal > 0) {
+      const line = document.createElement("span");
+      line.className = "bar-goal";
+      line.style.bottom = `${(goal / top) * 100}%`;
+      line.dataset.label = `Goal ${formatMinutes(goal)}`;
+      tracks.appendChild(line);
+    }
+    el.append(values, tracks, labels);
+  }
+
+  function renderWeek(data) {
+    const recent = data.recent_days || [];
+    const goal = Number(data.goal_minutes || 0);
+    const today = recent[0] || { focus_minutes: 0 };
+    const todayMinutes = Number(today.focus_minutes || 0);
+
+    setText("todayFocus", formatMinutes(todayMinutes));
+    const fill = byId("goalRingFill");
+    const ratio = goal > 0 ? clamp(todayMinutes / goal, 0, 1) : todayMinutes > 0 ? 1 : 0;
+    if (fill) {
+      fill.setAttribute("stroke-dasharray", `${(ratio * 100).toFixed(2)} 100`);
+      fill.style.opacity = ratio > 0 ? "1" : "0"; // a round cap would leave a dot at zero
+    }
+    const ring = byId("goalRing");
+    if (ring) ring.classList.toggle("is-met", goal > 0 && todayMinutes >= goal);
+    let note = "";
+    if (goal > 0) {
+      note = todayMinutes >= goal
+        ? `Daily goal of ${formatMinutes(goal)} met`
+        : `${formatMinutes(Math.ceil(goal - todayMinutes))} to your ${formatMinutes(goal)} goal`;
+    }
+    setText("todayNote", note);
+    if (ring) ring.setAttribute("aria-label", `Today: ${formatMinutes(todayMinutes)} of focus. ${note}`);
+
+    const last7 = recent.slice(0, 7).reverse();
+    const before = recent.slice(7, 14);
+    const sum = (rows) => rows.reduce((total, d) => total + Number(d.focus_minutes || 0), 0);
+    const total = sum(last7);
+    const diff = Math.round(total) - Math.round(sum(before));
+    const met = last7.filter((d) => goal > 0 && Number(d.focus_minutes || 0) >= goal).length;
+    const parts = [`${formatMinutes(total)} of focus`];
+    if (before.length === 7 && (total > 0 || diff !== 0)) {
+      parts.push(diff === 0 ? "same as the 7 days before" : `${formatMinutes(Math.abs(diff))} ${diff > 0 ? "more" : "less"} than the 7 days before`);
+    }
+    if (goal > 0 && met > 0) parts.push(`goal met on ${formatDays(met)}`);
+    setText("weekSubtitle", `${parts.join(" · ")}.`);
+
+    renderBars(
+      byId("weekChart"),
+      last7.map((d, i) => {
+        const date = parseDay(d.day);
+        const minutes = Number(d.focus_minutes || 0);
+        return {
+          label: i === last7.length - 1 ? "Today" : weekdayFormatter.format(date),
+          minutes,
+          title: tooltipText(d, date),
+          current: i === last7.length - 1,
+          met: goal > 0 && minutes >= goal,
+        };
+      }),
+      { goal, label: `Focus on each of the last 7 days: ${formatMinutes(total)} in all` }
+    );
+  }
+
+  function renderPatterns(data) {
+    const year = data.range?.year || selectedYear;
+    const start = data.range?.calc_start || "";
+    const end = data.range?.calc_end || "";
+    // Only days that have happened, from the first day anything was logged.
+    const days = (data.days || []).filter((d) => (!start || d.day >= start) && (!end || d.day <= end));
+    const todayKey = localDayKey(new Date());
+
+    const weekdays = Array.from({ length: 7 }, () => ({ minutes: 0, count: 0 }));
+    const months = Array.from({ length: 12 }, () => ({ minutes: 0, active: 0 }));
+    days.forEach((d) => {
+      const date = parseDay(d.day);
+      const minutes = Number(d.focus_minutes || 0);
+      const w = (date.getDay() + 6) % 7; // Monday first
+      weekdays[w].minutes += minutes;
+      weekdays[w].count += 1;
+      months[date.getMonth()].minutes += minutes;
+      if (minutes > 0) months[date.getMonth()].active += 1;
+    });
+
+    const monday = new Date(2024, 0, 1); // a Monday
+    const weekdayBars = weekdays.map((w, i) => {
+      const date = new Date(monday.getFullYear(), 0, 1 + i);
+      const average = w.count ? w.minutes / w.count : 0;
+      return {
+        label: weekdayFormatter.format(date),
+        long: longWeekdayFormatter.format(date),
+        minutes: average,
+        title: `${longWeekdayFormatter.format(date)}s: ${formatMinutes(average)} on average`,
+      };
+    });
+    const bestWeekday = weekdayBars.reduce((best, b) => (b.minutes > best.minutes ? b : best), weekdayBars[0]);
+    weekdayBars.forEach((b) => { b.current = b === bestWeekday && b.minutes > 0; });
+    setText(
+      "weekdaySubtitle",
+      bestWeekday.minutes > 0
+        ? `Average focus per day in ${year}. ${bestWeekday.long} is your strongest day.`
+        : `Average focus per day in ${year}.`
+    );
+    renderBars(byId("weekdayChart"), weekdayBars, { label: `Average focus by weekday in ${year}` });
+
+    const thisMonth = todayKey.slice(0, 4) === String(year) ? new Date().getMonth() : -1;
+    const monthBars = months.map((m, i) => ({
+      label: monthNames[i].slice(0, 1),
+      long: longMonthFormatter.format(new Date(year, i, 1)),
+      minutes: m.minutes,
+      title: `${longMonthFormatter.format(new Date(year, i, 1))}: ${formatMinutes(m.minutes)} on ${formatDays(m.active)}`,
+      current: i === thisMonth,
+    }));
+    const bestMonth = monthBars.reduce((best, b) => (b.minutes > best.minutes ? b : best), monthBars[0]);
+    setText(
+      "monthSubtitle",
+      bestMonth.minutes > 0
+        ? `Total focus each month of ${year}. Most in ${bestMonth.long}: ${formatMinutes(bestMonth.minutes)}.`
+        : `Total focus each month of ${year}.`
+    );
+    const monthChart = byId("monthChart");
+    renderBars(monthChart, monthBars, { label: `Total focus by month in ${year}`, compact: true });
+    if (monthChart) monthChart.classList.add("bar-chart-dense");
+  }
+
   // ── Rhythm profile: the usual sitting, week by week ──────────────
 
 
@@ -653,7 +833,9 @@
       renderSummary(data);
       renderYears(data);
       renderHeatmap(data);
+      renderWeek(data);
       renderRecent(data);
+      renderPatterns(data);
       renderBellCurve(data);
     } catch (e) {
       setText("heatmapSubtitle", "Dashboard data could not be loaded.");
