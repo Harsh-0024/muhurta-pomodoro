@@ -141,6 +141,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     Settings. A side benefit: the calendar icons in date boxes now show on the dark pages.
     Checked on the iPhone simulator in dark mode, and switching themes on the computer.
 
+19. **Keyboard focus shows on the top bar.** Tabbing through a page with the keyboard, the page
+    links and the level button only got their hover tint, and on the current page's gold tab
+    nothing changed at all, so you couldn't tell where you were. They now get the same soft gold
+    ring as the other buttons. A check that focuses every control on every page and compares its
+    look before and after found only these; all 143 controls now show focus. Checked on the
+    computer with real Tab presses.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.

@@ -827,8 +827,13 @@ body.modal-open {
 }
 
 /* Keyboard focus: the app's own soft gold ring, not the browser's default. */
+/* The top bar's page links, the level button and its menu included: before, keyboard focus there
+   only looked like hover, and on the current page's gold tab it showed nothing. */
 .btn:focus-visible,
-.modal-close:focus-visible {
+.modal-close:focus-visible,
+.nav-link:focus-visible,
+.nav-level-button:focus-visible,
+.level-option:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
   outline-offset: 2px;
 }
