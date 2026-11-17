@@ -9,6 +9,7 @@
   /* The gold behind dark words (the chosen page, level, choice, the account initial). */
   --gold-fill: linear-gradient(135deg, var(--gold2), var(--gold));
   --line: rgba(255, 255, 255, 0.08);
+  --field-line: #6e6452; /* a box you type into or pick from: warm, 3:1+ on every dark surface */
   --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
   --menu-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
   --topbar-bg: rgba(7, 6, 5, 0.65);
@@ -42,6 +43,7 @@ body[data-theme="light"] {
      filled gold stays light, as on the Start buttons (about 8:1). */
   --gold-fill: linear-gradient(135deg, #f3e8cf, #c9a962);
   --line: rgba(43, 35, 24, 0.13);
+  --field-line: #8f826b; /* 3.3:1+ on every light surface */
   --shadow: 0 24px 72px rgba(71, 58, 39, 0.15);
   --menu-shadow: 0 24px 68px rgba(71, 58, 39, 0.18);
   --topbar-bg: rgba(248, 247, 242, 0.78);
@@ -71,6 +73,7 @@ body[data-theme="light"] {
        filled gold stays light, as on the Start buttons (about 8:1). */
     --gold-fill: linear-gradient(135deg, #f3e8cf, #c9a962);
     --line: rgba(43, 35, 24, 0.13);
+    --field-line: #8f826b;
     --shadow: 0 24px 72px rgba(71, 58, 39, 0.15);
     --menu-shadow: 0 24px 68px rgba(71, 58, 39, 0.18);
     --topbar-bg: rgba(248, 247, 242, 0.78);
@@ -1591,7 +1594,7 @@ body.mode-cumulative .phase-label {
   gap: 1rem;
   width: 100%;
   border-radius: 14px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--field-line);
   background: var(--control-bg);
   color: var(--ink);
   font: inherit;
@@ -1961,7 +1964,7 @@ body.mode-cumulative .phase-label {
   appearance: none;
   -webkit-appearance: none;
   border-radius: 10px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--field-line);
   background-color: var(--control-bg);
   background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
     linear-gradient(135deg, var(--muted) 50%, transparent 50%);
@@ -2142,7 +2145,7 @@ body.mode-cumulative .phase-label {
 .input {
   width: 100%;
   border-radius: 10px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--field-line);
   background: var(--control-bg);
   color: var(--ink);
   font: inherit;

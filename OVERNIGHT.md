@@ -354,8 +354,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     pulse and the like were nearly invisible when off. The off track is now a warm grey
     (`#857e73`): 3.5-3.9:1 against the page, the white knob 4:1 on it, like the iPhone's own
     switches. On (gold) and the dark theme already passed and are unchanged. Checked on the iPhone.
-    Left as is: the boxes you type into have soft outlines (about 1.2:1) in both themes, part of
-    the look; each has a label above it, so this is your call.
+52. **Boxes you type into have a visible edge.** Their outlines were about 1.2:1 against the
+    page in both themes, so a box was hard to find. They now use a warm line from the app's own
+    palette (`--field-line`: `#6e6452` dark, `#8f826b` light), about 3:1, still one thin pixel,
+    not grey. Covers text boxes, the settings selects and the level picker. Checked on the
+    iPhone in light mode; Liftbook got the same treatment.
 
 ## If you release this: lines for "What's new"
 
