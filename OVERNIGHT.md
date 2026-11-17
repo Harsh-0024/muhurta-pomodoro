@@ -241,6 +241,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     device with the kind you picked, and come back when you return to Settings; Send or an
     emptied box clears them, and sign-out clears them with the running clocks. Checked on the
     computer: typed, reloaded, the words and "Could be better" came back.
+33. **Every control shows keyboard focus.** Went through each page on the computer, focusing
+    every link, button and field in turn. Two showed nothing: the name in the top bar (a link
+    home) and the Recent days rows on the Dashboard (only their date underlined, as on hover).
+    Both now get the gold ring the buttons and page links use. The big time on Timer has no ring
+    on purpose: focusing it selects the time and its hint changes to "Minutes, or h:mm:ss".
+    The phone build still hides rings on buttons (no keyboard there). Checked by rerunning the
+    same sweep: nothing left.
 
 ## If you release this: lines for "What's new"
 

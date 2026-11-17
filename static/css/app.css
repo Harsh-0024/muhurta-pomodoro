@@ -5950,3 +5950,13 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   color: #1a1208;
   background: linear-gradient(135deg, var(--gold2), var(--gold));
 }
+
+/* Keyboard focus on the two places that showed none: the name in the top bar (a link home) had
+   no ring at all, and a Recent days row only underlined its date, the same as a mouse passing
+   over it. Both get the app's gold ring, like the buttons and page links. */
+.brand:focus-visible,
+.recent-row.is-open:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
+  outline-offset: 2px;
+  border-radius: 0.5rem;
+}
