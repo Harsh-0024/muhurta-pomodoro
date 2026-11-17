@@ -92,7 +92,8 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
 
 11. **Tests for the Timer.** `tests/clocks.test.mjs` runs the real `timer-core.js` in Node with
     a stand-in page and a clock it can move: adding time while running, paused and ringing,
-    the 24-hour cap, and pausing when another clock starts. It is added to the Tests workflow.
+    the 24-hour cap, and pausing when another clock starts. It also covers the quick
+    lengths under the Timer (how blocks are counted and which six lengths show). It is added to the Tests workflow.
 
 12. **Flow and Timer say what they saved.** Stopping Flow sent the clock back to 00:00 with no word on
     what happened to the time. It now shows "Saved: 42 min of focus." for a few seconds

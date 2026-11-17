@@ -126,3 +126,43 @@ test("starting another clock pauses a running timer with a notice", () => {
   assert.equal(d.pausedBy, "flow");
   assert.deepEqual(p.logged.map((l) => [l.sec, l.details.paused_by]), [[45, "flow"]]);
 });
+
+/* ---------- the Timer's quick lengths (static/js/quick-lengths.js) ---------- */
+
+import { createRequire } from "node:module";
+const Q = createRequire(import.meta.url)(join(ROOT, "static/js/quick-lengths.js"));
+const seg = (kind, start, minutes, details) => {
+  const a = Date.parse(`2026-11-17T${start}:00Z`);
+  return { kind, started_at: new Date(a).toISOString(), ended_at: new Date(a + minutes * 60000).toISOString(), duration_sec: minutes * 60, details };
+};
+
+test("quick lengths: a short break doesn't end a block, a long one does", () => {
+  const blocks = Q.blocks([
+    seg("work", "09:00", 20),
+    seg("pause", "09:20", 3),
+    seg("flow", "09:23", 10), // 3 minutes away: the same block, 30 minutes
+    seg("timer", "10:00", 12), // 27 minutes away: a new block
+    seg("timer", "11:00", 0.5), // under a minute: not a block
+  ]);
+  assert.deepEqual(blocks, [30 * 60, 12 * 60]);
+});
+
+test("quick lengths: a Rhythm rest taken in full ends the block, however short", () => {
+  const blocks = Q.blocks([
+    seg("work", "09:00", 24),
+    seg("rest", "09:24", 3, { duration_sec: 180 }),
+    seg("work", "09:27", 24),
+  ]);
+  assert.deepEqual(blocks, [24 * 60, 24 * 60]);
+});
+
+test("quick lengths: six steps with the usual length third", () => {
+  const presets = [12, 24, 36, 48, 60, 72, 84, 96].map((work_min) => ({ work_min }));
+  const usual48 = Q.pick({ segments: [seg("work", "09:00", 47), seg("work", "12:00", 50)], presets, fallbackMin: 24 });
+  assert.equal(usual48.usual, 48);
+  assert.deepEqual(usual48.lengths, [24, 36, 48, 60, 72, 84]);
+  // No history: the fallback level; near the short end the six still fill.
+  assert.deepEqual(Q.pick({ segments: [], presets, fallbackMin: 12 }).lengths, [6, 12, 24, 36, 48, 60]);
+  // Near the long end too.
+  assert.deepEqual(Q.pick({ segments: [seg("flow", "09:00", 95)], presets, fallbackMin: 24 }).lengths, [36, 48, 60, 72, 84, 96]);
+});
