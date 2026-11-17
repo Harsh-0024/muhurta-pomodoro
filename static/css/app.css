@@ -5909,3 +5909,11 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
     inset: -0.3rem 0;
   }
 }
+
+/* Touch screens: iPhone Safari zooms the page in when a box under 16px is tapped, and
+   doesn't zoom back out. Boxes and pick lists are 16px there. */
+@media (pointer: coarse) {
+  .input,
+  .select,
+  .page-settings .select { font-size: 16px; }
+}

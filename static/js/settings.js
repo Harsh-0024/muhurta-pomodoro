@@ -594,7 +594,7 @@
     const form = $("customForm");
     const fd = new FormData(form);
     return {
-      name: String(fd.get("name") || "").trim(),
+      name: String(fd.get("preset_label") || "").trim(),
       work_min: parseInt(String(fd.get("work_min")), 10),
       short_rest_min: parseInt(String(fd.get("short_rest_min")), 10),
       long_rest_min: parseInt(String(fd.get("long_rest_min")), 10),

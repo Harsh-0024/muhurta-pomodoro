@@ -183,6 +183,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     touch screens each now answers to a finger-sized area around it; they look exactly as before
     and nothing moves. Checked on the iPhone simulator: a tap just outside the "i" opens it.
 
+25. **Tapping a box on an iPhone no longer zooms the page in.** iPhone Safari zooms in on any
+    text box or pick list smaller than 16px and doesn't zoom back out. Every box in Settings
+    (combination name and lengths, bells, profile, two-step code, delete check, feedback) was 14 to 15px.
+    On touch screens they are now 16px. The combination's Name box also offered to fill in your
+    own name from your contact card; it no longer does. Checked on the iPhone simulator, and
+    saving a combination still works.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
