@@ -330,6 +330,9 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     most). The largest images are the website screenshots in `docs/img` (about 330 KB each for
     the dashboard ones); making those smaller means re-compressing photos, which changes how they
     look, so they were left for you to decide.
+48. **Checked: page basics (no change needed).** Every page says it's in English (so a screen
+    reader pronounces it right), allows pinch zoom, and gives the browser bar colours for dark,
+    light and automatic, kept in step with the theme by `theme-color.js`.
 
 ## If you release this: lines for "What's new"
 
