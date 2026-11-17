@@ -121,6 +121,8 @@
       '<span class="today-text"><span class="today-key">Today</span> <b class="today-value">0m</b> <span class="today-goal"></span></span>' +
       '<span class="today-track"><span class="today-fill"></span></span>';
     quote.parentNode.insertBefore(el, quote);
+    loggedDay = dayKey(Date.now());
+    lastLive = liveStart() ? `${liveStart()}` : "";
     load();
     window.setInterval(draw, 1000);
     window.setInterval(() => {
