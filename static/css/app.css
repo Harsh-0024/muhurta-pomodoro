@@ -26,11 +26,13 @@
   --font-sans: "DM Sans", system-ui, sans-serif;
 }
 
+/* Light: --muted is 66% ink so small grey text reads at 4.5:1 or better on the page's darkest
+   point (it was 58%, about 4:1); the quote's author line matches it. */
 body[data-theme="light"] {
   --bg0: #f2f0ea;
   --bg1: #fcfbf7;
   --ink: #211d18;
-  --muted: rgba(33, 29, 24, 0.58);
+  --muted: rgba(33, 29, 24, 0.66);
   --faint: rgba(33, 29, 24, 0.1);
   --gold: #a98237;
   --gold2: #5f4721;
@@ -44,7 +46,7 @@ body[data-theme="light"] {
   --menu-bg: rgba(252, 251, 247, 0.96);
   --menu-bg-strong: rgba(252, 251, 247, 0.98);
   --quote-ink: rgba(33, 29, 24, 0.76);
-  --quote-muted: rgba(33, 29, 24, 0.48);
+  --quote-muted: rgba(33, 29, 24, 0.66);
   --ring-track: rgba(43, 35, 24, 0.08);
   --danger-ink: #7b2d2d;
   --danger-bg: rgba(130, 42, 42, 0.08);
@@ -56,7 +58,7 @@ body[data-theme="light"] {
     --bg0: #f2f0ea;
     --bg1: #fcfbf7;
     --ink: #211d18;
-    --muted: rgba(33, 29, 24, 0.58);
+    --muted: rgba(33, 29, 24, 0.66);
     --faint: rgba(33, 29, 24, 0.1);
     --gold: #a98237;
     --gold2: #5f4721;
@@ -70,7 +72,7 @@ body[data-theme="light"] {
     --menu-bg: rgba(252, 251, 247, 0.96);
     --menu-bg-strong: rgba(252, 251, 247, 0.98);
     --quote-ink: rgba(33, 29, 24, 0.76);
-    --quote-muted: rgba(33, 29, 24, 0.48);
+    --quote-muted: rgba(33, 29, 24, 0.66);
     --ring-track: rgba(43, 35, 24, 0.08);
     --danger-ink: #7b2d2d;
     --danger-bg: rgba(130, 42, 42, 0.08);
@@ -368,9 +370,9 @@ body[data-theme="light"] .ambient {
   border-top: 1px solid var(--line);
 }
 
+/* No extra fading: at 60% of the muted colour the version was too faint to read (2:1). */
 .foot-version {
   margin-left: 0.75rem;
-  opacity: 0.6;
 }
 
 /* Notices that float over the page: "a new version is ready"

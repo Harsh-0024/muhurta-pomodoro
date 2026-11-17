@@ -248,6 +248,15 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     on purpose: focusing it selects the time and its hint changes to "Minutes, or h:mm:ss".
     The phone build still hides rings on buttons (no keyboard there). Checked by rerunning the
     same sweep: nothing left.
+34. **Small grey text is readable in light mode.** Measured every piece of text on each page
+    against its background, light and dark, by the usual standard (4.5:1, or 3:1 for large
+    text). Dark passed. In light, nearly all secondary text (descriptions, labels, the other page
+    links, Dashboard captions, Settings hints) sat at about 4:1, the quote's author at 3:1 and
+    the version in the footer at 2:1. The light grey is now 66% ink instead of 58% (4.9:1 even
+    where the page's background is darkest), the author line matches it, and the version is no
+    longer faded on top of the grey. Rerun after the change: nothing below the standard in either
+    mode; on the iPhone the descriptions still read as grey, just easier. Not measured: words on
+    the gold gradient buttons (dark on gold, clearly readable).
 
 ## If you release this: lines for "What's new"
 
