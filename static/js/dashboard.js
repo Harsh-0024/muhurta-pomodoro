@@ -276,6 +276,10 @@
       const cell = document.createElement("span");
       const level = levelFor(day, goal);
       cell.className = `heat-cell heat-level-${level} ${level > 0 ? "heat-active" : "heat-inactive"}`;
+      // Days still to come fade, so an empty square reads as a missed day; today gets a thin ring.
+      const lastDay = data.range?.calc_end;
+      if (lastDay && day.day > lastDay) cell.classList.add("heat-future");
+      if (lastDay && day.day === lastDay && lastDay === localDayKey(new Date())) cell.classList.add("heat-today");
       cell.dataset.day = day.day;
       if (level > 0) {
         cell.style.background = heatColor(Number(day.focus_minutes || 0) / maxFocus);

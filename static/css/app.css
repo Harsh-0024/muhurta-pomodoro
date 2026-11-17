@@ -2957,6 +2957,16 @@ body[data-theme="light"].page-dashboard .day-sheet {
   opacity: 0;
 }
 
+/* The rest of the year: there, but quieter than a day that passed without focus. */
+.heat-future {
+  opacity: 0.4;
+}
+
+.heat-today {
+  outline: 1.5px solid var(--growth-3);
+  outline-offset: 1px;
+}
+
 .heat-level-0 {
   background: var(--growth-0);
 }

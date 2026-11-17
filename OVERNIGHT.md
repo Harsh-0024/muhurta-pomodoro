@@ -388,9 +388,15 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     today as a missed day until you focused, so after a focus day yesterday it read "0 days" all
     morning. Today now only counts once it's over: until you focus it shows the run up to
     yesterday (1 day here), a focus block today adds one, and a whole missed day still resets it.
-    Same in both builds (`db.py` on the computer, `docs/app/local-api.js` on the phone). Checked
+    Same in both builds (`db.py` on the computer, `mobile/web/local-api.js` on the phone). Checked
     on the iPhone (0 → 1 day) and in the computer's numbers. Left as is: Consistency ("3.5/wk"
     from 1 of 2 days) is high early on, but its note shows the days it comes from.
+    (Fixed in round 58: this fix first went into the built copy `docs/app/local-api.js`, which the
+    next phone build would have overwritten; it is now in the source and the built copy is back.)
+58. **The year chart shows where today is.** In "Yearly consistency" the rest of the year (late
+    November, December) looked exactly like days that passed without focus. Days still to come now
+    fade, and today has a thin green ring, so an empty square means a missed day and you can see
+    where you are in the year. Past years are unchanged. Checked on the iPhone in light mode.
 
 ## If you release this: lines for "What's new"
 
