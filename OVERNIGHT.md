@@ -71,6 +71,16 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
    Uses `/api/activity/history`, which computers and phones already answer.
    Checked: desktop browser (dark), iPhone simulator (light).
 
+9. **Rhythm fixes**
+   - With a dialog open on Rhythm ("Reset session?", the shortcut list, What's new), the
+     timer's keys still worked behind it: Space paused or resumed the timer instead of
+     pressing the button it was on, and S, T, K, B acted too. Keys now belong to the dialog
+     while it is open (Timer and Flow already did this).
+   - Space no longer scrolls the Rhythm page in a short window.
+   - With "Auto-start rest" on, the notification before the long break said "starting short
+     rest". It now says "long rest".
+   Checked: desktop browser (keys), by reading (notification text).
+
 ## Ideas not done yet
 
 (see the end of this file as the list grows)

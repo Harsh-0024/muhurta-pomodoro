@@ -1023,7 +1023,7 @@
 
     state.pendingRest = buildPendingRest(state.phaseIndex);
     if (state.settings.auto_start_break && state.pendingRest) {
-      const restName = state.pendingRest.kind === "long_rest" ? "long rest" : "short rest";
+      const restName = state.pendingRest.kind === "long" ? "long rest" : "short rest";
       notify("Focus complete", `${p.name} · starting ${restName}.`);
       chooseStartRest();
       return;
@@ -1720,6 +1720,9 @@
   async function handleShortcut(e) {
     if (isTypingTarget(e.target)) return;
     if (e.metaKey || e.ctrlKey || e.altKey) return; // ⌘R is refresh, not Reset
+    // A dialog is open ("Reset session?", the shortcut list, What's new):
+    // its keys are its own, not the timer's behind it.
+    if (document.body.classList.contains("modal-open")) return;
     const k = e.key.toLowerCase();
 
     if (state.mode === "work_choice") {
@@ -1817,11 +1820,18 @@
     });
 
     document.addEventListener("keydown", (e) => {
+      // Space acts on keyup; here it is only kept from scrolling the page.
+      if ((e.code === "Space" || e.key === " ") && !isTypingTarget(e.target) && !document.body.classList.contains("modal-open")) {
+        e.preventDefault();
+        return;
+      }
       handleShortcut(e);
     });
     document.addEventListener("keyup", (e) => {
       if (e.code !== "Space" && e.key !== " ") return;
-      if (isTypingTarget(e.target)) return;
+      if (isTypingTarget(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
+      // In a dialog, Space presses the button it is on (Cancel, Continue).
+      if (document.body.classList.contains("modal-open")) return;
       e.preventDefault();
       if (state.running && state.mode === "work" && state.session.poolSec >= 1) takePoolRestNow();
       else if (state.running && state.mode === "extend") beginRestFromExtend();
