@@ -926,10 +926,13 @@
   }
 
   function ago(iso) {
-    const sec = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
+    const at = Date.parse(iso);
+    if (!Number.isFinite(at)) return "a while ago";
+    // Whole units, rounded down: 59½ minutes is "59 min ago", never "60 min ago".
+    const sec = Math.max(0, (Date.now() - at) / 1000);
     if (sec < 60) return "just now";
-    if (sec < 3600) return `${Math.round(sec / 60)} min ago`;
-    if (sec < 86400) return `${Math.round(sec / 3600)} h ago`;
+    if (sec < 3600) return `${Math.floor(sec / 60)} min ago`;
+    if (sec < 86400) return `${Math.floor(sec / 3600)} h ago`;
     return new Date(iso).toLocaleDateString();
   }
 

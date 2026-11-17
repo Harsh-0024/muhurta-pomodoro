@@ -107,6 +107,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     remembered. They still count in the totals and still show on the day's strip.
     Checked: desktop browser, iPhone simulator.
 
+14. **"Last synced" says the right hour.** Settings' sync line rounded, so 59½ minutes read
+    "60 min ago" and 23½ hours "24 h ago"; it now rounds down ("59 min ago", "1 h ago"), and a
+    missing time no longer shows "Invalid Date". The admin page's "ago" got the same fix, and a
+    day back reads "yesterday" instead of "1 days ago". Checked that Settings loads cleanly.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.

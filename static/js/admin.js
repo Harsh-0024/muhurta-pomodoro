@@ -27,11 +27,17 @@
 
   function ago(iso) {
     if (!iso) return "never";
-    const sec = Math.max(0, (Date.now() - Date.parse(iso)) / 1000);
+    const at = Date.parse(iso);
+    if (!Number.isFinite(at)) return "never";
+    // Whole units, rounded down, so 59½ minutes never reads "60 min ago".
+    const sec = Math.max(0, (Date.now() - at) / 1000);
     if (sec < 90) return "just now";
-    if (sec < 3600) return `${Math.round(sec / 60)} min ago`;
-    if (sec < 86400) return `${Math.round(sec / 3600)} h ago`;
-    if (sec < 30 * 86400) return `${Math.round(sec / 86400)} days ago`;
+    if (sec < 3600) return `${Math.floor(sec / 60)} min ago`;
+    if (sec < 86400) return `${Math.floor(sec / 3600)} h ago`;
+    if (sec < 30 * 86400) {
+      const days = Math.floor(sec / 86400);
+      return days === 1 ? "yesterday" : `${days} days ago`;
+    }
     return new Date(iso).toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
   }
 
