@@ -160,6 +160,14 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     page, read aloud but not shown. Liftbook's 21 screens were already right. Checked that
     nothing moves, on the computer and the iPhone simulator (upright and on its side).
 
+22. **Pop-ups keep keyboard focus.** With a pop-up open (the shortcuts guide, "Are you sure?",
+    a day on the Dashboard, a session in History, What's new), Tab walked straight out into the
+    page behind it, and closing one could leave focus nowhere, so the next Tab started from the
+    top of the page. Now Tab and Shift+Tab go round inside the open pop-up, and closing it
+    returns focus to what you were on. One small script (`modal-focus.js`) covers every pop-up.
+    Liftbook's use the browser's own dialogs, which already did this. Checked on the computer
+    with real Tab, Shift+Tab and Escape presses.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
