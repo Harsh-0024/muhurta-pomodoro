@@ -219,7 +219,9 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     a phone the tab you had just tapped turned a faint white (a tapped button keeps the pointer
     look), and on a computer it did the same while the mouse rested on it. The chosen one now
     stays gold. Found while checking History with no sessions (its empty pages already read
-    well). Checked on the iPhone simulator.
+    well). Checked on the iPhone simulator. A later sweep of both apps, comparing every chosen
+    tab, chip and option with and without the pointer over it, found no other case (Liftbook's
+    chips were already right).
 
 ## If you release this: lines for "What's new"
 
