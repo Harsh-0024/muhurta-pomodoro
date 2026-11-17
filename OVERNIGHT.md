@@ -378,6 +378,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     keyboard focus a ring in the system's own highlight colour. The normal look is untouched (the
     rule is off unless that mode is on). The browser here can't switch the mode on, so I checked
     that the rule loads and stays off normally; Liftbook got the same rule.
+56. **Password managers file your login under your email.** On sign-up, the @username box was
+    marked as the account's login name, though you sign in with your email. So Safari and password
+    managers offered saved login emails in the @username box and could file the new password under
+    the handle, which the sign-in box (email only) won't take. It's now marked as an ordinary box,
+    like the two other username boxes in the app; the password step already tells password managers
+    the email. (Liftbook's sign-in takes email or username, so its sign-up was fine as it is.)
 
 ## If you release this: lines for "What's new"
 
