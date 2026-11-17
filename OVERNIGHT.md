@@ -223,6 +223,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     tab, chip and option with and without the pointer over it, found no other case (Liftbook's
     chips were already right).
 
+30. **A double tap on "Save combination" saves it once.** Two quick taps sent the form twice
+    and left two copies of the same combination. The button now waits for the first save to
+    finish. Every other save in both apps already did this (Liftbook's through one shared
+    helper), and a double tap on Flow's Stop records one session. Checked on the computer: three
+    quick clicks made one combination, and a later save still worked (test data removed).
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.

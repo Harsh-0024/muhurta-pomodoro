@@ -669,8 +669,12 @@
     renderCustomList();
   }
 
+  // A quick double tap on Save used to send the form twice and save two copies.
+  let savingPreset = false;
+
   async function submitPreset(ev) {
     ev.preventDefault();
+    if (savingPreset) return;
     const v = formValues();
     const problems = validate(v);
     if (problems.length) {
@@ -679,6 +683,9 @@
       return;
     }
     const editing = editingId;
+    const saveBtn = $("btnSavePreset");
+    savingPreset = true;
+    if (saveBtn) saveBtn.disabled = true;
     try {
       if (editing) {
         await api(`/api/presets/${editing.replace("custom-", "")}`, { method: "PUT", body: JSON.stringify(v) });
@@ -690,6 +697,9 @@
       toast(editing ? "Combination updated" : "Combination saved");
     } catch (e) {
       toast(e.message || "Could not save combination", "error");
+    } finally {
+      savingPreset = false;
+      if (saveBtn) saveBtn.disabled = false;
     }
   }
 
