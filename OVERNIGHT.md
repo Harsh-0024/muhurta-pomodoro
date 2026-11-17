@@ -397,6 +397,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     November, December) looked exactly like days that passed without focus. Days still to come now
     fade, and today has a thin green ring, so an empty square means a missed day and you can see
     where you are in the year. Past years are unchanged. Checked on the iPhone in light mode.
+59. **The Timer's quick lengths say what they are.** Under the dial, "6 12 24 36 48 60" were bare
+    numbers, so it wasn't clear they're minutes to tap. A quiet "MIN" now follows them, in the same
+    small capitals as "SET FOR" and "ENDS AT" above. It's added by the stylesheet, so it stays when
+    the row is rebuilt with your own lengths, and screen readers skip it (they already hear "Quick
+    lengths in minutes"). Checked on the iPhone.
 
 ## If you release this: lines for "What's new"
 

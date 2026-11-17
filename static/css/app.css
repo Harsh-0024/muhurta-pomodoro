@@ -4786,6 +4786,18 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
   margin: 0 auto 1.1rem;
 }
 
+/* The quick lengths are bare numbers; a quiet unit after them, styled like the labels above
+   the timer, says what they are. Screen readers already hear "Quick lengths in minutes". */
+#timerQuick::after {
+  content: "min";
+  content: "min" / "";
+  margin-left: 0.3rem;
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
 .countdown-pick {
   min-width: 2.2rem;
   padding: 0.3rem 0.45rem;
