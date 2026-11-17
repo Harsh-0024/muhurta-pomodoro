@@ -166,7 +166,9 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     top of the page. Now Tab and Shift+Tab go round inside the open pop-up, and closing it
     returns focus to what you were on. One small script (`modal-focus.js`) covers every pop-up.
     Liftbook's use the browser's own dialogs, which already did this. Checked on the computer
-    with real Tab, Shift+Tab and Escape presses.
+    with real Tab, Shift+Tab and Escape presses on the shortcuts guide and "Are you sure?"; the
+    Dashboard day, History session and What's new pop-ups use the same pattern but weren't
+    tried one by one.
 
 ## If you release this: lines for "What's new"
 
