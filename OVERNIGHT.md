@@ -407,8 +407,9 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     were the hardest to see, and the squares used the light theme's greens. Each theme now has its
     own four year-chart colours (`--heat-1..4` in app.css): unchanged in light, dim to bright sage
     in dark, and dashboard.js takes the squares' colours from them, so squares and legend match.
-    Other charts keep their greens. Checked on the iPhone in dark and light. If you switch theme
-    while the Dashboard is open, the squares change on the next load.
+    Other charts keep their greens. Checked on the iPhone in dark and light. The squares also
+    repaint at once if the look changes while the Dashboard is open (the system turning dark with
+    the theme set to follow it); checked on the computer by flipping the theme.
 
 ## If you release this: lines for "What's new"
 

@@ -137,6 +137,17 @@
     return stops.every(Boolean) ? stops : heatStops;
   }
 
+  // The page's look can change under it (the system turning dark at sunset with the theme set to
+  // follow it): repaint the year chart's squares in the new theme's colours.
+  function recolorHeatmap() {
+    const stops = themeHeatStops();
+    document.querySelectorAll("#heatmapGrid .heat-cell[data-heat]").forEach((cell) => {
+      cell.style.background = heatColor(Number(cell.dataset.heat), stops);
+    });
+  }
+  window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener?.("change", recolorHeatmap);
+  new MutationObserver(recolorHeatmap).observe(document.body, { attributes: true, attributeFilter: ["data-theme"] });
+
   function heatColor(ratio, stopsList = heatStops) {
     const value = clamp(Number(ratio || 0), 0, 1);
     if (value <= 0) return "";
@@ -296,7 +307,8 @@
       if (lastDay && day.day === lastDay && lastDay === localDayKey(new Date())) cell.classList.add("heat-today");
       cell.dataset.day = day.day;
       if (level > 0) {
-        cell.style.background = heatColor(Number(day.focus_minutes || 0) / maxFocus, stops);
+        cell.dataset.heat = String(Number(day.focus_minutes || 0) / maxFocus);
+        cell.style.background = heatColor(Number(cell.dataset.heat), stops);
         const details = tooltipText(day, date);
         cell.tabIndex = 0;
         cell.setAttribute("aria-label", details);
