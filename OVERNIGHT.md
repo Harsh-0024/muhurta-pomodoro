@@ -118,7 +118,8 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     new row. The question before deleting no longer says "This cannot be undone."
     Found on the way: the toast at the bottom of History and Settings sat under the page footer
     (the footer's text showed through it and it caught taps); the toast now sits above it.
-    Checked on desktop (deleted a test session, undid it, all its details came back).
+    Checked on desktop and the iPhone simulator (deleted a test session, undid it, all its
+    details came back); on the phone "Session deleted" wrapped onto two lines, now one.
 
 ## If you release this: lines for "What's new"
 

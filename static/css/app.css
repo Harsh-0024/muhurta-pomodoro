@@ -5861,6 +5861,7 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
 
 /* History: Undo in the toast after a delete. */
 .settings-toast.has-action.is-visible { pointer-events: auto; }
+.settings-toast.has-action { white-space: nowrap; } /* "Session deleted" stayed on two lines on phones */
 .settings-toast .toast-action {
   margin-left: 0.35rem;
   padding: 0.2rem 0.65rem;
