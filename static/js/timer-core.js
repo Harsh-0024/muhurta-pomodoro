@@ -15,6 +15,7 @@
   const RING_EVERY_MS = 4000;
   const RING_FOR_MS = 5 * 60 * 1000; // a forgotten alarm goes quiet after this
   const ENDS = new Set(["stop", "ring", "overtime"]);
+  const MAX_SEC = 24 * 60 * 60 - 1;
   const listeners = new Set();
   let settings = null;
   let settingsPromise = null;
@@ -160,6 +161,28 @@
     });
   }
 
+  // More time on a timer that is running, paused or ringing ("+5 min").
+  // The set length grows with it. A ringing timer starts counting again.
+  function addTime(sec) {
+    const data = read();
+    const add = Math.round(Number(sec) || 0);
+    if (!data || add <= 0) return false;
+    const now = Date.now();
+    const durationSec = Number(data.durationSec || 0) + add;
+    if (data.mode === "running") {
+      if ((Number(data.endsAt) - now) / 1000 + add > MAX_SEC) return false;
+      write({ ...data, durationSec, endsAt: Number(data.endsAt) + add * 1000 });
+    } else if (data.mode === "paused") {
+      if (Number(data.remainingSec || 0) + add > MAX_SEC) return false;
+      write({ ...data, durationSec, remainingSec: Number(data.remainingSec || 0) + add });
+    } else if (data.mode === "ringing") {
+      write({ ...data, mode: "running", durationSec, runStartedAt: now, endsAt: now + add * 1000, ringingSince: null, lastRingAt: null });
+    } else {
+      return false;
+    }
+    return true;
+  }
+
   function setQuote(quote) {
     const data = read();
     if (data) write({ ...data, currentQuote: quote });
@@ -263,6 +286,7 @@
     resume,
     stop,
     setQuote,
+    addTime,
     pauseFor,
     remainingSec,
     overtimeSec,

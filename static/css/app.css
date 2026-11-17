@@ -5760,3 +5760,11 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   color: var(--muted);
   font-size: 0.82rem;
 }
+
+/* Timer: "+1 min" and "+5 min" under a running timer, where the quick lengths were. */
+.countdown-add .countdown-pick {
+  font-family: inherit;
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+  padding: 0.35rem 0.7rem;
+}

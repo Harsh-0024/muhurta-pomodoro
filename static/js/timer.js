@@ -208,6 +208,7 @@
     show("timerEntry", idle);
     show("timerQuick", idle);
     show("timerTimeDisplay", !idle);
+    show("timerAdd", mode === "running" || mode === "paused" || mode === "ringing");
 
     show("btnTimerStart", idle);
     show("btnTimerPause", mode === "running");
@@ -242,7 +243,7 @@
       $("timerHint").textContent = "Counting down";
     } else if (mode === "paused") {
       $("timerEndsKey").textContent = "left";
-      $("timerEndsDisplay").textContent = formatDuration(remaining);
+      $("timerEndsDisplay").textContent = formatClock(remaining, { padded: false }); // as the big clock rounds it
       $("timerHint").textContent = "Resume when ready";
     } else {
       $("timerEndsKey").textContent = "ended at";
@@ -335,6 +336,13 @@
     $("timerQuick").addEventListener("click", (e) => {
       const btn = e.target.closest("[data-min]");
       if (btn) fillFields(Number(btn.dataset.min) * 60);
+    });
+
+    $("timerAdd").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-add]");
+      if (!btn) return;
+      if (!T().addTime(Number(btn.dataset.add))) showNotice("A timer can't be longer than 24 hours.");
+      render();
     });
 
     const entry = $("timerEntry");
