@@ -81,6 +81,15 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
      rest". It now says "long rest".
    Checked: desktop browser (keys), by reading (notification text).
 
+10. **Today's focus under the clock.** Rhythm, Timer and Flow show a quiet line under the
+    clock: "Today 1h 12m of 2h", with a thin gold line filling toward your daily goal ("goal
+    reached" once you pass it). It counts what is logged today plus the block running right
+    now, so it moves while you work. A tap opens the Dashboard. New file `static/js/today.js`;
+    it uses `/api/activity/day` and `/api/settings`, which phones already answer.
+    Checked: desktop browser (dark), iPhone simulator (light).
+    If you would rather keep the clock pages bare, removing the one `today.js` line in
+    `templates/base.html` takes it away.
+
 ## Ideas not done yet
 
 (see the end of this file as the list grows)

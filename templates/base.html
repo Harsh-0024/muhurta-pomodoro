@@ -98,7 +98,7 @@
   <script src="{{ url_for('static', filename='js/error-report.js') }}?v={{ asset_version }}"></script>
   <script>
     window.__PAGE__ = "{% block page_id %}home{% endblock %}";
-    window.__CLOCK_PAGES__ = { rhythm: "{{ url_for('index') }}", countdown: "{{ url_for('timer_page') }}", flow: "{{ url_for('flow_page') }}" };
+    window.__CLOCK_PAGES__ = { rhythm: "{{ url_for('index') }}", countdown: "{{ url_for('timer_page') }}", flow: "{{ url_for('flow_page') }}", dashboard: "{{ url_for('dashboard_page') }}" };
   </script>
   {% if not bare %}
   <script>
@@ -128,6 +128,7 @@
   <script src="{{ url_for('static', filename='js/dialog.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/shortcuts.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/refresh-sync.js') }}?v={{ asset_version }}" defer></script>
+  <script src="{{ url_for('static', filename='js/today.js') }}?v={{ asset_version }}" defer></script>
   {% endif %}
   {% if mobile %}<script src="{{ url_for('static', filename='js/mobile.js') }}?v={{ asset_version }}" defer></script>{% endif %}
   {% block scripts %}{% endblock %}

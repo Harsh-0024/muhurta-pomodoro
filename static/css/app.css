@@ -5800,3 +5800,44 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
 .bar-chart-hours .bar-tracks { height: 5.5rem; }
 .bar-chart-hours .bar-values span,
 .bar-chart-hours .bar-labels span { overflow: visible; }
+
+/* Today's focus under the clock (today.js) */
+.today-line {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.45rem;
+  width: max-content;
+  max-width: 100%;
+  margin: clamp(1.1rem, 2.4vh, 1.8rem) auto 0;
+  padding: 0.3rem 0.8rem;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+.today-line.hidden { display: none; }
+.today-line:hover { color: var(--ink); }
+.today-line:focus-visible { outline: 1px solid var(--gold); outline-offset: 2px; }
+.today-key { text-transform: uppercase; letter-spacing: 0.14em; font-size: 0.68rem; }
+.today-value { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
+.today-track {
+  display: block;
+  width: 9rem;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--line, rgba(255, 255, 255, 0.12));
+  overflow: hidden;
+}
+.today-track.hidden { display: none; }
+.today-fill {
+  display: block;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--gold);
+  transition: width 0.6s ease;
+}
+.today-line.is-met .today-value { color: var(--gold2, var(--gold)); }
+.today-line + .focus-quote { margin-top: clamp(1.1rem, 2.4vh, 1.8rem); }
