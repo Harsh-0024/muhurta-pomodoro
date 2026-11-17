@@ -379,7 +379,8 @@
     bars.forEach((bar) => {
       const minutes = Number(bar.minutes || 0);
       const value = document.createElement("span");
-      value.textContent = minutes <= 0 ? "" : options?.compact && minutes >= 60 ? `${Math.round(minutes / 60)}h` : formatMinutes(minutes);
+      if (bar.valueText !== undefined) value.textContent = bar.valueText;
+      else value.textContent = minutes <= 0 ? "" : options?.compact && minutes >= 60 ? `${Math.round(minutes / 60)}h` : formatMinutes(minutes);
       const track = document.createElement("div");
       track.className = "bar-track";
       track.title = bar.title || "";
@@ -409,6 +410,73 @@
       tracks.appendChild(line);
     }
     el.append(values, tracks, labels);
+  }
+
+  /* ---------- by time of day ---------- */
+
+  const HOUR_DAYS = 60;
+  const FOCUS_KINDS = new Set(["work", "extend", "flow", "timer"]);
+  const hourFormatter = new Intl.DateTimeFormat(undefined, { hour: "numeric" });
+  const hourLabel = (h) => hourFormatter.format(new Date(2024, 0, 1, h));
+  const clockFormatter = new Intl.DateTimeFormat(undefined, { hour: "numeric", minute: "2-digit" });
+  const clockLabel = (h) => clockFormatter.format(new Date(2024, 0, 1, h));
+
+  // Minutes of focus in each hour of the day (local time), from the sessions
+  // of the last 60 days. A session that crosses an hour is split between them.
+  function focusByHour(segments) {
+    const hours = new Array(24).fill(0);
+    segments.forEach((seg) => {
+      if (!FOCUS_KINDS.has(seg.kind) || !(Number(seg.productive_sec) > 0)) return;
+      let t = new Date(seg.started_at).getTime();
+      const end = new Date(seg.ended_at).getTime();
+      if (!Number.isFinite(t) || !Number.isFinite(end) || end <= t) return;
+      // An edited session can count less than its span; keep its counted length.
+      const scale = Math.min(1, (Number(seg.productive_sec) * 1000) / (end - t));
+      while (t < end) {
+        const d = new Date(t);
+        const next = new Date(d.getFullYear(), d.getMonth(), d.getDate(), d.getHours() + 1).getTime();
+        const upTo = Math.min(end, next > t ? next : t + 3600000);
+        hours[d.getHours()] += ((upTo - t) * scale) / 60000;
+        t = upTo;
+      }
+    });
+    return hours;
+  }
+
+  async function renderHours() {
+    const chart = byId("hourChart");
+    if (!chart || chart.dataset.drawn) return; // the same 60 days whichever year is shown
+    chart.dataset.drawn = "1";
+    let segments = [];
+    try {
+      const res = await fetch(`/api/activity/history?days=${HOUR_DAYS}`, { headers: { Accept: "application/json" } });
+      if (res.ok) segments = (await res.json()).segments || [];
+    } catch (_) {}
+    const hours = focusByHour(segments);
+    const total = hours.reduce((a, b) => a + b, 0);
+    const peak = hours.indexOf(Math.max(...hours));
+    const every = window.innerWidth < 400 ? 6 : 3; // "12 PM" and "3 PM" would touch on a narrow phone
+    const bars = hours.map((minutes, h) => ({
+      label: h % every === 0 ? hourLabel(h) : "",
+      minutes,
+      valueText: h === peak && minutes > 0 ? `${Math.round((minutes / total) * 100)}%` : "",
+      current: h === peak && minutes > 0,
+      title: `${clockLabel(h)} to ${clockLabel((h + 1) % 24)}: ${formatMinutes(minutes)}`,
+    }));
+    // The best three hours in a row say more than one tall bar.
+    let best = 0;
+    for (let h = 1; h < 24; h += 1) {
+      const sum = (i) => hours[i] + hours[(i + 1) % 24] + hours[(i + 2) % 24];
+      if (sum(h) > sum(best)) best = h;
+    }
+    setText(
+      "hourSubtitle",
+      total > 0
+        ? `When your focus fell in the last ${HOUR_DAYS} days. Most between ${clockLabel(best)} and ${clockLabel((best + 3) % 24)}.`
+        : `When your focus fell in the last ${HOUR_DAYS} days.`
+    );
+    renderBars(chart, bars, { label: `Focus by hour of the day, last ${HOUR_DAYS} days` });
+    chart.classList.add("bar-chart-dense", "bar-chart-hours");
   }
 
   function renderWeek(data) {
@@ -864,6 +932,7 @@
       renderWeek(data);
       renderRecent(data);
       renderPatterns(data);
+      renderHours();
       renderBellCurve(data);
     } catch (e) {
       setText("heatmapSubtitle", "Dashboard data could not be loaded.");

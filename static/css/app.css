@@ -5793,3 +5793,10 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
 /* History opened for one day (from the dashboard's day view) */
 .history-day { scroll-margin-top: 5.5rem; transition: box-shadow 0.6s ease; }
 .history-day.is-wanted { box-shadow: 0 0 0 1px var(--gold), 0 0 0 5px rgba(216, 189, 121, 0.14); }
+
+/* Dashboard: focus by hour of the day, across both columns */
+.hours-panel { grid-column: 1 / -1; }
+.bar-chart-hours { --bar-gap: 0.22rem; }
+.bar-chart-hours .bar-tracks { height: 5.5rem; }
+.bar-chart-hours .bar-values span,
+.bar-chart-hours .bar-labels span { overflow: visible; }

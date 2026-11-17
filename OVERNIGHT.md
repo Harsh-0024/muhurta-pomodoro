@@ -65,6 +65,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
    with links to Rhythm and the Dashboard. Data addresses (`/api/...`) still answer as before.
    Checked: desktop browser.
 
+8. **Dashboard: by time of day.** A third pattern panel under weekdays and months: 24 bars,
+   one per hour, showing when your focus fell over the last 60 days, with the busiest hour
+   marked and the best three hours in a row named ("Most between 9:00 AM and 12:00 PM").
+   Uses `/api/activity/history`, which computers and phones already answer.
+   Checked: desktop browser (dark), iPhone simulator (light).
+
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
