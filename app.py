@@ -31,21 +31,10 @@ app = Flask(__name__)
 app.config["JSON_SORT_KEYS"] = False
 
 BASE_DIR = Path(__file__).resolve().parent
-ASSET_VERSION_PATHS = (
-    BASE_DIR / "static" / "js" / "app.js",
-    BASE_DIR / "static" / "js" / "flow.js",
-    BASE_DIR / "static" / "js" / "session-monitor.js",
-    BASE_DIR / "static" / "js" / "dashboard.js",
-    BASE_DIR / "static" / "js" / "settings.js",
-    BASE_DIR / "static" / "js" / "history.js",
-    BASE_DIR / "static" / "js" / "sounds.js",
-    BASE_DIR / "static" / "js" / "dialog.js",
-    BASE_DIR / "static" / "js" / "shortcuts.js",
-    BASE_DIR / "static" / "js" / "alive.js",
-    BASE_DIR / "static" / "js" / "sign-in.js",
-    BASE_DIR / "static" / "js" / "admin.js",
-    BASE_DIR / "static" / "js" / "feedback.js",
-    BASE_DIR / "static" / "css" / "app.css",
+# Every script and stylesheet: a change to any of them gives the pages a new ?v=, so a
+# browser never keeps an old copy (the list used to miss mobile.css, timer.js and others).
+ASSET_VERSION_PATHS = tuple(
+    sorted((BASE_DIR / "static" / "js").glob("*.js")) + sorted((BASE_DIR / "static" / "css").glob("*.css"))
 )
 BUILTIN_QUOTES = [
     {"quote": "You have power over your mind, not outside events. Realize this, and you will find strength.", "author": "Marcus Aurelius"},

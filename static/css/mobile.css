@@ -704,3 +704,95 @@ body.is-mobile .bar-tracks {
 body.is-mobile .dashboard-panel:has(> .recent-list) {
   display: none;
 }
+
+/* ---- A phone turned sideways ----
+   About 400 points tall: the upright column (times, ring, buttons, quote) put the
+   ring below the tab bar. Here the ring sits on the left with its buttons beside
+   it, the bars are slimmer and the top bar scrolls away. */
+@media (orientation: landscape) and (max-height: 520px) {
+  body.is-mobile {
+    --tabbar-h: 3.1rem;
+  }
+
+  body.is-mobile .topbar {
+    position: static;
+    min-height: 0;
+    padding-top: calc(0.35rem + var(--safe-top));
+    padding-bottom: 0.35rem;
+  }
+
+  /* Wide enough for each tab's icon and name side by side. */
+  body.is-mobile .tab {
+    flex-direction: row;
+    gap: 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  body.is-mobile .tab svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0.2rem 0.55rem;
+  }
+
+  body.is-mobile .main {
+    padding-top: 0.25rem;
+  }
+
+  /* The ring on the left; the times, buttons and notices in a column beside it.
+     The two wrappers step aside (display: contents) so their parts share one grid. */
+  body.is-mobile .hero,
+  body.is-mobile.page-home .hero,
+  body.is-mobile.page-flow .hero,
+  body.is-mobile.page-timer .hero {
+    /* the screen's height, less the top bar and the tab bar */
+    --ring-size: clamp(8.5rem, calc(100svh - 3rem - var(--safe-top) - var(--tabbar-h) - var(--safe-bottom) - 2rem), 15rem);
+    display: grid;
+    grid-template-columns: auto minmax(0, 22rem);
+    grid-template-rows: 1fr auto auto auto auto auto auto 1fr;
+    align-content: center;
+    align-items: center;
+    justify-content: center;
+    min-height: var(--ring-size);
+    gap: 0 2.5rem;
+  }
+
+  body.is-mobile .timer-layout,
+  body.is-mobile .timer-panel {
+    display: contents;
+  }
+
+  body.is-mobile .timer-ring-wrap {
+    grid-column: 1;
+    grid-row: 1 / -1;
+    width: var(--ring-size);
+    margin: 0;
+  }
+
+  body.is-mobile .time-display {
+    font-size: 2.4rem;
+  }
+
+  body.is-mobile .hero > .session-live,
+  body.is-mobile .timer-panel > :not(.timer-ring-wrap) {
+    grid-column: 2;
+    width: 100%;
+    margin: 0;
+  }
+
+  body.is-mobile .hero > .session-live { grid-row: 2; margin-bottom: 0.6rem; }
+  body.is-mobile .timer-panel > .choice-panel,
+  body.is-mobile .timer-panel > .countdown-quick:not(.countdown-add) { grid-row: 3; }
+  body.is-mobile .timer-panel > .countdown-add { grid-row: 4; }
+  body.is-mobile .timer-panel > .controls { grid-row: 5; }
+  body.is-mobile .timer-panel > .session-notice { grid-row: 6; }
+  body.is-mobile .timer-layout > .today-line { grid-column: 2; grid-row: 7; margin: 0.6rem 0 0; }
+
+  body.is-mobile .timer-panel > .countdown-quick {
+    margin-bottom: 0.4rem;
+  }
+
+  /* The quote waits for the phone to be upright again. */
+  body.is-mobile .focus-quote {
+    display: none;
+  }
+}

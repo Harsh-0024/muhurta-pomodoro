@@ -121,6 +121,19 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     Checked on desktop and the iPhone simulator (deleted a test session, undid it, all its
     details came back); on the phone "Session deleted" wrapped onto two lines, now one.
 
+16. **A phone turned sideways.** With the phone on its side, the clock (Rhythm, Timer and Flow)
+    was pushed below the tab bar: only the top of the ring showed, and the time was hidden. Now
+    the ring sits on the left with the times, buttons and today's total beside it, the top bar
+    scrolls away, the tabs put their icon and name side by side, and the quote waits until the
+    phone is upright. Only phones on their side (under 520 points tall) change. Checked on the
+    iPhone simulator on its side (all three clocks) and upright (unchanged).
+
+17. **Browsers always get the newest scripts and styles.** Pages ask for `app.css?v=…`, where the
+    number changes when the files do, so a browser never keeps an old copy. The number only
+    followed some files: changes to `mobile.css`, `timer.js`, `today.js` and a dozen others
+    didn't move it, so after an update a browser could run an old Timer with new pages. It now
+    follows every script and stylesheet. Found while checking item 16.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
