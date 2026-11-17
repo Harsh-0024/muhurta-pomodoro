@@ -170,6 +170,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     sure?", a Dashboard day, a History session (Tab steps through each date box's parts, then
     on round) and What's new (shown with a stand-in reply, so the real one stays unseen).
 
+23. **Screen readers no longer read the clock aloud every second.** The row of figures above each
+    clock (rest pool, work done, elapsed, productivity…) was marked to be announced whenever it
+    changed, and while a clock runs some of those change every second, so a screen reader would
+    keep talking through your focus. The row is now read only when you move to it. Messages that
+    matter (saved, cancelled, time's up) keep their own announcements. Liftbook's announcements
+    were already only on changes you cause.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
