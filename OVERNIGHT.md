@@ -229,6 +229,14 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     helper), and a double tap on Flow's Stop records one session. Checked on the computer: three
     quick clicks made one combination, and a later save still worked (test data removed).
 
+31. **The Dashboard moves on to the new day.** It loaded its figures once. The phone app reopens
+    on the page it was left on, so a Dashboard looked at last night still showed yesterday as
+    "Today" (and the last 7 days ending yesterday) the next morning. It now loads again when
+    you come back to it on a new day, or within a minute if it stays open past midnight; on
+    31 December it moves on to the new year unless you were looking at an older one. The today
+    line under the clocks already did this, and Liftbook redraws each screen as you open it.
+    Checked on the computer by moving the page's clock a day ahead.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.

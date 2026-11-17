@@ -966,6 +966,31 @@
       loadDashboard(selectedYear);
     });
     loadDashboard(selectedYear);
+    watchNewDay();
+  }
+
+  // The phone app reopens on the page it was left on, so a dashboard seen last night would still
+  // show yesterday as "Today" in the morning. Load again when the day has turned (on return to
+  // the page, or within a minute if it stays open past midnight).
+  function localDay(ms = Date.now()) {
+    const d = new Date(ms);
+    return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+  }
+
+  function watchNewDay() {
+    let day = localDay();
+    const check = () => {
+      if (document.visibilityState !== "visible") return;
+      const now = localDay();
+      if (now === day) return;
+      const lastYear = Number(day.split("-")[0]);
+      day = now;
+      // Watching the year that just ended rolls on to the new one; an older year stays put.
+      if (selectedYear === lastYear) selectedYear = new Date().getFullYear();
+      loadDashboard(selectedYear);
+    };
+    document.addEventListener("visibilitychange", check);
+    window.setInterval(check, 60 * 1000);
   }
 
   document.addEventListener("DOMContentLoaded", init);
