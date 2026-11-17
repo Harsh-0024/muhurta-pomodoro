@@ -1236,7 +1236,10 @@ def dashboard_summary(
         }
         records.append(record)
         if day_iso <= calc_end_iso:
-            current_streak = current_streak + 1 if focus_minutes > 0 else 0
+            # Today isn't over: with no focus yet it neither adds to the run nor breaks it.
+            today_open = day_iso == calc_end_iso and calc_end_day == today and focus_minutes <= 0
+            if not today_open:
+                current_streak = current_streak + 1 if focus_minutes > 0 else 0
             recent_days.insert(0, record)
             if len(recent_days) > 14:
                 recent_days.pop()

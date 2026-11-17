@@ -384,6 +384,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     the handle, which the sign-in box (email only) won't take. It's now marked as an ordinary box,
     like the two other username boxes in the app; the password step already tells password managers
     the email. (Liftbook's sign-in takes email or username, so its sign-up was fine as it is.)
+57. **Your streak doesn't drop to 0 in the morning.** The Dashboard's "Current streak" counted
+    today as a missed day until you focused, so after a focus day yesterday it read "0 days" all
+    morning. Today now only counts once it's over: until you focus it shows the run up to
+    yesterday (1 day here), a focus block today adds one, and a whole missed day still resets it.
+    Same in both builds (`db.py` on the computer, `docs/app/local-api.js` on the phone). Checked
+    on the iPhone (0 → 1 day) and in the computer's numbers. Left as is: Consistency ("3.5/wk"
+    from 1 of 2 days) is high early on, but its note shows the days it comes from.
 
 ## If you release this: lines for "What's new"
 

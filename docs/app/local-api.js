@@ -875,7 +875,9 @@
       };
       records.push(record);
       if (iso <= calcEndIso) {
-        current = focus > 0 ? current + 1 : 0;
+        // Today isn't over: with no focus yet it neither adds to the run nor breaks it.
+        const todayOpen = iso === calcEndIso && calcEnd === today && !(focus > 0);
+        if (!todayOpen) current = focus > 0 ? current + 1 : 0;
         recent.unshift(record);
         if (recent.length > 14) recent.pop();
       }
