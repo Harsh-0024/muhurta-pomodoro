@@ -403,6 +403,9 @@
       } else if (e.key.toLowerCase() === "s") {
         if (mode === "paused") resume();
         else if (mode === "idle") start();
+      } else if (e.key === "+" || e.key === "=") {
+        // "+" (or the same key without Shift) adds a minute, as the button does.
+        if (mode !== "idle" && mode !== "overtime") $("timerAdd").querySelector('[data-add="60"]').click();
       }
     });
   }

@@ -11,6 +11,7 @@
     { keys: "B", action: "Rhythm: rest (during overtime)" },
     { keys: "3", action: "Rhythm: skip (during overtime)" },
     { keys: "1 · 2 · 3", action: "Rhythm: choose options when a dialog is open" },
+    { keys: "+", action: "Timer: add a minute (running, paused or ringing)" },
     { keys: "⌘R · Ctrl+R · F5", action: "Refresh and sync with your account" },
   ];
 

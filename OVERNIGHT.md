@@ -51,7 +51,7 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
 5. **Timer: "+1 min" and "+5 min".** Under a running or paused Timer, where the quick lengths
    sit before you start, two small buttons add time without cancelling. On a ringing timer
    ("Ring until dismissed") they start it counting again for that long. "Set for" grows to
-   match, and a timer can't pass 24 hours. Also: while paused, "left" could show one second
+   match, and a timer can't pass 24 hours. The "+" key adds a minute (listed under Keyboard). Also: while paused, "left" could show one second
    less than the big clock (29:57 against 29:58); they now agree.
    Checked: desktop browser, iPhone simulator.
 
