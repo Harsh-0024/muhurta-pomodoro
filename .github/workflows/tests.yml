@@ -1,7 +1,8 @@
 # The checks, on every push and pull request: the computer side
 # (tests/test_sign_in.py, against a stand-in Supabase), the phones' own code
 # (tests/phone, the real mobile/web scripts in Node) and the What's new
-# summary function. Nothing reaches the real Supabase.
+# summary function, and the Timer's timekeeping (tests/clocks.test.mjs).
+# Nothing reaches the real Supabase.
 name: Tests
 
 on:
@@ -43,6 +44,9 @@ jobs:
         env:
           PYTHON: python
         run: node --test tests/phone/phone.test.mjs
+
+      - name: The Timer's timekeeping
+        run: node --test tests/clocks.test.mjs
 
       - name: What's new summaries
         run: node --test supabase/functions/whats-new/core.test.mjs

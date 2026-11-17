@@ -90,6 +90,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     If you would rather keep the clock pages bare, removing the one `today.js` line in
     `templates/base.html` takes it away.
 
+11. **Tests for the Timer.** `tests/clocks.test.mjs` runs the real `timer-core.js` in Node with
+    a stand-in page and a clock it can move: adding time while running, paused and ringing,
+    the 24-hour cap, and pausing when another clock starts. It is added to the Tests workflow.
+
 ## Good to know before merging
 
 - The unmerged "Activities" branch (`ccr-fa74c739-y3z13x`) and this one both add styles at the
