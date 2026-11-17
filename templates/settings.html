@@ -271,9 +271,9 @@
             <label class="signin-label" for="profileUsername">Username</label>
             <div class="username-wrap">
               <span class="username-at" aria-hidden="true">@</span>
-              <input type="text" id="profileUsername" class="input" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20" required />
+              <input type="text" id="profileUsername" class="input" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="20" required aria-describedby="settingsUsernameNote" />
             </div>
-            <p class="field-note">3–20 letters, numbers, _ or . — starting with a letter.</p>
+            <p class="field-note" id="settingsUsernameNote">3–20 letters, numbers, _ or . — starting with a letter.</p>
           </div>
           <div class="profile-actions">
             <button type="button" class="btn btn-quiet btn-small" id="btnProfileCancel">Cancel</button>
@@ -299,12 +299,12 @@
             <p class="field-note">1. In your authenticator app, add an account: scan this code, or tap <a class="signin-link" id="twoStepLink" href="#">Add to authenticator</a> on this device, or type the key.</p>
             <img class="two-step-qr" id="twoStepQr" alt="QR code to scan with your authenticator app" width="180" height="180" />
             <p class="field-note">Key: <code class="two-step-secret" id="twoStepSecret"></code></p>
-            <p class="field-note">2. Type the 6-digit code it shows for Muhurta Pomodoro.</p>
+            <p class="field-note" id="twoStepStep2">2. Type the 6-digit code it shows for Muhurta Pomodoro.</p>
           </div>
           <p class="field-note" id="twoStepOffNote" hidden>Type the code your authenticator app shows now to turn two-step sign-in off.</p>
           <div class="field">
             <label class="signin-label" for="twoStepInput">Code</label>
-            <input type="text" id="twoStepInput" class="input sync-code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="7" />
+            <input type="text" id="twoStepInput" class="input sync-code" inputmode="numeric" autocomplete="one-time-code" placeholder="123456" maxlength="7" aria-describedby="twoStepStep2 twoStepOffNote" />
           </div>
           <div class="profile-actions">
             <button type="button" class="btn btn-quiet btn-small" id="btnTwoStepCancel">Cancel</button>
@@ -323,10 +323,10 @@
           <button type="button" class="btn btn-danger btn-small" id="btnDeleteAccount">Delete account</button>
         </div>
         <form class="pref-row profile-form" id="deleteAccountForm" novalidate hidden>
-          <p class="field-note">This can't be undone. To keep your history, save a backup first (History → Save a backup).</p>
+          <p class="field-note" id="deleteWarning">This can't be undone. To keep your history, save a backup first (History → Save a backup).</p>
           <div class="field">
             <label class="signin-label" for="deleteConfirm">To confirm, type your email: <strong id="deleteEmail"></strong></label>
-            <input type="email" id="deleteConfirm" class="input" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" />
+            <input type="email" id="deleteConfirm" class="input" aria-describedby="deleteWarning" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" />
           </div>
           <div class="profile-actions">
             <button type="button" class="btn btn-quiet btn-small" id="btnDeleteCancel">Cancel</button>
@@ -363,7 +363,7 @@
         </div>
         <div class="field">
           <label class="signin-label" for="feedbackMessage">Your words</label>
-          <textarea id="feedbackMessage" class="input feedback-message" rows="4" maxlength="2000" placeholder="What would you like Muhurta Pomodoro to do?"></textarea>
+          <textarea id="feedbackMessage" class="input feedback-message" aria-describedby="feedbackStatus" rows="4" maxlength="2000" placeholder="What would you like Muhurta Pomodoro to do?"></textarea>
         </div>
         <div class="feedback-actions">
           <p class="field-note" id="feedbackStatus" aria-live="polite">Sent with your name and email, so you can be answered.</p>

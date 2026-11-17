@@ -63,8 +63,8 @@
       </div>
       <div class="field">
         <label class="signin-label" for="signupEmail">Email</label>
-        <input type="email" id="signupEmail" class="input" placeholder="you@example.com" autocomplete="email" required />
-        <p class="field-note">We'll send a code to confirm it's yours.</p>
+        <input type="email" id="signupEmail" class="input" placeholder="you@example.com" autocomplete="email" required aria-describedby="signupEmailNote" />
+        <p class="field-note" id="signupEmailNote">We'll send a code to confirm it's yours.</p>
       </div>
       <button type="submit" class="btn btn-primary signin-submit" id="btnDetails">Continue</button>
       <p class="signin-switch">Already have an account? <button type="button" class="signin-link" data-back>Sign in</button></p>
@@ -74,8 +74,8 @@
     <form class="signin-step" id="stepResetEmail" novalidate hidden>
       <div class="field">
         <label class="signin-label" for="resetEmail">Email</label>
-        <input type="email" id="resetEmail" class="input" placeholder="you@example.com" autocomplete="email" required />
-        <p class="field-note">We'll send a code to this address.</p>
+        <input type="email" id="resetEmail" class="input" placeholder="you@example.com" autocomplete="email" required aria-describedby="resetEmailNote" />
+        <p class="field-note" id="resetEmailNote">We'll send a code to this address.</p>
       </div>
       <button type="submit" class="btn btn-primary signin-submit" id="btnResetSend">Send code</button>
       <p class="signin-switch"><button type="button" class="signin-link" data-back>Back to sign in</button></p>
@@ -134,7 +134,7 @@
       <div class="field">
         <label class="signin-label" for="newPassword2">Confirm password</label>
         <div class="password-wrap">
-          <input type="password" id="newPassword2" class="input" autocomplete="new-password" maxlength="72" required />
+          <input type="password" id="newPassword2" class="input" autocomplete="new-password" maxlength="72" required aria-describedby="matchNote" />
           <button type="button" class="password-toggle" data-toggle="newPassword2" aria-label="Show password">Show</button>
         </div>
         <p class="field-note" id="matchNote" aria-live="polite"></p>

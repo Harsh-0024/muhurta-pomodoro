@@ -297,6 +297,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     (Sound, say) hid the page's main heading, so the screen started at "Sound" with nothing above
     it. The heading is now only hidden from sight there (`mobile.css`), so a screen reader still
     finds "Refine the ritual." first. Looks the same on the iPhone.
+42. **Field notes are read with their fields.** Checked every box and list for the right phone
+    keyboard and autofill: already right (number pads, name and one-time-code autofill). But some
+    notes under a field weren't tied to it, so a screen reader skipped them when the field got
+    focus: the username rules and the "Sent with your name and email" note in Settings, the
+    two-step "Type the 6-digit code" step, the delete-account warning, the "We'll send a code"
+    notes on sign-up and reset, and "Passwords match" under Confirm password. Each is now read with
+    its field (`aria-describedby`, templates only). The other sign-in fields already were.
 
 ## If you release this: lines for "What's new"
 
