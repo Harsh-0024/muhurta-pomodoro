@@ -100,6 +100,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     (only for a minute or more). The Timer does the same when you cancel part-way or stop
     its overtime: "Cancelled. 12 min of focus saved." Checked: desktop browser.
 
+13. **History: moments under a minute are folded away.** A day's list was crowded with
+    seconds-long entries (a pause tapped twice, a 3-second overtime): in the test copy of your
+    data, 31 of 130 rows. Each day now lists only what lasted a minute or more, with a line
+    under it: "9 moments under a minute · Show". Show brings them all back, and the choice is
+    remembered. They still count in the totals and still show on the day's strip.
+    Checked: desktop browser, iPhone simulator.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
@@ -109,6 +116,7 @@ Drafts for `release_notes.py`, in the voice of the existing notes. Use, change o
 "Rhythm, Timer and Flow show today's focus under the clock, filling toward your daily goal.",
 "Timer: add 1 or 5 minutes without cancelling (or press +). Cancelling part-way, and stopping Flow, now say how much focus was saved.",
 "Fixes: a Rhythm block ending while the Flow page was open now chimes and moves on; keys no longer reach the timer behind an open dialog; Flow stopped in one window stops in the others; light mode on the Dashboard uses the light colours.",
+"In History, entries shorter than a minute are tucked under each day; \"Show\" brings them back.",
 only(COMPUTERS, "A mistyped address now shows the app's own page instead of a bare error."),
 ```
 

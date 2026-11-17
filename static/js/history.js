@@ -9,6 +9,8 @@
   const MAX_SEC = 24 * 60 * 60;
   const FUTURE_SLACK_MS = 5 * 60 * 1000;
   const MODE_KEY = "muhurata.history.mode";
+  const SHORT_KEY = "muhurata.history.short"; // "show" lists moments under a minute too
+  const SHORT_SEC = 60;
 
   const KINDS = {
     work: { label: "Focus", focus: true },
@@ -20,6 +22,10 @@
     pause: { label: "Pause", focus: false },
   };
 
+  let showShort = false;
+  try {
+    showShort = localStorage.getItem(SHORT_KEY) === "show";
+  } catch (_) {}
   let view = "recent";
   let recent = []; // segments loaded for the "By day" view, newest first
   let oldestLoaded = null; // earliest day the "By day" view has fetched
@@ -327,6 +333,15 @@
       .map((day) => {
         const segs = groups.get(day);
         const t = counted.get(day) || dayTotals(segs);
+        // Seconds-long starts and stops (a pause tapped twice) are folded away:
+        // they still count in the totals and show on the strip.
+        const short = segs.filter((x) => Number(x.duration_sec) < SHORT_SEC).length;
+        const rows = showShort ? segs : segs.filter((x) => Number(x.duration_sec) >= SHORT_SEC);
+        const shortLine = short
+          ? `<button type="button" class="history-short" data-action="toggle-short">${
+              showShort ? `Hide ${short === 1 ? "the moment" : `the ${short} moments`} under a minute` : `${short} ${short === 1 ? "moment" : "moments"} under a minute · Show`
+            }</button>`
+          : "";
         return `
           <section class="pref-group history-day" id="day-${day}">
             <header class="history-day-head">
@@ -334,7 +349,8 @@
               <p class="history-day-sum"><b>${formatDuration(t.focus)}</b> focus${t.rest ? ` · ${formatDuration(t.rest)} rest` : ""}</p>
             </header>
             ${dayTimeline(day, segs.slice().sort((a, b) => startOf(a) - startOf(b)))}
-            <ul class="custom-list history-items">${segs.map(segmentRow).join("")}</ul>
+            <ul class="custom-list history-items">${rows.map(segmentRow).join("")}</ul>
+            ${shortLine}
           </section>`;
       })
       .join("");
@@ -633,6 +649,19 @@
     $("historyList")?.addEventListener("click", (e) => {
       const btn = e.target.closest("[data-action]");
       if (!btn) return;
+      if (btn.dataset.action === "toggle-short") {
+        // Keep the day in place while its list grows or shrinks.
+        const top = btn.closest(".history-day")?.getBoundingClientRect().top;
+        const dayId = btn.closest(".history-day")?.id;
+        showShort = !showShort;
+        try {
+          localStorage.setItem(SHORT_KEY, showShort ? "show" : "hide");
+        } catch (_) {}
+        render();
+        const again = dayId && document.getElementById(dayId);
+        if (again && top !== undefined) window.scrollBy(0, again.getBoundingClientRect().top - top);
+        return;
+      }
       const host = btn.closest("[data-id]");
       const seg = host && findSegment(Number(host.dataset.id));
       if (!seg) return;

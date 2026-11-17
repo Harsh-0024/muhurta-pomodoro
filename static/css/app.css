@@ -5841,3 +5841,20 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
 }
 .today-line.is-met .today-value { color: var(--gold2, var(--gold)); }
 .today-line + .focus-quote { margin-top: clamp(1.1rem, 2.4vh, 1.8rem); }
+
+/* History: moments under a minute, folded away */
+.history-short {
+  display: block;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  border: 0;
+  border-top: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  text-align: center;
+  cursor: pointer;
+}
+.history-short:hover { color: var(--ink); }
+.history-short:focus-visible { outline: 1px solid var(--gold); outline-offset: -2px; }
