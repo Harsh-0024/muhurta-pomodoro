@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Not found{% endblock %}
+{% block body_class %}page-not-found{% endblock %}
+{% block page_id %}not-found{% endblock %}
+{% block content %}
+<section class="not-found" aria-labelledby="notFoundTitle">
+  <p class="modal-kicker">Nothing here</p>
+  <h1 class="not-found-title" id="notFoundTitle">This page doesn't exist</h1>
+  <p class="card-lede">The address may be mistyped, or the page has moved.</p>
+  <p class="not-found-links">
+    <a class="btn btn-primary" href="{{ url_for('index') }}">Go to Rhythm</a>
+    <a class="btn btn-ghost" href="{{ url_for('dashboard_page') }}">Dashboard</a>
+  </p>
+</section>
+{% endblock %}

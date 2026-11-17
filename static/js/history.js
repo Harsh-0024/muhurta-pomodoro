@@ -328,7 +328,7 @@
         const segs = groups.get(day);
         const t = counted.get(day) || dayTotals(segs);
         return `
-          <section class="pref-group history-day">
+          <section class="pref-group history-day" id="day-${day}">
             <header class="history-day-head">
               <h2 class="history-day-title">${escapeHtml(formatDayHeading(day))}</h2>
               <p class="history-day-sum"><b>${formatDuration(t.focus)}</b> focus${t.rest ? ` · ${formatDuration(t.rest)} rest` : ""}</p>
@@ -678,6 +678,18 @@
     });
   }
 
+  // Bring one day into view and mark it for a moment.
+  function showDay(day) {
+    const el = document.getElementById(`day-${day}`);
+    if (!el) {
+      toast("Nothing was timed on that day.");
+      return;
+    }
+    el.scrollIntoView({ block: "start" });
+    el.classList.add("is-wanted");
+    window.setTimeout(() => el.classList.remove("is-wanted"), 2400);
+  }
+
   async function init() {
     if (window.__PAGE__ !== "history") return;
     wire();
@@ -687,7 +699,15 @@
       const [segs] = await Promise.all([loadRecent(localDayISO(Date.now())), loadLong()]);
       mergeRecent(segs);
       if (new URLSearchParams(location.search).get("view") === "long" || location.hash === "#long") view = "long";
+      // Opened for one day (the dashboard's day view): load back to it.
+      const wanted = /^#day=(\d{4}-\d{2}-\d{2})$/.exec(location.hash)?.[1] || null;
+      if (wanted && wanted <= localDayISO(Date.now())) {
+        for (let i = 0; i < 80 && oldestLoaded > wanted && hasEarlier(); i += 1) {
+          mergeRecent(await loadRecent(shiftDay(oldestLoaded, -1)));
+        }
+      }
       setView(view);
+      if (wanted) showDay(wanted);
     } catch (e) {
       if (list) list.innerHTML = "";
       toast(e.message || "Could not load history", "error");

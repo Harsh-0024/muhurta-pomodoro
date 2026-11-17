@@ -224,6 +224,14 @@ def _preset_exists(preset_id: str) -> bool:
         conn.close()
 
 
+@app.errorhandler(404)
+def not_found(_err):
+    """A mistyped address gets the app's own page, not the server's bare one."""
+    if request.path.startswith(("/api/", "/static/", "/auth/")):
+        return jsonify({"error": "Not found"}), 404
+    return render_template("not_found.html"), 404
+
+
 @app.route("/")
 def index():
     return render_template("index.html", initial_quote=INITIAL_QUOTE)

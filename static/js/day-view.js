@@ -169,6 +169,8 @@
     $("dayKicker").textContent = kickerFormat.format(date);
     $("dayTitle").textContent = titleFormat.format(date);
     $("dayNext").disabled = day >= dayKey(new Date());
+    const edit = $("dayEdit");
+    if (edit) edit.href = `${edit.getAttribute("href").split("#")[0]}#day=${day}`;
     try {
       const res = await fetch(`/api/activity/day?day=${day}`, { headers: { Accept: "application/json" } });
       if (!res.ok) throw new Error(res.statusText);

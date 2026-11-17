@@ -5768,3 +5768,28 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   letter-spacing: 0.02em;
   padding: 0.35rem 0.7rem;
 }
+
+/* A mistyped address */
+.not-found {
+  max-width: 30rem;
+  margin: 12vh auto 0;
+  text-align: center;
+}
+.not-found-title {
+  margin: 0.2rem 0 0.6rem;
+  font-family: var(--font-serif);
+  font-weight: 500;
+  font-size: clamp(1.9rem, 5vw, 2.6rem);
+  line-height: 1.15;
+}
+.not-found-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1.6rem;
+}
+
+/* History opened for one day (from the dashboard's day view) */
+.history-day { scroll-margin-top: 5.5rem; transition: box-shadow 0.6s ease; }
+.history-day.is-wanted { box-shadow: 0 0 0 1px var(--gold), 0 0 0 5px rgba(216, 189, 121, 0.14); }

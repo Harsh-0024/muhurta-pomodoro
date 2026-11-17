@@ -55,6 +55,16 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
    less than the big clock (29:57 against 29:58); they now agree.
    Checked: desktop browser, iPhone simulator.
 
+6. **Day view: "Edit in History" opens that day.** The link in the dashboard's day sheet used
+   to open History at today. It now loads back to the day you were looking at, scrolls to it
+   and outlines it for a moment (or says nothing was timed that day).
+   Checked: desktop browser.
+
+7. **A page for mistyped addresses (computers).** An address that doesn't exist (for example
+   `/history`) showed the server's bare white "Not Found". It now shows the app's own page
+   with links to Rhythm and the Dashboard. Data addresses (`/api/...`) still answer as before.
+   Checked: desktop browser.
+
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
