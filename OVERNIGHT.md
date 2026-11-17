@@ -291,6 +291,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     links' row following the page) still glided: browsers don't apply the setting to a script's
     smooth scroll. They now jump straight there when it's on. The ring's slow breathing stays:
     it only fades, nothing moves.
+41. **Checked: page titles and headings; one fix on the phone.** Every page (Rhythm, Timer, Flow,
+    Settings, History, Dashboard, on the computer and the phone) has its own title and one main
+    heading, with sections under it in order. One gap: on the phone, opening a Settings section
+    (Sound, say) hid the page's main heading, so the screen started at "Sound" with nothing above
+    it. The heading is now only hidden from sight there (`mobile.css`), so a screen reader still
+    finds "Refine the ritual." first. Looks the same on the iPhone.
 
 ## If you release this: lines for "What's new"
 

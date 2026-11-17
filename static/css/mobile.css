@@ -452,9 +452,22 @@ body.settings-phone[data-settings-view="list"] .settings-sections {
   display: none;
 }
 
-body.settings-phone[data-settings-view="section"] .settings-hero,
+body.settings-phone[data-settings-view="section"] .settings-hero .lede,
 body.settings-phone[data-settings-view="section"] .settings-nav {
   display: none;
+}
+
+/* Out of sight in a section, but its title stays the page's heading for screen readers. */
+body.settings-phone[data-settings-view="section"] .settings-hero {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 body.settings-phone .pref-section {
