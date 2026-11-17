@@ -321,6 +321,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     nothing on Rhythm, Timer, Flow, Settings, History or Dashboard was cut off or spilled over
     anything, and no page grew sideways. Checked at computer width only (the simulator's Safari
     can't take the test styles).
+46. **Checked: no errors in the console (no change needed).** Every page (and an unknown one)
+    opened with no script errors or failed promises. The only red lines were the server saying
+    "not signed in" to the feedback list and two-step status, which happens only on a copy run
+    without an account (with one, Settings sends you to sign in first), and is handled quietly.
+    The sync check every 3 seconds per open page is by design: it asks this app, not the network.
 
 ## If you release this: lines for "What's new"
 
