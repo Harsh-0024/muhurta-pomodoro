@@ -5938,3 +5938,7 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   -webkit-line-clamp: 2;
   line-clamp: 2;
 }
+
+/* Dashboard, before the first session of the year: what fills it in, and where to start. */
+.dashboard-welcome { margin-bottom: 1.5rem; }
+.dashboard-welcome .card-lede { margin: 0.4rem 0 1rem; max-width: 34rem; }

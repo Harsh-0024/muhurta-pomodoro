@@ -4,6 +4,11 @@
 {% block page_id %}dashboard{% endblock %}
 {% block content %}
 <h1 class="sr-only">Dashboard</h1>
+<section class="dashboard-panel dashboard-welcome hidden" id="dashWelcome" aria-labelledby="dashWelcomeTitle">
+  <h2 class="card-title" id="dashWelcomeTitle">Your dashboard starts here</h2>
+  <p class="card-lede">Every focus session you finish on Rhythm, Timer or Flow fills these figures and charts in: your streak, your best days and the hours you focus best.</p>
+  <a class="btn btn-primary btn-small" href="{{ url_for('index') }}">Start a session</a>
+</section>
 <section class="dashboard-stats" aria-label="Focus summary">
   <article class="metric-card metric-card-primary">
     <span class="metric-label" id="totalFocusLabel">Focus this year</span>

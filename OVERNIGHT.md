@@ -206,6 +206,14 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     screen of both apps (Liftbook had nothing to fix). Checked on the iPhone simulator with a
     real long-named combination, deleted afterwards.
 
+28. **The Dashboard for someone who has just started.** With no focus yet this year, the page was
+    a wall of zeros, and Consistency read "0 of 321 days", as if every day since 1 January had
+    been missed (once you focus, it counts from your first day). Now a short welcome sits on top:
+    what fills the page in, and a "Start a session" button. The consistency note says "No focus
+    yet in 2026". Both go away with the first session. Found by running a copy of the app with an
+    empty data folder and reading every page: Rhythm, Timer, Flow and Settings already read well.
+    Checked on the iPhone simulator (empty) and on desktop with sessions.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.

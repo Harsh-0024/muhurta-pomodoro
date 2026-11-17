@@ -148,7 +148,11 @@
     updateToggleCard("streakCard", states.streakCard);
     updateToggleCard("averageCard", states.averageCard);
     setText("consistencyRate", formatDayRate(s.consistency_days_per_week));
-    setText("consistencyNote", `${s.active_days || 0} of ${s.days_elapsed || 0} days`);
+    // With no focus in the year, "0 of 321 days" reads like a judgement; say what's true instead.
+    const none = !Number(s.active_days || 0);
+    setText("consistencyNote", none ? `No focus yet in ${year}` : `${s.active_days} of ${s.days_elapsed || 0} days`);
+    const welcome = byId("dashWelcome");
+    if (welcome) welcome.classList.toggle("hidden", !(none && Number(year) === new Date().getFullYear()));
     setText(
       "heatmapSubtitle",
       `${formatMinutes(s.total_focus_minutes)} across ${formatDays(s.active_days)} in ${year}.`
