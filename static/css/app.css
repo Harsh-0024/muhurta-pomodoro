@@ -2493,7 +2493,9 @@ body.mode-cumulative .phase-label {
 
 @media (max-width: 880px) {
   .settings-layout {
-    grid-template-columns: 1fr;
+    /* minmax(0, …): a plain 1fr grew to the row of section links, so at 320px (a phone, or a
+       computer zoomed to 400%) the whole page scrolled sideways; the row scrolls on its own. */
+    grid-template-columns: minmax(0, 1fr);
     gap: 1.5rem;
   }
 
@@ -4784,6 +4786,7 @@ body.timer-ringing .countdown-ring-wrap .ring-progress {
 .timer-ring-wrap {
   --ring: min(320px, 88vw, max(176px, 100vh - var(--ring-room)));
   width: var(--ring);
+  max-width: 100%; /* 88vw is wider than the panel's inside at 320px: it stuck out by 7px */
 }
 
 .timer-ring-wrap .time-display {

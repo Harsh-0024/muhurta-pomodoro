@@ -279,6 +279,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     tall, without anything moving. Left as they are: the Dashboard's heatmap squares (13pt) and
     History's thin timeline blocks, small by nature, with full-size ways to the same thing (the
     Recent days rows, the Edit buttons); the "i" buttons already had their touch area (item 24).
+39. **Nothing scrolls sideways at 320px wide.** A small phone, or a computer zoomed to 400%, shows
+    the computer build 320px wide. There, Settings scrolled sideways by 41px (the row of section
+    links stretched the whole column) and the clock ring on Rhythm, Timer and Flow stuck out by
+    7px. The column can now shrink (the link row scrolls on its own, as it was meant to) and the
+    ring is never wider than its panel. Measured again: every page fits at 320px, and nothing
+    changed at full width. The phone build already fitted.
 
 ## If you release this: lines for "What's new"
 
