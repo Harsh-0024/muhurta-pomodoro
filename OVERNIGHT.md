@@ -264,6 +264,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     labels are 10px instead of 9. Rerun: Rhythm, Timer and Flow pass in both modes (the rest of
     the phone pages already did). On the iPhone the labels still fit on one line and the quote
     still sits quietly under the clock.
+36. **Pop-ups measured too.** The level menu, keyboard shortcuts, confirm, the Dashboard's day
+    view and Rhythm info, the default-combination menu and Add a session, on the computer and the
+    phone build, light and dark: all pass but one. The small gold weekday over the day view's
+    title ("Tuesday") was 3.4:1 in light; it's now a deeper shade of the same gold (5.2:1), which
+    also fixes the "Nothing here" page's kicker.
 
 ## If you release this: lines for "What's new"
 

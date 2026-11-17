@@ -5962,3 +5962,15 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   outline-offset: 2px;
   border-radius: 0.5rem;
 }
+
+/* Light: the small gold word over a pop-up's title (the day view's weekday, "Nothing here") was
+   the theme's gold, 3.4:1 at 11px. A deeper shade of the same gold reads at 5:1. */
+body[data-theme="light"] .modal-kicker {
+  color: #866526;
+}
+
+@media (prefers-color-scheme: light) {
+  body[data-theme="system"] .modal-kicker {
+    color: #866526;
+  }
+}
