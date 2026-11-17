@@ -146,6 +146,12 @@
       } finally {
         send.textContent = "Send";
         update();
+        // Sent: the box is empty, so Send stays off and keyboard focus has nowhere to come back
+        // to. On a computer it goes to the box, ready for the next note (on a phone that would
+        // pop the keyboard up; the "Thank you" is read out either way).
+        const at = document.activeElement;
+        const lost = !at || at === document.body || at === send;
+        if (send.disabled && lost && matchMedia("(pointer: fine)").matches) text.focus({ preventScroll: true });
       }
     });
 

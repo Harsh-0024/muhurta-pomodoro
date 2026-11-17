@@ -311,6 +311,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     keyboard focus to the top of the page, so the next Tab started over. Focus now comes back to
     the button when it switches on again, unless you've moved on. Done once for every page in
     `modal-focus.js` (browsers send no event for this, so it watches the switch itself).
+44. **After sending feedback, focus waits in the box.** The one place item 43 couldn't help: once
+    a note is sent the box is empty, so Send stays off and keyboard focus had nowhere to return.
+    On a computer it now goes to the message box, ready for the next note; on a phone it doesn't
+    (that would pop the keyboard up), and the "Thank you" is read out either way. Tested with the
+    server's reply stood in for, so nothing was really sent.
 
 ## If you release this: lines for "What's new"
 
