@@ -177,6 +177,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     matter (saved, cancelled, time's up) keep their own announcements. Liftbook's announcements
     were already only on changes you cause.
 
+24. **Easier to tap on a phone: the little "i" and the Timer's quick lengths.** Measuring every
+    button on the phone pages found the "i" beside Rhythm profile (which opens its explanation)
+    was an 18-point circle, and the Timer's quick lengths (6, 12, 24…) were 30 points tall. On
+    touch screens each now answers to a finger-sized area around it; they look exactly as before
+    and nothing moves. Checked on the iPhone simulator: a tap just outside the "i" opens it.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.

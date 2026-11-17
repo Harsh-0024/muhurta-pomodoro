@@ -5892,3 +5892,20 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   white-space: nowrap;
   border: 0;
 }
+
+/* Touch screens: the small "i" and the quick-length numbers keep their look but take a
+   finger-sized tap, through an invisible area around them. */
+@media (pointer: coarse) {
+  .info-button,
+  .countdown-pick { position: relative; }
+  .info-button::after {
+    content: "";
+    position: absolute;
+    inset: -0.8rem;
+  }
+  .countdown-pick::after {
+    content: "";
+    position: absolute;
+    inset: -0.3rem 0;
+  }
+}
