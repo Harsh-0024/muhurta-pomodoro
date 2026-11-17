@@ -839,7 +839,7 @@ body.modal-open {
   overflow: hidden;
 }
 
-/* Keyboard focus: the app's own soft gold ring, not the browser's default. */
+/* Keyboard focus: the app's own gold ring (full gold: at 70% it was about 2.3:1 in the light theme), not the browser's default. */
 /* The top bar's page links, the level button and its menu included: before, keyboard focus there
    only looked like hover, and on the current page's gold tab it showed nothing. */
 .btn:focus-visible,
@@ -847,7 +847,7 @@ body.modal-open {
 .nav-link:focus-visible,
 .nav-level-button:focus-visible,
 .level-option:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
+  outline: 2px solid var(--gold);
   outline-offset: 2px;
 }
 
@@ -1439,6 +1439,12 @@ body.mode-cumulative .phase-label {
   outline: none;
 }
 
+/* Keyboard focus: a ring, not only the soft hover wash (that alone was about 1.1:1). */
+.settings-nav-link:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: -2px;
+}
+
 .settings-nav-link.is-active {
   color: var(--ink);
   background: var(--surface-strong);
@@ -1607,7 +1613,7 @@ body.mode-cumulative .phase-label {
 .select-button:hover,
 .select-button:focus-visible,
 .select-button[aria-expanded="true"] {
-  border-color: rgba(201, 169, 98, 0.5);
+  border-color: var(--gold);
   outline: none;
 }
 
@@ -2162,7 +2168,7 @@ body.mode-cumulative .phase-label {
 .input:focus,
 .page-settings .select:focus-visible {
   outline: none;
-  border-color: rgba(201, 169, 98, 0.6);
+  border-color: var(--gold);
   box-shadow: 0 0 0 3px rgba(201, 169, 98, 0.15);
 }
 
@@ -3461,7 +3467,7 @@ body[data-theme="light"] .bell-peak-label {
 }
 
 .info-button:focus-visible {
-  outline: 1px solid var(--gold);
+  outline: 2px solid var(--gold);
   outline-offset: 2px;
 }
 
@@ -3730,6 +3736,12 @@ a.btn {
 .history-back:focus-visible {
   color: var(--gold2);
   outline: none;
+}
+
+.history-back:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 .page-history .main {
@@ -4102,7 +4114,7 @@ body[data-theme="light"] .history-sheet input[type="datetime-local"] {
 .history-chip:hover,
 .history-chip:focus-visible {
   color: var(--ink);
-  border-color: rgba(201, 169, 98, 0.5);
+  border-color: var(--gold);
   outline: none;
 }
 
@@ -4762,7 +4774,7 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
 }
 
 .countdown-pick:focus-visible {
-  outline: 1px solid var(--gold);
+  outline: 2px solid var(--gold);
   outline-offset: 1px;
 }
 
@@ -5972,7 +5984,7 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
    over it. Both get the app's gold ring, like the buttons and page links. */
 .brand:focus-visible,
 .recent-row.is-open:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--gold) 70%, transparent);
+  outline: 2px solid var(--gold);
   outline-offset: 2px;
   border-radius: 0.5rem;
 }

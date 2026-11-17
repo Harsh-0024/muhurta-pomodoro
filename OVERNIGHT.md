@@ -359,6 +359,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     palette (`--field-line`: `#6e6452` dark, `#8f826b` light), about 3:1, still one thin pixel,
     not grey. Covers text boxes, the settings selects and the level picker. Checked on the
     iPhone in light mode; Liftbook got the same treatment.
+53. **Keyboard focus shows clearly.** Where Tab lands is now always marked with a 2px ring or edge
+    in the theme's full gold. Before, the main ring was gold faded to 70% (about 2.3:1 in the
+    light theme), a focused select or level picker got a pale edge fainter than the new resting
+    outline, two rings were 1px, and the Settings menu links and History's back link only changed
+    colour. Hover is unchanged apart from pickers now turning gold. Checked with Tab in the light
+    theme on desktop; Liftbook's ring got the same fix.
 
 ## If you release this: lines for "What's new"
 
