@@ -112,6 +112,14 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     missing time no longer shows "Invalid Date". The admin page's "ago" got the same fix, and a
     day back reads "yesterday" instead of "1 days ago". Checked that Settings loads cleanly.
 
+15. **History: Undo after deleting a session.** Deleting a session now shows "Session deleted"
+    with an Undo button for 8 seconds; Undo saves the same session again (same kind, times,
+    preset and details) through the clocks' own save, so it works on phones too and syncs as a
+    new row. The question before deleting no longer says "This cannot be undone."
+    Found on the way: the toast at the bottom of History and Settings sat under the page footer
+    (the footer's text showed through it and it caught taps); the toast now sits above it.
+    Checked on desktop (deleted a test session, undid it, all its details came back).
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.

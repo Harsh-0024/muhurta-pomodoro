@@ -43,14 +43,31 @@
   /* ---------- helpers ---------- */
 
   let toastTimer = null;
-  function toast(msg, kind) {
+  // action: { label, run } adds a button to the toast (Undo), and keeps it up for 8 seconds.
+  function toast(msg, kind, action) {
     const el = $("settingsToast");
     if (!el) return;
+    // Inside <main> it sits under the footer (main is z-index 1, the footer 2), which hid
+    // part of it and caught taps on Undo. At the top level it is above both.
+    if (el.parentElement !== document.body) document.body.appendChild(el);
     el.textContent = msg;
     el.classList.toggle("is-error", kind === "error");
+    el.classList.toggle("has-action", Boolean(action));
+    if (action) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "toast-action";
+      btn.textContent = action.label;
+      btn.addEventListener("click", () => {
+        el.classList.remove("is-visible", "has-action");
+        btn.remove();
+        action.run();
+      }, { once: true });
+      el.appendChild(btn);
+    }
     el.classList.add("is-visible");
     if (toastTimer) clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => el.classList.remove("is-visible"), kind === "error" ? 4000 : 1800);
+    toastTimer = setTimeout(() => el.classList.remove("is-visible", "has-action"), action ? 8000 : kind === "error" ? 4000 : 1800);
   }
 
   function askConfirm(options) {
@@ -610,7 +627,7 @@
     const kind = kindOf(seg);
     const ok = await askConfirm({
       title: "Delete this session?",
-      message: `${kind.label} ${dayPhrase(seg.day)}, ${plainRange(seg)} (${formatDuration(seg.duration_sec)}). It will disappear from the dashboard. This cannot be undone.`,
+      message: `${kind.label} ${dayPhrase(seg.day)}, ${plainRange(seg)} (${formatDuration(seg.duration_sec)}). It will disappear from the dashboard.`,
       accept: "Delete",
     });
     if (!ok) return;
@@ -618,9 +635,34 @@
       await api(`/api/activity/segment/${seg.id}`, { method: "DELETE" });
       recent = recent.filter((s) => s.id !== seg.id);
       await afterChange(null, seg.day);
-      toast("Session deleted");
+      toast("Session deleted", null, { label: "Undo", run: () => restoreSegment(seg) });
     } catch (e) {
       toast(e.message || "Could not delete", "error");
+    }
+  }
+
+  // Undo a delete: save the same session again, as the clock first saved it (same kind,
+  // times, preset and details). It comes back as a new row; sync sends it like any other.
+  async function restoreSegment(seg) {
+    try {
+      const saved = await api("/api/activity/segment", {
+        method: "POST",
+        body: JSON.stringify({
+          day: seg.day,
+          kind: seg.kind,
+          started_at: seg.started_at,
+          ended_at: seg.ended_at,
+          duration_sec: Number(seg.duration_sec),
+          preset_id: seg.preset_id || "",
+          preset_name: seg.preset_name || "",
+          phase_index: seg.phase_index ?? null,
+          details: seg.details || {},
+        }),
+      });
+      await afterChange(saved, seg.day);
+      toast("Session back");
+    } catch (e) {
+      toast(e.message || "Could not bring it back", "error");
     }
   }
 

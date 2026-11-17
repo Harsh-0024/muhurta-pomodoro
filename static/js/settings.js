@@ -51,6 +51,9 @@
   function toast(msg, kind) {
     const el = $("settingsToast");
     if (!el) return;
+    // Inside <main> it sits under the footer (main is z-index 1, the footer 2), which hid
+    // part of it and caught taps on Undo. At the top level it is above both.
+    if (el.parentElement !== document.body) document.body.appendChild(el);
     el.textContent = msg;
     el.classList.toggle("is-error", kind === "error");
     el.classList.add("is-visible");

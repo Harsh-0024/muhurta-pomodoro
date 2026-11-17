@@ -5858,3 +5858,18 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
 }
 .history-short:hover { color: var(--ink); }
 .history-short:focus-visible { outline: 1px solid var(--gold); outline-offset: -2px; }
+
+/* History: Undo in the toast after a delete. */
+.settings-toast.has-action.is-visible { pointer-events: auto; }
+.settings-toast .toast-action {
+  margin-left: 0.35rem;
+  padding: 0.2rem 0.65rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gold2);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.settings-toast .toast-action:hover { background: var(--gold-soft, rgba(201, 162, 39, 0.12)); }
