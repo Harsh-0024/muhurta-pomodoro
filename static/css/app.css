@@ -5942,3 +5942,11 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
 /* Dashboard, before the first session of the year: what fills it in, and where to start. */
 .dashboard-welcome { margin-bottom: 1.5rem; }
 .dashboard-welcome .card-lede { margin: 0.4rem 0 1rem; max-width: 34rem; }
+
+/* The chosen segment stays gold under the pointer, and after a tap on a phone (where the tapped
+   button keeps its hover); hover used to outrank it and turn it white. */
+.segment.is-active:hover:not(:disabled),
+.segment.is-active:focus-visible {
+  color: #1a1208;
+  background: linear-gradient(135deg, var(--gold2), var(--gold));
+}

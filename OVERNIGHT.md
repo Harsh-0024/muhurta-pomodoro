@@ -214,6 +214,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     empty data folder and reading every page: Rhythm, Timer, Flow and Settings already read well.
     Checked on the iPhone simulator (empty) and on desktop with sessions.
 
+29. **A chosen tab stays gold.** In two-way pickers (History's "By day / Unusually long" and the
+    others built the same way), the chosen one is gold. But the pointer style outranked it, so on
+    a phone the tab you had just tapped turned a faint white (a tapped button keeps the pointer
+    look), and on a computer it did the same while the mouse rested on it. The chosen one now
+    stays gold. Found while checking History with no sessions (its empty pages already read
+    well). Checked on the iPhone simulator.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
