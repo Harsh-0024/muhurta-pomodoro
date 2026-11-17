@@ -1819,19 +1819,32 @@ body.mode-cumulative .phase-label {
 .page-settings .range {
   --fill: 70%;
   flex: 1;
-  height: 6px;
+  /* 24px to click or tap anywhere near the line; the line itself stays 6px (the track below). */
+  height: 24px;
   margin: 0;
-  border-radius: 999px;
   appearance: none;
   -webkit-appearance: none;
-  background: linear-gradient(to right, var(--gold) var(--fill), var(--faint) var(--fill));
+  background: transparent;
   cursor: pointer;
+}
+
+.page-settings .range::-webkit-slider-runnable-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--gold) var(--fill), var(--faint) var(--fill));
+}
+
+.page-settings .range::-moz-range-track {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(to right, var(--gold) var(--fill), var(--faint) var(--fill));
 }
 
 .page-settings .range::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 18px;
   height: 18px;
+  margin-top: -6px; /* centre the 18px knob on the 6px track */
   border-radius: 50%;
   background: #fff;
   border: 2px solid var(--gold);
@@ -3458,6 +3471,15 @@ body[data-theme="light"] .bell-peak-label {
   line-height: 1;
   cursor: pointer;
   transition: color 0.2s ease, border-color 0.2s ease;
+  position: relative;
+}
+
+/* The circle stays small; an unseen ring around it makes it 26px to click or tap. */
+.info-button::before {
+  content: "";
+  position: absolute;
+  inset: -5px; /* from inside the 1px border: 18 + 2 * 4 = 26px */
+  border-radius: 50%;
 }
 
 .info-button:hover,

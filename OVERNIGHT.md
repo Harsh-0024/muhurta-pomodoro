@@ -365,6 +365,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     outline, two rings were 1px, and the Settings menu links and History's back link only changed
     colour. Hover is unchanged apart from pickers now turning gold. Checked with Tab in the light
     theme on desktop; Liftbook's ring got the same fix.
+54. **Small controls are easier to hit.** A sweep for click targets under 24px found two. The
+    "i" buttons on the Dashboard were an 18px circle; they look the same but an unseen ring makes
+    them about 26px to click (on touch they already had a bigger one). The Volume slider was a 6px
+    line, so a click just above or below it missed; the line still looks 6px and rounded, but the
+    control is now 24px tall (a click 9px above the line's centre now moves it). Left as is: the
+    13px heatmap squares, which are the chart itself. Checked on desktop; on the iPhone the slider
+    looks the same (Safari moves a slider only by dragging the knob, so taps prove nothing there).
 
 ## If you release this: lines for "What's new"
 
