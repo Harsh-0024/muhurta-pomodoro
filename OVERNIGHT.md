@@ -285,6 +285,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     7px. The column can now shrink (the link row scrolls on its own, as it was meant to) and the
     ring is never wider than its panel. Measured again: every page fits at 320px, and nothing
     changed at full width. The phone build already fitted.
+40. **Reduce Motion stops the scripted scrolling.** With Reduce Motion on (iPhone: Settings >
+    Accessibility > Motion), the CSS animations were already calm, but the two smooth scrolls
+    started from Settings' script (to the combination form when you edit one, and the section
+    links' row following the page) still glided: browsers don't apply the setting to a script's
+    smooth scroll. They now jump straight there when it's on. The ring's slow breathing stays:
+    it only fades, nothing moves.
 
 ## If you release this: lines for "What's new"
 

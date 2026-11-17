@@ -2,6 +2,9 @@
   "use strict";
 
   const $ = (id) => document.getElementById(id);
+  // Reduce Motion on: a script's smooth scroll ignores it unless asked, so it jumps instead.
+  const scrollBehavior = () =>
+    (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? "auto" : "smooth");
 
   const GOAL_MIN = 15;
   const GOAL_MAX = 960;
@@ -653,7 +656,7 @@
     $("customForm").classList.add("is-editing");
     renderPresetPreview();
     renderCustomList();
-    $("customForm").scrollIntoView({ block: "center", behavior: "smooth" });
+    $("customForm").scrollIntoView({ block: "center", behavior: scrollBehavior() });
     $("presetName").focus({ preventScroll: true });
   }
 
@@ -759,7 +762,7 @@
         a.classList.toggle("is-active", on);
         // On phones the nav is a horizontal strip; keep the current tab in it.
         if (on && nav && nav.scrollWidth > nav.clientWidth) {
-          nav.scrollTo({ left: a.offsetLeft - nav.clientWidth / 2 + a.offsetWidth / 2, behavior: "smooth" });
+          nav.scrollTo({ left: a.offsetLeft - nav.clientWidth / 2 + a.offsetWidth / 2, behavior: scrollBehavior() });
         }
       });
     };
