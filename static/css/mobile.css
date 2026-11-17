@@ -804,3 +804,17 @@ body.is-mobile .dashboard-panel:has(> .recent-list) {
 body.is-mobile .topnav { flex: 0 1 auto; min-width: 0; }
 body.is-mobile .nav-level-button { max-width: 100%; }
 body.is-mobile .topbar > .brand { flex-shrink: 0; }
+
+/* Tap areas: the name in the top bar (home) was 19pt tall and History's "← Settings" 18pt,
+   under the 24pt minimum (Apple asks 44). An invisible area around each makes them about
+   44pt tall without moving anything. */
+body.is-mobile .brand,
+body.is-mobile .history-back {
+  position: relative;
+}
+body.is-mobile .brand::after,
+body.is-mobile .history-back::after {
+  content: "";
+  position: absolute;
+  inset: -0.8rem -0.4rem;
+}

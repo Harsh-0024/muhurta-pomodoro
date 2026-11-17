@@ -273,6 +273,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     button, field and menu option on each page (the level and default-combination menus opened),
     on the computer and the phone build, has a name a screen reader can say: its text, its label,
     or an aria-label for the icon-only ones.
+38. **The name in the top bar and History's back link are easier to tap on the phone.** Measured
+    every tap target on the phone build against the 24pt minimum: the name (a link home) was 19pt
+    tall and History's "← Settings" 18pt. Each now has an invisible area around it, about 44pt
+    tall, without anything moving. Left as they are: the Dashboard's heatmap squares (13pt) and
+    History's thin timeline blocks, small by nature, with full-size ways to the same thing (the
+    Recent days rows, the Edit buttons); the "i" buttons already had their touch area (item 24).
 
 ## If you release this: lines for "What's new"
 
