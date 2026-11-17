@@ -145,6 +145,8 @@ Drafts for `release_notes.py`, in the voice of the existing notes. Use, change o
 "Fixes: a Rhythm block ending while the Flow page was open now chimes and moves on; keys no longer reach the timer behind an open dialog; Flow stopped in one window stops in the others; light mode on the Dashboard uses the light colours.",
 "In History, entries shorter than a minute are tucked under each day; \"Show\" brings them back.",
 only(COMPUTERS, "A mistyped address now shows the app's own page instead of a bare error."),
+"Deleted a session in History by mistake? Tap Undo on the message that follows.",
+only(PHONES, "Turn your phone on its side and the clock sits beside its buttons, all on one screen."),
 ```
 
 ## Good to know before merging
