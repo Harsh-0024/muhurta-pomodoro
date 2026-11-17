@@ -6037,3 +6037,15 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
     border-color: #857e73;
   }
 }
+
+/* Windows high-contrast (forced colours) drops shadows and custom colours, so the focus marks drawn
+   as a soft shadow or a gold edge vanished there. In that mode only, every keyboard focus gets a
+   ring in the system's own highlight colour; the normal look is untouched. */
+@media (forced-colors: active) {
+  :focus-visible:not(main):not(h1),
+  .input:focus,
+  .countdown-entry:focus {
+    outline: 2px solid Highlight !important;
+    outline-offset: 2px;
+  }
+}

@@ -372,6 +372,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     control is now 24px tall (a click 9px above the line's centre now moves it). Left as is: the
     13px heatmap squares, which are the chart itself. Checked on desktop; on the iPhone the slider
     looks the same (Safari moves a slider only by dragging the knob, so taps prove nothing there).
+55. **Focus shows in Windows high-contrast mode.** That mode removes shadows and custom colours, so
+    every focus mark drawn as a soft shadow or a gold edge (the segments, the steppers, the pickers,
+    the text boxes) showed nothing there. A rule that only applies in that mode now gives every
+    keyboard focus a ring in the system's own highlight colour. The normal look is untouched (the
+    rule is off unless that mode is on). The browser here can't switch the mode on, so I checked
+    that the rule loads and stays off normally; Liftbook got the same rule.
 
 ## If you release this: lines for "What's new"
 
