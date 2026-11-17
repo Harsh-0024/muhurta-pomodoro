@@ -269,6 +269,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     phone build, light and dark: all pass but one. The small gold weekday over the day view's
     title ("Tuesday") was 3.4:1 in light; it's now a deeper shade of the same gold (5.2:1), which
     also fixes the "Nothing here" page's kicker.
+37. **Checked: every control has a name for screen readers (no change needed).** Every link,
+    button, field and menu option on each page (the level and default-combination menus opened),
+    on the computer and the phone build, has a name a screen reader can say: its text, its label,
+    or an aria-label for the icon-only ones.
 
 ## If you release this: lines for "What's new"
 
