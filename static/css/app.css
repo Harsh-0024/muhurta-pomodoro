@@ -5977,3 +5977,19 @@ body[data-theme="light"] .modal-kicker {
     color: #866526;
   }
 }
+
+/* The chosen segment in the light theme (By day / Unusually long, the theme picker, the level
+   choices...): it took the light theme's darker gold, so its near-black words sat on #5f4721 at
+   about 2:1. It now uses the light gold of the Start buttons, about 8:1. */
+body[data-theme="light"] .segment.is-active,
+body[data-theme="light"] .segment.is-active:hover:not(:disabled),
+body[data-theme="light"] .segment.is-active:focus-visible {
+  background: linear-gradient(135deg, #f3e8cf, #c9a962);
+}
+@media (prefers-color-scheme: light) {
+  body[data-theme="system"] .segment.is-active,
+  body[data-theme="system"] .segment.is-active:hover:not(:disabled),
+  body[data-theme="system"] .segment.is-active:focus-visible {
+    background: linear-gradient(135deg, #f3e8cf, #c9a962);
+  }
+}

@@ -333,6 +333,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
 48. **Checked: page basics (no change needed).** Every page says it's in English (so a screen
     reader pronounces it right), allows pinch zoom, and gives the browser bar colours for dark,
     light and automatic, kept in step with the theme by `theme-color.js`.
+49. **The chosen button in a row of choices is readable in light mode.** Looked at what a new
+    person sees with no sessions yet (Dashboard and History, on the iPhone): both explain
+    themselves well. But there, in the light theme, the chosen half of "By day / Unusually long"
+    (and every row of choices like it: theme, level, timer end) had near-black words on the
+    light theme's dark gold, about 2:1 at its darker end. It now uses the light gold of the Start
+    buttons, about 8:1; the dark theme is unchanged. The earlier contrast check missed it because
+    it couldn't measure text on a gradient. Checked on the iPhone in light mode.
 
 ## If you release this: lines for "What's new"
 
