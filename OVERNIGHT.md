@@ -213,6 +213,10 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
   don't change the same lines' meaning). That branch is also behind `main` in `db.py`,
   `release_notes.py` and the tests workflow, independent of anything here.
 - No version bump or release note is in this branch: nothing ships until you choose.
+- The three Python test files in `tests/` are scripts that each replace the sign-in service for
+  the whole run, so run them one at a time (`python tests/test_sign_in.py`, and the same for
+  `test_shared_time.py` and `test_devices.py`). All three pass that way. Running them together
+  with `python -m unittest discover` makes them clash and fail, on `main` too.
 
 ## Ideas not done yet
 
