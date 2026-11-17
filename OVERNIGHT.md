@@ -99,6 +99,18 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     (only for a minute or more). The Timer does the same when you cancel part-way or stop
     its overtime: "Cancelled. 12 min of focus saved." Checked: desktop browser.
 
+## If you release this: lines for "What's new"
+
+Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
+
+```python
+"The Dashboard shows more: today against your goal, the last 7 days, your average by weekday, each month's total, and when in the day you focus. Tap a day to see its sittings on a timeline.",
+"Rhythm, Timer and Flow show today's focus under the clock, filling toward your daily goal.",
+"Timer: add 1 or 5 minutes without cancelling (or press +). Cancelling part-way, and stopping Flow, now say how much focus was saved.",
+"Fixes: a Rhythm block ending while the Flow page was open now chimes and moves on; keys no longer reach the timer behind an open dialog; Flow stopped in one window stops in the others; light mode on the Dashboard uses the light colours.",
+only(COMPUTERS, "A mistyped address now shows the app's own page instead of a bare error."),
+```
+
 ## Good to know before merging
 
 - The unmerged "Activities" branch (`ccr-fa74c739-y3z13x`) and this one both add styles at the
