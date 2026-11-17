@@ -2,7 +2,8 @@
   "use strict";
 
   const STORAGE_KEY = "muhurat_flow_session_v1";
-  const baseTitle = "Muhurta Pomodoro";
+  // The page's own title ("Flow · Muhurta Pomodoro"), set in base.html.
+  const baseTitle = document.documentElement.dataset.title || "Muhurta Pomodoro";
   let tickTimer = null;
   let quoteLoadId = 0;
   let settings = null;

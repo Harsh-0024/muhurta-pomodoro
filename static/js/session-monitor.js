@@ -2,7 +2,8 @@
   "use strict";
 
   const SESSION_STORAGE_KEY = "muhurat_timer_session_v1";
-  const baseTitle = "Muhurta Pomodoro";
+  // The page's own title ("Flow · Muhurta Pomodoro"), set in base.html.
+  const baseTitle = document.documentElement.dataset.title || "Muhurta Pomodoro";
   let settings = null;
   let presets = null;
   let monitorTimer = null;

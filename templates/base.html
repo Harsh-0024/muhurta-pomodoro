@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-title="{% if self.title() %}{{ self.title() }} · {% endif %}Muhurta Pomodoro">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1{% if mobile %}, viewport-fit=cover{% endif %}" />
-  <title>Muhurta Pomodoro</title>
+  <title>{% block title %}{% endblock %}{% if self.title() %} · {% endif %}Muhurta Pomodoro</title>
   {# The page's own colours, so Safari's bars match it (theme-color.js keeps them in step). #}
   {% if theme == 'dark' %}
   <meta name="color-scheme" content="dark" />

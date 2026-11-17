@@ -148,6 +148,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     look before and after found only these; all 143 controls now show focus. Checked on the
     computer with real Tab presses.
 
+20. **Each page has its own title.** Every page already named itself (Timer, Dashboard, History…)
+    but the shared layout never used it, so every browser tab, history entry and Windows window
+    read "Muhurta Pomodoro". They now read "Dashboard · Muhurta Pomodoro" and so on (Rhythm,
+    Timer and Flow still show the time while a clock runs). When a clock stops, the title goes
+    back to the page's own name instead of the bare app name. Checked on the computer.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.

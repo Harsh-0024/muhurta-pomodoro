@@ -2,7 +2,8 @@
   "use strict";
 
   const RING_LEN = 2 * Math.PI * 96;
-  const baseTitle = "Muhurta Pomodoro";
+  // The page's own title ("Flow · Muhurta Pomodoro"), set in base.html.
+  const baseTitle = document.documentElement.dataset.title || "Muhurta Pomodoro";
   const SESSION_STORAGE_KEY = "muhurat_timer_session_v1";
   let noticeTimer = null;
 
