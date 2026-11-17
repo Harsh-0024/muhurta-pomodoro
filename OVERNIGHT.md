@@ -90,6 +90,15 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     If you would rather keep the clock pages bare, removing the one `today.js` line in
     `templates/base.html` takes it away.
 
+## Good to know before merging
+
+- The unmerged "Activities" branch (`ccr-fa74c739-y3z13x`) and this one both add styles at the
+  end of `static/css/app.css` and both add to `dashboard.js`, `dashboard.html`, `history.js`
+  and `base.html`. Git will ask for a hand where they meet (keep both sides each time; they
+  don't change the same lines' meaning). That branch is also behind `main` in `db.py`,
+  `release_notes.py` and the tests workflow, independent of anything here.
+- No version bump or release note is in this branch: nothing ships until you choose.
+
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
