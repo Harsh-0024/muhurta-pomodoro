@@ -37,6 +37,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
    - "Are you sure?" dialog: Enter pressed while the Cancel button had focus chose Continue.
      Enter on Cancel now cancels.
 
+4. **Clock fixes (Timer and Flow)**
+   - Flow open in two windows: stopping it in one left it running in the other, and that
+     window's next save brought the stopped flow back. The other window now stops too.
+   - Pressing Start (or Space) twice quickly on Timer or Flow could start the clock twice while
+     the other clocks were still being paused, resetting its start. The second press is ignored.
+   Checked in the desktop browser.
+
 ## Ideas not done yet
 
 (see the end of this file as the list grows)

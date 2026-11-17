@@ -278,14 +278,26 @@
 
   /* ---------- actions ---------- */
 
+  let starting = false; // a second press while the other clocks are being paused
+
+  async function pauseOthers() {
+    starting = true;
+    try {
+      return await window.OneClock.pauseOthers("timer", "Timer");
+    } finally {
+      starting = false;
+    }
+  }
+
   async function start() {
     const sec = enteredSec();
-    if (sec < 1) return;
+    if (sec < 1 || starting || T().read()) return;
     saveLast(sec);
     if ("Notification" in window && Notification.permission === "default") {
       Notification.requestPermission().catch(() => {});
     }
-    const notices = await window.OneClock.pauseOthers("timer", "Timer");
+    const notices = await pauseOthers();
+    if (T().read()) return; // started in another window meanwhile
     T().start(sec, displayedQuote());
     T().loadSettings().then((s) => window.FocusSounds?.start(s));
     loadQuote();
@@ -294,7 +306,8 @@
   }
 
   async function resume() {
-    const notices = await window.OneClock.pauseOthers("timer", "Timer");
+    if (starting || T().read()?.mode !== "paused") return;
+    const notices = await pauseOthers();
     T().resume();
     T().loadSettings().then((s) => window.FocusSounds?.start(s));
     loadQuote();

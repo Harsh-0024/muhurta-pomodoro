@@ -265,8 +265,16 @@
     }
   }
 
+  let starting = false; // a second press while the other clocks are being paused
+
   async function startFlow() {
-    await pauseOthers();
+    if (starting || state.mode !== "idle") return;
+    starting = true;
+    try {
+      await pauseOthers();
+    } finally {
+      starting = false;
+    }
     const now = Date.now();
     state.mode = "running";
     state.startedAt = now;
@@ -294,8 +302,14 @@
   }
 
   async function resumeFlow() {
+    if (starting || state.mode !== "paused") return;
+    starting = true;
+    try {
+      await pauseOthers();
+    } finally {
+      starting = false;
+    }
     if (state.mode !== "paused") return;
-    await pauseOthers();
     state.mode = "running";
     state.runStartedAt = Date.now();
     playWorkBeginChime();
@@ -320,6 +334,19 @@
     persist();
   }
 
+  function endFromOutside() {
+    if (state.mode === "idle") return;
+    state.mode = "idle";
+    state.startedAt = null;
+    state.runStartedAt = null;
+    state.focusedSec = 0;
+    stopTicking();
+    try {
+      sessionStorage.removeItem(STORAGE_KEY);
+    } catch (_) {}
+    render();
+  }
+
   function wireControls() {
     document.getElementById("btnFlowStart")?.addEventListener("click", startFlow);
     document.getElementById("btnFlowPause")?.addEventListener("click", pauseFlow);
@@ -327,7 +354,13 @@
     document.getElementById("btnFlowStop")?.addEventListener("click", stopFlow);
     window.addEventListener("beforeunload", persist);
     window.addEventListener("storage", (event) => {
-      if (event.key !== STORAGE_KEY || !event.newValue) return;
+      if (event.key !== STORAGE_KEY) return;
+      if (!event.newValue) {
+        // Stopped in another window, which logged it: stop here too, or this
+        // window's next save would bring the flow back.
+        endFromOutside();
+        return;
+      }
       applyStoredFlow(parseStored(event.newValue), true);
     });
     document.addEventListener("visibilitychange", () => {
