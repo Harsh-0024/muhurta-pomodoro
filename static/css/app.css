@@ -5917,3 +5917,24 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   .select,
   .page-settings .select { font-size: 16px; }
 }
+
+/* A long combination name ends in "…" in the level button instead of pushing the bar wide. */
+.nav-level { min-width: 0; max-width: 100%; }
+.nav-level-button { max-width: 16rem; min-width: 0; }
+#levelButtonText {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Inside the ring, a long combination name stays clear of the ring: narrower, two lines at most. */
+.cycle-hint {
+  max-width: 66%;
+  margin-inline: auto;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}

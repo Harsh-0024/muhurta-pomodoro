@@ -197,6 +197,15 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     emails). The Timer's length box keeps the full keyboard, because the iPhone number pad has
     no ":" for "m:ss".
 
+27. **A long combination name no longer pushes the page sideways on a phone.** A combination can
+    have a name of up to 80 characters. Picked, it filled the level button in the top bar, which
+    then ran off the right edge, so the whole page could be dragged sideways. The button now ends
+    a long name in "…" (the menu still shows it in full), and the brand beside it keeps its size.
+    Inside the ring, the "Session 1 of 4 · name" line now stays clear of the ring itself, two
+    lines at most. Built-in names look as before. Found by putting long names into every
+    screen of both apps (Liftbook had nothing to fix). Checked on the iPhone simulator with a
+    real long-named combination, deleted afterwards.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.

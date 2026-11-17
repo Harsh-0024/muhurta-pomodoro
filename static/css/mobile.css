@@ -796,3 +796,8 @@ body.is-mobile .dashboard-panel:has(> .recent-list) {
     display: none;
   }
 }
+
+/* Phone: the level button shrinks beside the brand (a long combination name ends in "…"). */
+body.is-mobile .topnav { flex: 0 1 auto; min-width: 0; }
+body.is-mobile .nav-level-button { max-width: 100%; }
+body.is-mobile .topbar > .brand { flex-shrink: 0; }
