@@ -154,6 +154,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     Timer and Flow still show the time while a clock runs). When a clock stops, the title goes
     back to the page's own name instead of the bare app name. Checked on the computer.
 
+21. **Every page has a main heading for screen readers.** Rhythm, Timer, Flow and the Dashboard
+    had no main heading (h1), so a screen reader's list of headings started at the dashboard's
+    cards, or, on the clocks, held only the hidden dialogs' titles. Each now has one naming the
+    page, read aloud but not shown. Liftbook's 21 screens were already right. Checked that
+    nothing moves, on the computer and the iPhone simulator (upright and on its side).
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
