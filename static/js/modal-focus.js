@@ -53,4 +53,27 @@
     if (wasOpen && !open) setTimeout(restore, 0);
     wasOpen = open;
   }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
+
+  // A button switched off while it works ("Sending…", "Saving…") drops keyboard focus to the
+  // top of the page. When it's switched back on, focus returns to it, unless something else
+  // has taken focus in the meantime.
+  // (Browsers don't send a focus event when that happens, so this watches the switch itself.)
+  let lastFocus = null;
+  let parked = null;
+  document.addEventListener("focusin", (e) => {
+    lastFocus = e.target;
+    parked = null;
+  });
+  new MutationObserver((changes) => {
+    for (const { target: el } of changes) {
+      if (!(el instanceof HTMLButtonElement)) continue;
+      const lost = !document.activeElement || document.activeElement === document.body;
+      if (el.disabled) {
+        if (document.activeElement === el || (lastFocus === el && lost)) parked = el;
+      } else if (parked === el) {
+        parked = null;
+        if (lost && el.isConnected && visible(el)) el.focus({ preventScroll: true });
+      }
+    }
+  }).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["disabled"] });
 })();

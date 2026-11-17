@@ -304,6 +304,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     two-step "Type the 6-digit code" step, the delete-account warning, the "We'll send a code"
     notes on sign-up and reset, and "Passwords match" under Confirm password. Each is now read with
     its field (`aria-describedby`, templates only). The other sign-in fields already were.
+43. **Keyboard focus stays on a button after it works.** Checked how messages reach a screen
+    reader: the timer notice, the feedback status, sign-in errors and the pop-ups were already
+    announced. One gap: buttons that switch off while they work (Send feedback, Save a
+    combination, the History fixes, sign-in steps, the admin page: about a dozen places) dropped
+    keyboard focus to the top of the page, so the next Tab started over. Focus now comes back to
+    the button when it switches on again, unless you've moved on. Done once for every page in
+    `modal-focus.js` (browsers send no event for this, so it watches the switch itself).
 
 ## If you release this: lines for "What's new"
 
