@@ -5985,3 +5985,18 @@ body[data-theme="light"] .modal-kicker {
     color: #866526;
   }
 }
+
+/* A switch that is off, in the light theme: its pale track and white knob were about 1.2:1 and
+   1.1:1 against the page, so you could barely tell a switch was there, or that it was off. The
+   off track is now a warm grey: about 3.5-3.9:1 against the page, the knob about 4:1 on it.
+   (On, it was already gold at 3.4:1; the dark theme's white knob stands out on its own.) */
+body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
+  background: #857e73;
+  border-color: #857e73;
+}
+@media (prefers-color-scheme: light) {
+  body[data-theme="system"] .toggle input:not(:checked) + .toggle-ui {
+    background: #857e73;
+    border-color: #857e73;
+  }
+}

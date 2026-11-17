@@ -348,6 +348,14 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     the light gold of the Start buttons in the light one, so the light-theme patch from item 49
     is folded into it. The sweep is now clean on all six pages in both themes; checked on the
     iPhone in its own light mode too.
+51. **Off switches show in the light theme.** Measured how controls stand out from the page
+    (3:1 is the bar for a control's shape). In the light theme a switch that was off had a pale
+    track and a white knob at about 1.2:1 and 1.1:1 against the page, so Auto-start rest, Minute
+    pulse and the like were nearly invisible when off. The off track is now a warm grey
+    (`#857e73`): 3.5-3.9:1 against the page, the white knob 4:1 on it, like the iPhone's own
+    switches. On (gold) and the dark theme already passed and are unchanged. Checked on the iPhone.
+    Left as is: the boxes you type into have soft outlines (about 1.2:1) in both themes, part of
+    the look; each has a label above it, so this is your call.
 
 ## If you release this: lines for "What's new"
 
