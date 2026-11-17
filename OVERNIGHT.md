@@ -326,6 +326,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     "not signed in" to the feedback list and two-step status, which happens only on a copy run
     without an account (with one, Settings sends you to sign in first), and is handled quietly.
     The sync check every 3 seconds per open page is by design: it asks this app, not the network.
+47. **Checked: image sizes (no change needed).** The app's own icons are already small (45 KB at
+    most). The largest images are the website screenshots in `docs/img` (about 330 KB each for
+    the dashboard ones); making those smaller means re-compressing photos, which changes how they
+    look, so they were left for you to decide.
 
 ## If you release this: lines for "What's new"
 
