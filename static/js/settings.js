@@ -899,7 +899,7 @@
 
   // An unfinished timer or flow session is kept in the browser; it belongs to
   // the account that started it, so it goes when that account signs out.
-  const SESSION_KEYS = ["muhurat_timer_session_v1", "muhurat_flow_session_v1", "muhurat_session_command_v1"];
+  const SESSION_KEYS = ["muhurat_timer_session_v1", "muhurat_flow_session_v1", "muhurat_session_command_v1", "muhurat_feedback_draft_v1"];
 
   let accountEmail = "";
   let accountProfile = null;

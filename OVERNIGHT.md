@@ -236,6 +236,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     31 December it moves on to the new year unless you were looking at an older one. The today
     line under the clocks already did this, and Liftbook redraws each screen as you open it.
     Checked on the computer by moving the page's clock a day ahead.
+32. **Feedback words are kept until sent.** Every Muhurta page is its own page load, so a tap
+    on Rhythm or Timer while writing feedback threw the words away. They're now kept on the
+    device with the kind you picked, and come back when you return to Settings; Send or an
+    emptied box clears them, and sign-out clears them with the running clocks. Checked on the
+    computer: typed, reloaded, the words and "Could be better" came back.
 
 ## If you release this: lines for "What's new"
 

@@ -14,6 +14,20 @@
   const STATES = { new: "Sent", seen: "Read", done: "Done" };
   const MAX = 2000;
   const NOTE = "Sent with your name and email, so you can be answered.";
+  // Unsaved words are kept on this device until sent (a tap on Rhythm or Timer
+  // reloads the page). Sign-out clears it (settings.js SESSION_KEYS).
+  const DRAFT_KEY = "muhurat_feedback_draft_v1";
+  const draft = {
+    read() {
+      try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || "null"); } catch (_) { return null; }
+    },
+    write(value) {
+      try { localStorage.setItem(DRAFT_KEY, JSON.stringify(value)); } catch (_) {}
+    },
+    clear() {
+      try { localStorage.removeItem(DRAFT_KEY); } catch (_) {}
+    },
+  };
 
   function el(tag, cls, text) {
     const node = document.createElement(tag);
@@ -82,6 +96,7 @@
         b.tabIndex = on ? 0 : -1;
       });
       text.placeholder = KINDS[kind].hint;
+      if (text.value.trim()) draft.write({ kind, text: text.value });
     };
     buttons.forEach((b, i) => {
       b.addEventListener("click", () => {
@@ -104,8 +119,10 @@
       if (status.dataset.tone) return;  // keep a result on screen until they type again
       status.textContent = len > MAX * 0.8 ? `${MAX - len} characters left` : NOTE;
     };
+    const keep = () => (text.value.trim() ? draft.write({ kind, text: text.value }) : draft.clear());
     text.addEventListener("input", () => {
       delete status.dataset.tone;
+      keep();
       update();
     });
 
@@ -118,6 +135,7 @@
       try {
         const item = await api("/api/feedback", { method: "POST", body: JSON.stringify({ kind, message }) });
         text.value = "";
+        draft.clear();
         status.textContent = "Thank you. It went straight to the maker.";
         status.dataset.tone = "ok";
         sent = [item, ...sent];
@@ -131,7 +149,13 @@
       }
     });
 
-    pick("idea");
+    const was = draft.read();
+    if (was && typeof was.text === "string" && was.text.trim()) {
+      text.value = was.text.slice(0, MAX);
+      pick(was.kind);
+    } else {
+      pick("idea");
+    }
     update();
     api("/api/feedback")
       .then((data) => {
