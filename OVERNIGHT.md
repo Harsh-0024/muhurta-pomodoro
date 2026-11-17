@@ -316,6 +316,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     On a computer it now goes to the message box, ready for the next note; on a phone it doesn't
     (that would pop the keyboard up), and the "Thank you" is read out either way. Tested with the
     server's reply stood in for, so nothing was really sent.
+45. **Checked: extra text spacing fits (no change needed).** With the spacing some readers and
+    reading tools add (line height 1.5, wider letters and words, more room after paragraphs),
+    nothing on Rhythm, Timer, Flow, Settings, History or Dashboard was cut off or spilled over
+    anything, and no page grew sideways. Checked at computer width only (the simulator's Safari
+    can't take the test styles).
 
 ## If you release this: lines for "What's new"
 
