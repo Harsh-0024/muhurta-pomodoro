@@ -167,6 +167,13 @@
     // ours too made the two take turns and the window title blink.
     const timer = window.__PAGE__ === "timer" && window.MuhurtaTimer?.read();
     if (timer && timer.mode !== "idle") return;
+    // Likewise a running or paused Flow on the Flow page (flow.js).
+    if (window.__PAGE__ === "flow") {
+      try {
+        const flow = JSON.parse(localStorage.getItem("muhurat_flow_session_v1") || "null");
+        if (flow && (flow.mode === "running" || flow.mode === "paused")) return;
+      } catch (_) {}
+    }
     // Timer or Flow running from this page (Dashboard, Settings...) shows in
     // the title too, as Rhythm does; a running one beats a paused Rhythm.
     const other = otherClockTitle();
@@ -305,7 +312,7 @@
   }
 
   function tick() {
-    if (window.__PAGE__ === "home" || window.__PAGE__ === "flow") return;
+    if (window.__PAGE__ === "home") return; // Rhythm's own page keeps its time (app.js)
     const data = readSession();
     syncTitle(data);
     playDueSound(data);
@@ -313,7 +320,7 @@
   }
 
   function start() {
-    if (window.__PAGE__ === "home" || window.__PAGE__ === "flow") return;
+    if (window.__PAGE__ === "home") return; // Rhythm's own page keeps its time (app.js)
     tick();
     monitorTimer = window.setInterval(tick, 500);
     document.addEventListener("visibilitychange", tick);
