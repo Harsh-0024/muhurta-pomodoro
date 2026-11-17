@@ -94,9 +94,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     a stand-in page and a clock it can move: adding time while running, paused and ringing,
     the 24-hour cap, and pausing when another clock starts. It is added to the Tests workflow.
 
-12. **Flow says what it saved.** Stopping Flow sent the clock back to 00:00 with no word on
+12. **Flow and Timer say what they saved.** Stopping Flow sent the clock back to 00:00 with no word on
     what happened to the time. It now shows "Saved: 42 min of focus." for a few seconds
-    (only for a minute or more). Checked: desktop browser.
+    (only for a minute or more). The Timer does the same when you cancel part-way or stop
+    its overtime: "Cancelled. 12 min of focus saved." Checked: desktop browser.
 
 ## Good to know before merging
 

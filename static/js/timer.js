@@ -50,6 +50,13 @@
     return parts.join(" ");
   }
 
+  // "12 min", "1h 5m": how a notice says a length (as Flow's does).
+  function spoken(sec) {
+    const m = Math.floor(sec / 60);
+    if (m < 60) return `${m} min`;
+    return m % 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m / 60}h`;
+  }
+
   function formatTimeOfDay(ms) {
     return new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   }
@@ -318,9 +325,14 @@
 
   function stop() {
     const data = T().read();
+    const focused = data ? Number(data.durationSec || 0) - T().remainingSec(data) + T().overtimeSec(data) : 0;
     T().stop();
     if (data?.durationSec) fillFields(Number(data.durationSec));
     render();
+    // Cancelled part-way, or overtime stopped: the time so far still counts.
+    if (data && data.mode !== "ringing" && focused >= 60) {
+      showNotice(`${data.mode === "overtime" ? "Stopped" : "Cancelled"}. ${spoken(focused)} of focus saved.`);
+    }
   }
 
   function wire() {
