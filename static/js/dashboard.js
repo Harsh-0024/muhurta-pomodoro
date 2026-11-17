@@ -217,7 +217,8 @@
   function tooltipText(day, date) {
     const focus = formatMinutes(day.focus_minutes);
     const rest = formatMinutes(day.rest_minutes);
-    const status = Number(day.focus_minutes || 0) > 0 ? `${focus} focus` : "No focus";
+    const today = day.day === localDayKey(new Date());
+    const status = Number(day.focus_minutes || 0) > 0 ? `${focus} focus${today ? " so far" : ""}` : today ? "No focus yet" : "No focus";
     return `${fullDayFormatter.format(date)} · ${status} · ${rest} rest`;
   }
 
@@ -359,14 +360,19 @@
     const recent = data.recent_days || [];
     const max = Math.max(...recent.map((d) => Number(d.focus_minutes || 0)), Number(data.goal_minutes || 1));
     list.innerHTML = "";
+    const todayKey = localDayKey(new Date());
     recent.forEach((day) => {
       const row = document.createElement("div");
       row.className = "recent-row";
       const width = Math.max(0, Math.min(100, (Number(day.focus_minutes || 0) / max) * 100));
+      const focused = Number(day.focus_minutes || 0) > 0;
+      // Today isn't over, so it is "so far" or "nothing yet", not a day without focus.
+      const isToday = day.day === todayKey;
+      const status = day.goal_met ? "Goal met" : focused ? (isToday ? "So far" : "Focus day") : isToday ? "Nothing yet" : "No focus";
       row.innerHTML = `
         <div class="recent-date">
-          <strong>${dayFormatter.format(parseDay(day.day))}</strong>
-          <span>${day.goal_met ? "Goal met" : Number(day.focus_minutes || 0) > 0 ? "Focus day" : "No focus"}</span>
+          <strong>${isToday ? "Today" : dayFormatter.format(parseDay(day.day))}</strong>
+          <span>${status}</span>
         </div>
         <div class="recent-bar" aria-hidden="true"><span style="width: ${width}%"></span></div>
         <div class="recent-minutes">

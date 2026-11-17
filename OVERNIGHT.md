@@ -410,6 +410,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     Other charts keep their greens. Checked on the iPhone in dark and light. The squares also
     repaint at once if the look changes while the Dashboard is open (the system turning dark with
     the theme set to follow it); checked on the computer by flipping the theme.
+61. **Recent days doesn't write today off.** The Dashboard's "Recent days" list labelled today "No
+    focus" until you focused, like a day already lost. Today's row now reads "Today", with
+    "Nothing yet" (or "So far" once you've focused, or "Goal met"), and its screen-reader label
+    says "No focus yet" / "… focus so far". Past days are unchanged. Same spirit as the streak
+    (item 57) and the year chart's ring (item 58). Checked on the computer.
 
 ## If you release this: lines for "What's new"
 
