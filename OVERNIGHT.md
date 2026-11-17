@@ -257,6 +257,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     longer faded on top of the grey. Rerun after the change: nothing below the standard in either
     mode; on the iPhone the descriptions still read as grey, just easier. Not measured: words on
     the gold gradient buttons (dark on gold, clearly readable).
+35. **The phone's small clock labels and quote are readable.** The same measuring on the phone
+    build found its own fading: the labels under the clocks ("rest pool", "work done", "ends
+    at", 9px) were faded to 75% and the quote to 80%, on top of their grey, so they read at about
+    3.1 to 3.6:1 in both light and dark. The fading is gone (the grey keeps them quiet), and the
+    labels are 10px instead of 9. Rerun: Rhythm, Timer and Flow pass in both modes (the rest of
+    the phone pages already did). On the iPhone the labels still fit on one line and the quote
+    still sits quietly under the clock.
 
 ## If you release this: lines for "What's new"
 

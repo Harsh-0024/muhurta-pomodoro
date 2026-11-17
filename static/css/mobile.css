@@ -351,8 +351,10 @@ body.is-mobile .live-val {
   font-size: 1.1rem;
 }
 
+/* Quiet by their grey alone: faded on top of it they read at about 3:1, too faint for
+   9px words on a phone. A touch bigger too. */
 body.is-mobile .live-key {
-  opacity: 0.75;
+  font-size: 0.62rem;
 }
 
 body.is-mobile .timer-panel {
@@ -367,9 +369,10 @@ body.is-mobile .timer-ring-wrap {
   margin-bottom: 2rem;
 }
 
+/* Not faded: the quote's own colours are already quiet, and at 80% its author line dropped
+   to about 3.5:1. */
 body.is-mobile .focus-quote {
   margin-top: 0;
-  opacity: 0.8;
 }
 
 body.is-mobile .focus-quote blockquote {
