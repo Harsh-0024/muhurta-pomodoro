@@ -325,6 +325,7 @@
       state.focusedSec += Math.max(0, (now - state.runStartedAt) / 1000);
       logFlowSegment(state.runStartedAt, now);
     }
+    const done = state.focusedSec;
     state.mode = "idle";
     state.startedAt = null;
     state.runStartedAt = null;
@@ -332,6 +333,14 @@
     stopTicking();
     render();
     persist();
+    // The clock goes back to zero; say what was just saved.
+    if (done >= 60) showNotice(`Saved: ${spoken(done)} of focus.`);
+  }
+
+  function spoken(sec) {
+    const m = Math.floor(sec / 60);
+    if (m < 60) return `${m} min`;
+    return m % 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m / 60}h`;
   }
 
   function endFromOutside() {
