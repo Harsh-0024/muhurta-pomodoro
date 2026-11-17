@@ -2666,6 +2666,12 @@ body[data-theme="light"].page-home.rest-long {
   --growth-wash: rgba(94, 151, 91, 0.14);
   --growth-track: rgba(255, 255, 255, 0.055);
   --growth-bar: linear-gradient(90deg, #b9d7aa, #0f4f32);
+  /* Year chart, little to a lot. On a dark page "more" is brighter (a deep green there all but
+     vanished into the page); dashboard.js reads these for the squares, so they match the legend. */
+  --heat-1: #1f4a32;
+  --heat-2: #2f7a4b;
+  --heat-3: #5fa96a;
+  --heat-4: #a9d69b;
 }
 
 body[data-theme="light"].page-dashboard .main,
@@ -2679,6 +2685,10 @@ body[data-theme="light"].page-dashboard .day-sheet {
   --growth-wash: rgba(88, 133, 78, 0.12);
   --growth-track: rgba(37, 57, 36, 0.08);
   --growth-bar: linear-gradient(90deg, #cfe3c5, #145334);
+  --heat-1: #cfe3c5;
+  --heat-2: #87bb78;
+  --heat-3: #3f8a50;
+  --heat-4: #145334;
 }
 
 @media (prefers-color-scheme: light) {
@@ -2693,6 +2703,10 @@ body[data-theme="light"].page-dashboard .day-sheet {
     --growth-wash: rgba(88, 133, 78, 0.12);
     --growth-track: rgba(37, 57, 36, 0.08);
     --growth-bar: linear-gradient(90deg, #cfe3c5, #145334);
+    --heat-1: #cfe3c5;
+    --heat-2: #87bb78;
+    --heat-3: #3f8a50;
+    --heat-4: #145334;
   }
 }
 
@@ -2972,22 +2986,22 @@ body[data-theme="light"].page-dashboard .day-sheet {
 }
 
 .heat-level-1 {
-  background: var(--growth-1);
+  background: var(--heat-1);
   border-color: var(--growth-line);
 }
 
 .heat-level-2 {
-  background: var(--growth-2);
+  background: var(--heat-2);
   border-color: var(--growth-line);
 }
 
 .heat-level-3 {
-  background: var(--growth-3);
+  background: var(--heat-3);
   border-color: var(--growth-line);
 }
 
 .heat-level-4 {
-  background: var(--growth-4);
+  background: var(--heat-4);
   border-color: rgba(255, 255, 255, 0.22);
 }
 

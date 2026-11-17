@@ -124,14 +124,27 @@
     return Math.max(min, Math.min(max, n));
   }
 
-  function heatColor(ratio) {
+  // The theme's own year-chart colours (--heat-1..4 in app.css: brighter for more on a dark page),
+  // so the squares match the legend; the list above if the stylesheet has none.
+  function themeHeatStops() {
+    const grid = byId("heatmapGrid");
+    if (!grid) return heatStops;
+    const css = getComputedStyle(grid);
+    const stops = [1, 2, 3, 4].map((n) => {
+      const hex = css.getPropertyValue(`--heat-${n}`).trim().replace("#", "");
+      return /^[0-9a-f]{6}$/i.test(hex) ? [0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)) : null;
+    });
+    return stops.every(Boolean) ? stops : heatStops;
+  }
+
+  function heatColor(ratio, stopsList = heatStops) {
     const value = clamp(Number(ratio || 0), 0, 1);
     if (value <= 0) return "";
-    const scaled = value * (heatStops.length - 1);
-    const index = Math.min(heatStops.length - 2, Math.floor(scaled));
+    const scaled = value * (stopsList.length - 1);
+    const index = Math.min(stopsList.length - 2, Math.floor(scaled));
     const local = scaled - index;
-    const from = heatStops[index];
-    const to = heatStops[index + 1];
+    const from = stopsList[index];
+    const to = stopsList[index + 1];
     const rgb = from.map((channel, i) => Math.round(channel + (to[i] - channel) * local));
     return `rgb(${rgb[0]}, ${rgb[1]}, ${rgb[2]})`;
   }
@@ -246,6 +259,7 @@
     const columns = Math.ceil((days.length + leading) / 7);
     const goal = Math.max(1, Number(data.goal_minutes || 1));
     const maxFocus = Math.max(...days.map((day) => Number(day.focus_minutes || 0)), goal);
+    const stops = themeHeatStops();
     grid.setAttribute("aria-label", `Daily focus activity for ${data.range?.year || selectedYear}`);
 
     grid.innerHTML = "";
@@ -282,7 +296,7 @@
       if (lastDay && day.day === lastDay && lastDay === localDayKey(new Date())) cell.classList.add("heat-today");
       cell.dataset.day = day.day;
       if (level > 0) {
-        cell.style.background = heatColor(Number(day.focus_minutes || 0) / maxFocus);
+        cell.style.background = heatColor(Number(day.focus_minutes || 0) / maxFocus, stops);
         const details = tooltipText(day, date);
         cell.tabIndex = 0;
         cell.setAttribute("aria-label", details);

@@ -402,6 +402,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     small capitals as "SET FOR" and "ENDS AT" above. It's added by the stylesheet, so it stays when
     the row is rebuilt with your own lengths, and screen readers skip it (they already hear "Quick
     lengths in minutes"). Checked on the iPhone.
+60. **In the dark theme, more focus is brighter on the year chart.** Its greens ran pale to deep in
+    both themes, so on a dark page "More" was a deep green that almost vanished: your best days
+    were the hardest to see, and the squares used the light theme's greens. Each theme now has its
+    own four year-chart colours (`--heat-1..4` in app.css): unchanged in light, dim to bright sage
+    in dark, and dashboard.js takes the squares' colours from them, so squares and legend match.
+    Other charts keep their greens. Checked on the iPhone in dark and light. If you switch theme
+    while the Dashboard is open, the squares change on the next load.
 
 ## If you release this: lines for "What's new"
 
