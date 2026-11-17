@@ -340,6 +340,14 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     light theme's dark gold, about 2:1 at its darker end. It now uses the light gold of the Start
     buttons, about 8:1; the dark theme is unchanged. The earlier contrast check missed it because
     it couldn't measure text on a gradient. Checked on the iPhone in light mode.
+50. **Every gold-filled label is readable in light mode.** Item 49 fixed one; a sweep of all
+    words on a gradient, on every page in both themes, found the same 2.1:1 in three more places
+    in the light theme: the current page in the top menu ("Rhythm", "Timer"...), the chosen level
+    in the level menu, and the round account initial in Settings (and the admin page's "new"
+    badge). All six now share one gold, `--gold-fill` in `app.css`: unchanged in the dark theme,
+    the light gold of the Start buttons in the light one, so the light-theme patch from item 49
+    is folded into it. The sweep is now clean on all six pages in both themes; checked on the
+    iPhone in its own light mode too.
 
 ## If you release this: lines for "What's new"
 

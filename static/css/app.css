@@ -6,6 +6,8 @@
   --faint: rgba(247, 243, 236, 0.12);
   --gold: #c9a962;
   --gold2: #e8d9b4;
+  /* The gold behind dark words (the chosen page, level, choice, the account initial). */
+  --gold-fill: linear-gradient(135deg, var(--gold2), var(--gold));
   --line: rgba(255, 255, 255, 0.08);
   --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
   --menu-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
@@ -36,6 +38,9 @@ body[data-theme="light"] {
   --faint: rgba(33, 29, 24, 0.1);
   --gold: #a98237;
   --gold2: #5f4721;
+  /* The light theme's own golds are dark, too dark behind dark words (about 2:1), so the
+     filled gold stays light, as on the Start buttons (about 8:1). */
+  --gold-fill: linear-gradient(135deg, #f3e8cf, #c9a962);
   --line: rgba(43, 35, 24, 0.13);
   --shadow: 0 24px 72px rgba(71, 58, 39, 0.15);
   --menu-shadow: 0 24px 68px rgba(71, 58, 39, 0.18);
@@ -62,6 +67,9 @@ body[data-theme="light"] {
     --faint: rgba(33, 29, 24, 0.1);
     --gold: #a98237;
     --gold2: #5f4721;
+    /* The light theme's own golds are dark, too dark behind dark words (about 2:1), so the
+       filled gold stays light, as on the Start buttons (about 8:1). */
+    --gold-fill: linear-gradient(135deg, #f3e8cf, #c9a962);
     --line: rgba(43, 35, 24, 0.13);
     --shadow: 0 24px 72px rgba(71, 58, 39, 0.15);
     --menu-shadow: 0 24px 68px rgba(71, 58, 39, 0.18);
@@ -251,7 +259,7 @@ body[data-theme="light"] .ambient {
 .nav-level-button[aria-expanded="true"] {
   color: #1a1208;
   border-color: rgba(255, 255, 255, 0.2);
-  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  background: var(--gold-fill);
   box-shadow: 0 10px 32px rgba(201, 169, 98, 0.16);
 }
 
@@ -315,7 +323,7 @@ body[data-theme="light"] .ambient {
 
 .level-option.is-active {
   color: #1a1208;
-  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  background: var(--gold-fill);
 }
 
 .level-name {
@@ -1895,7 +1903,7 @@ body.mode-cumulative .phase-label {
 
 .segment.is-active {
   color: #1a1208;
-  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  background: var(--gold-fill);
 }
 
 .segment:disabled {
@@ -4492,7 +4500,7 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
   width: 1.6rem;
   height: 1.6rem;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  background: var(--gold-fill);
   color: #1a1208;
   font-size: 0.8rem;
   font-weight: 500;
@@ -5178,7 +5186,7 @@ body[data-theme="light"] .feedback-state[data-state="done"] { color: #3f7d47; }
 .admin-new {
   margin-left: 0.35rem;
   border-color: transparent;
-  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  background: var(--gold-fill);
   color: #1a1208;
   font-family: var(--font-sans);
   letter-spacing: 0;
@@ -5953,7 +5961,7 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
 .segment.is-active:hover:not(:disabled),
 .segment.is-active:focus-visible {
   color: #1a1208;
-  background: linear-gradient(135deg, var(--gold2), var(--gold));
+  background: var(--gold-fill);
 }
 
 /* Keyboard focus on the two places that showed none: the name in the top bar (a link home) had
@@ -5975,21 +5983,5 @@ body[data-theme="light"] .modal-kicker {
 @media (prefers-color-scheme: light) {
   body[data-theme="system"] .modal-kicker {
     color: #866526;
-  }
-}
-
-/* The chosen segment in the light theme (By day / Unusually long, the theme picker, the level
-   choices...): it took the light theme's darker gold, so its near-black words sat on #5f4721 at
-   about 2:1. It now uses the light gold of the Start buttons, about 8:1. */
-body[data-theme="light"] .segment.is-active,
-body[data-theme="light"] .segment.is-active:hover:not(:disabled),
-body[data-theme="light"] .segment.is-active:focus-visible {
-  background: linear-gradient(135deg, #f3e8cf, #c9a962);
-}
-@media (prefers-color-scheme: light) {
-  body[data-theme="system"] .segment.is-active,
-  body[data-theme="system"] .segment.is-active:hover:not(:disabled),
-  body[data-theme="system"] .segment.is-active:focus-visible {
-    background: linear-gradient(135deg, #f3e8cf, #c9a962);
   }
 }
