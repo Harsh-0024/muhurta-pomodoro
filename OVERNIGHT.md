@@ -190,6 +190,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     own name from your contact card; it no longer does. Checked on the iPhone simulator, and
     saving a combination still works.
 
+26. **Usernames aren't autocorrected on a phone.** Username boxes (sign-up, finishing sign-up,
+    and Settings) already skipped the capital letter, but the phone's autocorrect still ran, so
+    "harshb" could turn into a real word as you typed. It's off on those boxes now. The other boxes
+    already brought up the right keyboard (numbers for lengths and codes, the email keyboard for
+    emails). The Timer's length box keeps the full keyboard, because the iPhone number pad has
+    no ":" for "m:ss".
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
