@@ -134,6 +134,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     didn't move it, so after an update a browser could run an old Timer with new pages. It now
     follows every script and stylesheet. Found while checking item 16.
 
+18. **Safari's bars match the page.** In dark mode on the iPhone, Safari's strip behind the clock
+    and its bottom toolbar stayed light on some pages (History, for one), framing the dark page in
+    white. The pages now say which colours they use (`color-scheme` and `theme-color`, light, dark
+    or following the phone), and `theme-color.js` keeps that in step when the theme is changed in
+    Settings. A side benefit: the calendar icons in date boxes now show on the dark pages.
+    Checked on the iPhone simulator in dark mode, and switching themes on the computer.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.

@@ -4,6 +4,18 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1{% if mobile %}, viewport-fit=cover{% endif %}" />
   <title>Muhurta Pomodoro</title>
+  {# The page's own colours, so Safari's bars match it (theme-color.js keeps them in step). #}
+  {% if theme == 'dark' %}
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#070605" />
+  {% elif theme == 'light' %}
+  <meta name="color-scheme" content="light" />
+  <meta name="theme-color" content="#f2f0ea" />
+  {% else %}
+  <meta name="color-scheme" content="dark light" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#070605" />
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#f2f0ea" />
+  {% endif %}
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23040302'/%3E%3Cg fill='none' stroke='%23d8bd79' stroke-width='4' stroke-linecap='round'%3E%3Ccircle cx='32' cy='32' r='22'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M32 6v14M32 44v14M6 32h14M44 32h14M13.6 13.6l10 10M40.4 40.4l10 10M50.4 13.6l-10 10M23.6 40.4l-10 10'/%3E%3C/g%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -129,6 +141,7 @@
   <script src="{{ url_for('static', filename='js/shortcuts.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/refresh-sync.js') }}?v={{ asset_version }}" defer></script>
   <script src="{{ url_for('static', filename='js/today.js') }}?v={{ asset_version }}" defer></script>
+  <script src="{{ url_for('static', filename='js/theme-color.js') }}?v={{ asset_version }}" defer></script>
   {% endif %}
   {% if mobile %}<script src="{{ url_for('static', filename='js/mobile.js') }}?v={{ asset_version }}" defer></script>{% endif %}
   {% block scripts %}{% endblock %}
