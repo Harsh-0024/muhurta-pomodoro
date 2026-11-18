@@ -446,6 +446,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     group named "Daily focus activity for 2026: 1 day with focus", and each day says its date and
     minutes and opens the day. Checked on the computer (8140): the day shows in the page's
     accessibility tree as a button.
+68. **Today's goal, said once.** Before any focus, the Dashboard's Today card read "2h to your 2h
+    goal". With nothing yet it now says "Daily goal: 2h"; once you start it counts down as before
+    ("1h 35m to your 2h goal"), then "Daily goal of 2h met". Checked on the computer (8140) and the
+    phone build (8141).
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

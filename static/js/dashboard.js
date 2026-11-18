@@ -595,9 +595,12 @@
     if (ring) ring.classList.toggle("is-met", goal > 0 && todayMinutes >= goal);
     let note = "";
     if (goal > 0) {
+      // Before any focus, "2h to your 2h goal" says the same thing twice: just name the goal.
       note = todayMinutes >= goal
         ? `Daily goal of ${formatMinutes(goal)} met`
-        : `${formatMinutes(Math.ceil(goal - todayMinutes))} to your ${formatMinutes(goal)} goal`;
+        : todayMinutes <= 0
+          ? `Daily goal: ${formatMinutes(goal)}`
+          : `${formatMinutes(Math.ceil(goal - todayMinutes))} to your ${formatMinutes(goal)} goal`;
     }
     setText("todayNote", note);
     if (ring) ring.setAttribute("aria-label", `Today: ${formatMinutes(todayMinutes)} of focus. ${note}`);
