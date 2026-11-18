@@ -433,6 +433,9 @@ Drafts for `release_notes.py`, in the voice of the existing notes. Use, change o
 only(COMPUTERS, "A mistyped address now shows the app's own page instead of a bare error."),
 "Deleted a session in History by mistake? Tap Undo on the message that follows.",
 only(PHONES, "Turn your phone on its side and the clock sits beside its buttons, all on one screen."),
+"Your streak no longer drops to 0 in the morning: today counts once it's over, and until you focus the Dashboard shows the run up to yesterday.",
+"The year chart marks today and fades the days still to come; in the dark theme, more focus now shows brighter.",
+"Clearer to use: boxes you type into have a visible edge, keyboard focus always shows a gold ring, and small buttons are easier to hit.",
 ```
 
 ## Good to know before merging
