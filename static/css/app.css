@@ -2740,10 +2740,18 @@ body[data-theme="light"].page-dashboard .day-sheet {
   transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
 }
 
-.metric-card-toggle:hover,
 .metric-card-toggle:focus-visible {
   border-color: var(--growth-line);
   box-shadow: 0 0 0 3px var(--growth-wash);
+}
+
+/* Hover only with a real pointer: on a phone, where these cards have no border or padding, a
+   touch left the hover ring stuck on, pressed against the card's words. */
+@media (hover: hover) and (pointer: fine) {
+  .metric-card-toggle:hover {
+    border-color: var(--growth-line);
+    box-shadow: 0 0 0 3px var(--growth-wash);
+  }
 }
 
 .metric-card-toggle:active {

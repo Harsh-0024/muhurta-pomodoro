@@ -515,6 +515,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     Also checked and clean: Flow and Timer controls all named (quick lengths say pressed);
     Timer's "ends at" matches the clock; History's timeline blocks are named by their hover text
     and kept out of the Tab order, with Edit / Delete buttons named per session.
+82. **No stuck ring on the phone's average card.** On the iPhone the Dashboard's cards have no
+    border or padding, and a touch (or the page loading under a finger) left the card's hover ring
+    on, pressed against "AVG / ACTIVE DAY" and "in 2026". The hover ring now shows only with a
+    mouse; the keyboard focus ring is unchanged. Checked on the iPhone simulator (8141): a tap
+    switches to Avg / all days with no ring; tapped again to switch back.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
