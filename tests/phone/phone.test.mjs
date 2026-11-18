@@ -538,3 +538,31 @@ test("refresh one device, sync them all: asks the open ones, reports the offline
   assert.ok(!p.ctx.__MUHURTA_DEVICES__.connected());
   mac.close();
 });
+
+test("the streak holds until today is over, and a whole missed day still ends it", async () => {
+  const p = await phone();
+  await createAccount(p, "mira@x.com");
+  const pad = (n) => String(n).padStart(2, "0");
+  const dayOf = (back) => {
+    const d = new Date();
+    d.setDate(d.getDate() - back);
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+  };
+  const focusOn = (day) => ({
+    uuid: crypto.randomUUID(), updated_at: `${day}T12:00:00.000Z`, day, kind: "work",
+    started_at: `${day}T09:00:00Z`, ended_at: `${day}T09:25:00Z`, duration_sec: 1500,
+    productive_sec: 1500, rest_sec: 0, preset_id: "", preset_name: "", phase_index: null,
+    details_json: "{}", created_at: `${day} 09:25:00`, device_id: "",
+  });
+  const restore = (days) => p.call("POST", "/api/backup/restore", {
+    app: "muhurta-pomodoro", kind: "backup", format: 1, activity_segments: days.map(focusOn),
+    custom_presets: [], focus_by_device: [], settings: {},
+  });
+  const streak = async (endBack = 0) => (await p.call("GET", `/api/dashboard?day=${dayOf(endBack)}&days=30`)).data.summary.current_streak;
+
+  await restore([dayOf(2), dayOf(1)]);
+  assert.equal(await streak(), 2, "nothing yet today: the run up to yesterday still shows");
+  await restore([dayOf(0)]);
+  assert.equal(await streak(), 3, "a focus block today adds to it");
+  assert.equal(await streak(3), 0, "a day that is over without focus (3 days ago) ends the run there");
+});

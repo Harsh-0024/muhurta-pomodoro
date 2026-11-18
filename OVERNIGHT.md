@@ -415,6 +415,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     "Nothing yet" (or "So far" once you've focused, or "Goal met"), and its screen-reader label
     says "No focus yet" / "… focus so far". Past days are unchanged. Same spirit as the streak
     (item 57) and the year chart's ring (item 58). Checked on the computer.
+62. **A test guards the streak.** The phone tests (`tests/phone/phone.test.mjs`) now check it: with
+    focus yesterday and the day before and none yet today the streak is 2, a block today makes it
+    3, and a day that ended without focus ends the run. Taking item 57's fix out makes it fail
+    ("nothing yet today: the run up to yesterday still shows"), so the morning-zero can't come
+    back unnoticed. Phone tests: 8 pass. (The computer's `db.py` has the same rule; its Python
+    tests are sign-in scripts with no dashboard check to add this to.)
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
