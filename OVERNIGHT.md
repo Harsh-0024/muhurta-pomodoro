@@ -483,6 +483,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     the page's Space shortcut, so it opens the menu instead of starting the clock. Checked on the
     computer (8140) with real key presses: Enter opens on Sparsha, ↓ moves to Sthiti, Escape returns
     to the button with Sparsha still chosen and the clock idle; Space opens the menu, clock idle.
+76. **History's choices answer the arrow keys.** In History's session editor, Focus / Rest and
+    Start & end / Start & duration are radio-style choices, but each option was its own Tab stop
+    and ← → did nothing (Settings' choices already worked that way). Each group is now one Tab
+    stop, and the arrows move the choice. The admin page's Open / Done / All filter got the same.
+    Checked on the computer (8140): in Add a session, → on Focus chooses Rest; Escape closed the
+    editor without saving. The admin filter wasn't tried live (same code).
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

@@ -286,9 +286,21 @@
       buttons.forEach((x) => {
         x.classList.toggle("is-active", x === b);
         x.setAttribute("aria-checked", x === b ? "true" : "false");
+        x.tabIndex = x === b ? 0 : -1;
       });
       if (feedback) renderFeedback();
     }));
+    buttons.forEach((x) => { x.tabIndex = x.classList.contains("is-active") ? 0 : -1; });
+    // ← → move along Open / Done / All, as radio buttons do.
+    $("feedbackFilter").addEventListener("keydown", (e) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      const at = buttons.indexOf(document.activeElement);
+      if (!step || at < 0) return;
+      e.preventDefault();
+      const next = buttons[(at + step + buttons.length) % buttons.length];
+      next.focus();
+      next.click();
+    });
   })();
 
   /* ---------- errors ---------- */

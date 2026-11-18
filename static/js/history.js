@@ -423,7 +423,24 @@
         const on = b.dataset.value === value;
         b.classList.toggle("is-active", on);
         b.setAttribute("aria-checked", String(on));
+        b.tabIndex = on ? 0 : -1; // one stop for the group; the arrows move within it
       });
+  }
+
+  // ← → (and ↑ ↓) choose the next option in a group, as a set of radio buttons does (and as
+  // Settings' do): the click runs the group's own handler.
+  function arrowsChoose(groupId) {
+    $(groupId)?.addEventListener("keydown", (e) => {
+      const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[e.key];
+      if (!step) return;
+      const buttons = [...$(groupId).querySelectorAll(".segment")];
+      const at = buttons.indexOf(document.activeElement);
+      if (at < 0) return;
+      e.preventDefault();
+      const next = buttons[(at + step + buttons.length) % buttons.length];
+      next.focus();
+      next.click();
+    });
   }
 
   const segmentedValue = (groupId) => $(groupId)?.querySelector(".segment.is-active")?.dataset.value;
@@ -725,6 +742,8 @@
       writeMode(b.dataset.value);
       updatePreview();
     });
+    arrowsChoose("modePicker");
+    arrowsChoose("kindPicker");
     $("kindPicker")?.addEventListener("click", (e) => {
       const b = e.target.closest(".segment");
       if (!b) return;
