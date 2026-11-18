@@ -500,6 +500,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     time nothing changed, so nothing was read out. When the words are the same, the strip now empties
     and fills again a moment later (History keeps its Undo button). Checked on the computer (8140):
     turning Auto-start breaks on and off logs "Saved", "", "Saved"; the setting is back to off.
+79. **Rhythm's tab only counts down when something is running.** With nothing started, the tab
+    read "24:00 focus", the same as a running session. Flow and Timer show the page's name when
+    idle; Rhythm now does too ("Rhythm · Muhurta Pomodoro"), and every running, paused, rest and
+    done title is as before. Checked on the computer (8140) after a reload.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

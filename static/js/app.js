@@ -793,7 +793,9 @@
   }
 
   function updateDocumentTitle() {
-    if (window.__PAGE__ !== "home") {
+    // Idle as on Flow and Timer: the page's own name, so "24:00 focus" in the tab only ever
+    // means a session is running.
+    if (window.__PAGE__ !== "home" || state.mode === "idle") {
       document.title = baseTitle;
       return;
     }
