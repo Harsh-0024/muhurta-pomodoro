@@ -467,6 +467,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     comparison now appears only when the week before reaches your first logged day; until then it
     reads "25m of focus." Checked on the computer (8140); the phone app gives the same first day
     (`calc_start` in `mobile/web/local-api.js`).
+73. **The day view knows today isn't over.** Opening today (or stepping to it with →) with no
+    focus yet said "Nothing was timed on this day." It now says "Nothing timed yet today."; past
+    days keep the old words. Checked on the computer (8140): 17 Nov shows its sitting, → to today
+    gives the new line, ← ← to 16 Nov the old one.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

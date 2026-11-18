@@ -164,6 +164,8 @@
 
   async function show(day) {
     current = day;
+    // Today isn't over, so nothing yet is not the same as nothing on the day.
+    $("dayEmpty").textContent = day === dayKey(new Date()) ? "Nothing timed yet today." : "Nothing was timed on this day.";
     const id = ++loadId;
     const date = parseDay(day);
     $("dayKicker").textContent = kickerFormat.format(date);
@@ -187,7 +189,6 @@
     const modal = $("dayModal");
     if (!modal || !/^\d{4}-\d{2}-\d{2}$/.test(String(day))) return;
     opener = document.activeElement;
-    $("dayEmpty").textContent = "Nothing was timed on this day.";
     modal.classList.remove("hidden");
     modal.setAttribute("aria-hidden", "false");
     document.body.classList.add("modal-open");
