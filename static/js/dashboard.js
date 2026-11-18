@@ -612,7 +612,11 @@
     const diff = Math.round(total) - Math.round(sum(before));
     const met = last7.filter((d) => goal > 0 && Number(d.focus_minutes || 0) >= goal).length;
     const parts = [`${formatMinutes(total)} of focus`];
-    if (before.length === 7 && (total > 0 || diff !== 0)) {
+    // Only compare with a week you were using the app in: before your first logged day, "25m more
+    // than the 7 days before" is just this week's total said twice.
+    const firstDay = data.range?.calc_start || "";
+    const hadBefore = !firstDay || before.some((d) => d.day >= firstDay);
+    if (before.length === 7 && hadBefore && (total > 0 || diff !== 0)) {
       parts.push(diff === 0 ? "same as the 7 days before" : `${formatMinutes(Math.abs(diff))} ${diff > 0 ? "more" : "less"} than the 7 days before`);
     }
     if (goal > 0 && met > 0) parts.push(`goal met on ${formatDays(met)}`);

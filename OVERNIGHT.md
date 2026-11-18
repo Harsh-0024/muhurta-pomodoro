@@ -462,6 +462,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     pages). Also looked over the phone's Settings in the simulator: nothing to change. Checked:
     /history answers with a redirect to /settings/history; all four Python scripts and the phone
     tests pass.
+72. **Last 7 days only compares with a week you used the app.** Two days after the first session it
+    said "25m of focus · 25m more than the 7 days before", though there was nothing before. The
+    comparison now appears only when the week before reaches your first logged day; until then it
+    reads "25m of focus." Checked on the computer (8140); the phone app gives the same first day
+    (`calc_start` in `mobile/web/local-api.js`).
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
