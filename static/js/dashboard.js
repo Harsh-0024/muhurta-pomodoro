@@ -1059,7 +1059,9 @@
   async function init() {
     if (window.__PAGE__ !== "dashboard") return;
     wireTrendInfo();
-    ["streakCard", "averageCard"].forEach((cardId) => {
+    // Only the average card has a second view; the streak card shows its best beneath, so it
+    // is a plain card (no Tab stop or hover that does nothing).
+    ["averageCard"].forEach((cardId) => {
       const card = byId(cardId);
       if (!card) return;
       const activate = () => {

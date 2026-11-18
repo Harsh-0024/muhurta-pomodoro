@@ -508,6 +508,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     25m. in 2026", and nothing said a press switches it. It now says "Average per active day: 25m
     in 2026. Press for average over all days" (and the other way round once pressed). The card
     looks the same. Checked on the computer (8140): pressing twice goes over and back.
+81. **The streak card no longer acts like a button.** It was a Tab stop, a "button" to screen
+    readers, and lit up on hover, but it has one view only, so pressing did nothing. It is now a
+    plain card like Focus this year and Consistency; the average card, which does switch, keeps
+    all of that. Checked on the computer (8140).
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
