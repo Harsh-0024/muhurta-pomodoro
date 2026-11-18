@@ -57,6 +57,9 @@
     return m % 60 ? `${Math.floor(m / 60)}h ${m % 60}m` : `${m / 60}h`;
   }
 
+  // "Click" with a mouse or trackpad, "Tap" on a touch screen.
+  const pointWord = window.matchMedia?.("(hover: hover) and (pointer: fine)").matches ? "Click" : "Tap";
+
   function formatTimeOfDay(ms) {
     return new Date(ms).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
   }
@@ -230,7 +233,7 @@
     if (idle) {
       setRing(0);
       $("timerHint").textContent =
-        document.activeElement === $("timerEntry") ? "Minutes, or h:mm:ss" : "Tap the time to change it";
+        document.activeElement === $("timerEntry") ? "Minutes, or h:mm:ss" : `${pointWord} the time to change it`;
       $("timerEndsKey").textContent = "ends at";
       $("timerFocusedDisplay").textContent = "0:00";
       // Idle: the title is session-monitor.js's (a Rhythm session may be running).
