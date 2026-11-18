@@ -426,6 +426,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     days so far into a weekly rate, so one session on the year's first day read "7/wk" and one of
     two days "3.5/wk". Under a week of history it now shows the days themselves ("1 of 2", "days
     so far"); from a week on, the weekly rate as before. Checked on the computer (8140).
+64. **Recent days folds empty stretches.** The Dashboard's Recent days listed every day without
+    focus on its own row, so a quiet fortnight was a dozen identical "No focus 0m 0m rest" rows.
+    Three or more past days in a row with no focus and no rest now read as one row ("5 – 16 Nov",
+    "No focus", "12 days"); one or two such days, and today, keep their own rows and still open
+    the day. Checked on the computer (8140); on the phone this panel isn't shown.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

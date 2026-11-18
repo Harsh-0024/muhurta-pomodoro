@@ -365,7 +365,22 @@
     const max = Math.max(...recent.map((d) => Number(d.focus_minutes || 0)), Number(data.goal_minutes || 1));
     list.innerHTML = "";
     const todayKey = localDayKey(new Date());
-    recent.forEach((day) => {
+    // A long run of past days with nothing in them reads as one row ("5 – 16 Nov · No focus,
+    // 12 days") instead of a dozen identical ones; one or two such days still get rows of their own.
+    const blank = (day) => day.day !== todayKey && !Number(day.focus_minutes || 0) && !Number(day.rest_minutes || 0);
+    for (let i = 0; i < recent.length; ) {
+      let j = i;
+      while (j < recent.length && blank(recent[j])) j += 1;
+      if (j - i >= 3) {
+        list.appendChild(blankRunRow(recent[j - 1].day, recent[i].day, j - i));
+        i = j;
+        continue;
+      }
+      renderRecentDay(recent[i]);
+      i += 1;
+    }
+
+    function renderRecentDay(day) {
       const row = document.createElement("div");
       row.className = "recent-row";
       const width = Math.max(0, Math.min(100, (Number(day.focus_minutes || 0) / max) * 100));
@@ -386,7 +401,34 @@
       `;
       makeDayButton(row, day.day, tooltipText(day, parseDay(day.day)));
       list.appendChild(row);
-    });
+    }
+  }
+
+  // One row for several days in a row without focus or rest: oldest and newest day, how many.
+  function blankRunRow(fromDay, toDay, count) {
+    const from = parseDay(fromDay);
+    const to = parseDay(toDay);
+    let range;
+    try {
+      range = dayFormatter.formatRange(from, to);
+    } catch (_) {
+      range = `${dayFormatter.format(from)} – ${dayFormatter.format(to)}`;
+    }
+    const row = document.createElement("div");
+    row.className = "recent-row is-run";
+    row.innerHTML = `
+      <div class="recent-date">
+        <strong></strong>
+        <span>No focus</span>
+      </div>
+      <div class="recent-bar" aria-hidden="true"><span style="width: 0%"></span></div>
+      <div class="recent-minutes">
+        <strong>0m</strong>
+        <span>${count} days</span>
+      </div>
+    `;
+    row.querySelector(".recent-date strong").textContent = range;
+    return row;
   }
 
   // ── Bars: the last 7 days, weekdays and months ───────────────────
