@@ -57,7 +57,11 @@
     // Inside <main> it sits under the footer (main is z-index 1, the footer 2), which hid
     // part of it and caught taps on Undo. At the top level it is above both.
     if (el.parentElement !== document.body) document.body.appendChild(el);
-    el.textContent = msg;
+    // The same words twice in a row ("Saved", "Saved") are not read out again by screen
+    // readers unless the region empties first, so clear it and fill it a moment later.
+    const same = el.textContent === msg;
+    el.textContent = same ? "" : msg;
+    if (same) setTimeout(() => { el.textContent = msg; }, 50);
     el.classList.toggle("is-error", kind === "error");
     el.classList.add("is-visible");
     if (toastTimer) clearTimeout(toastTimer);

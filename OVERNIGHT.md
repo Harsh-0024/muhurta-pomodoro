@@ -495,6 +495,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     group on the computer pages answering the arrow keys (Settings', History's, the admin filter).
     Checked on the computer (8140) with real key presses: → shows Unusually long ("Nothing looks out
     of place"), Home goes back to By day.
+78. **The same message twice is read out twice.** Settings and History share one message strip
+    that screen readers watch. Saving two settings in a row put "Saved" in it twice, and the second
+    time nothing changed, so nothing was read out. When the words are the same, the strip now empties
+    and fills again a moment later (History keeps its Undo button). Checked on the computer (8140):
+    turning Auto-start breaks on and off logs "Saved", "", "Saved"; the setting is back to off.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

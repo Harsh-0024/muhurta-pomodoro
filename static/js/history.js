@@ -50,9 +50,13 @@
     // Inside <main> it sits under the footer (main is z-index 1, the footer 2), which hid
     // part of it and caught taps on Undo. At the top level it is above both.
     if (el.parentElement !== document.body) document.body.appendChild(el);
-    el.textContent = msg;
+    // The same words twice in a row are not read out again unless the region empties
+    // first, so the text goes in a moment later (Undo button too).
+    const same = el.firstChild?.nodeValue === msg;
+    el.textContent = same ? "" : msg;
     el.classList.toggle("is-error", kind === "error");
     el.classList.toggle("has-action", Boolean(action));
+    if (same) setTimeout(() => el.prepend(msg), 50);
     if (action) {
       const btn = document.createElement("button");
       btn.type = "button";
