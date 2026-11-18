@@ -419,8 +419,9 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     focus yesterday and the day before and none yet today the streak is 2, a block today makes it
     3, and a day that ended without focus ends the run. Taking item 57's fix out makes it fail
     ("nothing yet today: the run up to yesterday still shows"), so the morning-zero can't come
-    back unnoticed. Phone tests: 8 pass. (The computer's `db.py` has the same rule; its Python
-    tests are sign-in scripts with no dashboard check to add this to.)
+    back unnoticed. Phone tests: 8 pass. The computer's copy of the rule (`db.py`) has the same
+    check in a new script, `tests/test_streak.py` (its own empty database; taking the fix out makes
+    it fail "got 0, want 2"), added to the tests workflow on GitHub.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
@@ -452,9 +453,9 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
   don't change the same lines' meaning). That branch is also behind `main` in `db.py`,
   `release_notes.py` and the tests workflow, independent of anything here.
 - No version bump or release note is in this branch: nothing ships until you choose.
-- The three Python test files in `tests/` are scripts that each replace the sign-in service for
-  the whole run, so run them one at a time (`python tests/test_sign_in.py`, and the same for
-  `test_shared_time.py` and `test_devices.py`). All three pass that way. Running them together
+- The four Python test files in `tests/` are scripts that each replace the sign-in service or the
+  data folder for the whole run, so run them one at a time (`python tests/test_sign_in.py`, and
+  the same for `test_shared_time.py`, `test_devices.py` and `test_streak.py`). All four pass. Running them together
   with `python -m unittest discover` makes them clash and fail, on `main` too.
 
 ## Ideas not done yet

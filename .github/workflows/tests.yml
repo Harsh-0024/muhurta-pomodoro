@@ -40,6 +40,9 @@ jobs:
       - name: Refresh one device, sync them all
         run: python tests/test_devices.py
 
+      - name: The streak holds until today is over
+        run: python tests/test_streak.py
+
       - name: Phones
         env:
           PYTHON: python
