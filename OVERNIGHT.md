@@ -476,6 +476,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     when it is the length set. Checked on the computer (8140): choosing 24 marks only 24 pressed
     (the test account's length was set back to 25 afterwards). Also checked: Flow's buttons are
     named, and the Timer's "ends at" keeps up with the clock while idle.
+75. **Rhythm's level menu works from the keyboard.** Opening it left the focus on the button, the
+    arrow keys did nothing, and Escape closed it with the focus lost. Now the chosen level takes the
+    focus when it opens, ↑ ↓ (and Home / End) move through the levels, Enter chooses one, and
+    Escape closes it and puts you back on the button. Space on the picker also stopped reaching
+    the page's Space shortcut, so it opens the menu instead of starting the clock. Checked on the
+    computer (8140) with real key presses: Enter opens on Sparsha, ↓ moves to Sthiti, Escape returns
+    to the button with Sparsha still chosen and the clock idle; Space opens the menu, clock idle.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

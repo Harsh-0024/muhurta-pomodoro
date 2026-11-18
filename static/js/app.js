@@ -1635,6 +1635,9 @@
     if (!menu || !button) return;
     const open = menu.classList.toggle("hidden");
     button.setAttribute("aria-expanded", open ? "false" : "true");
+    // Opened, the chosen level takes the keyboard focus, so ↑ ↓ and Enter work straight away.
+    // (A moment later: the list fades in and can't take focus while it is still hidden.)
+    if (!open) setTimeout(() => (menu.querySelector(".level-option.is-active") || menu.querySelector(".level-option"))?.focus(), 30);
   }
 
   async function selectPreset(id, fromUser) {
@@ -1699,7 +1702,23 @@
         if (!document.getElementById("levelPicker")?.contains(e.target)) closeLevelMenu();
       });
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape") closeLevelMenu();
+        if (e.key !== "Escape" || menu.classList.contains("hidden")) return;
+        const inside = menu.contains(document.activeElement);
+        closeLevelMenu();
+        if (inside) button.focus(); // back where you were, not the top of the page
+      });
+      // ↑ ↓ (and Home / End) step through the levels while the list is open.
+      menu.addEventListener("keydown", (e) => {
+        const options = [...menu.querySelectorAll(".level-option")];
+        const at = options.indexOf(document.activeElement);
+        let next = null;
+        if (e.key === "ArrowDown") next = options[(at + 1) % options.length];
+        else if (e.key === "ArrowUp") next = options[(at - 1 + options.length) % options.length];
+        else if (e.key === "Home") next = options[0];
+        else if (e.key === "End") next = options[options.length - 1];
+        if (!next) return;
+        e.preventDefault();
+        next.focus();
       });
     }
   }
@@ -1716,6 +1735,11 @@
     if (!el) return false;
     const tag = el.tagName;
     return tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || el.isContentEditable;
+  }
+
+  // On the level picker, Space and Enter choose a level; they don't start or pause the clock.
+  function inLevelPicker(el) {
+    return Boolean(el?.closest?.("#levelPicker"));
   }
 
   async function handleShortcut(e) {
@@ -1822,6 +1846,7 @@
 
     document.addEventListener("keydown", (e) => {
       // Space acts on keyup; here it is only kept from scrolling the page.
+      if (inLevelPicker(e.target)) return;
       if ((e.code === "Space" || e.key === " ") && !isTypingTarget(e.target) && !document.body.classList.contains("modal-open")) {
         e.preventDefault();
         return;
@@ -1830,7 +1855,7 @@
     });
     document.addEventListener("keyup", (e) => {
       if (e.code !== "Space" && e.key !== " ") return;
-      if (isTypingTarget(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
+      if (isTypingTarget(e.target) || inLevelPicker(e.target) || e.metaKey || e.ctrlKey || e.altKey) return;
       // In a dialog, Space presses the button it is on (Cancel, Continue).
       if (document.body.classList.contains("modal-open")) return;
       e.preventDefault();
