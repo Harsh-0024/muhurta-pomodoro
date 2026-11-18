@@ -453,6 +453,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
 69. **Timer: "Click" with a mouse, "Tap" on a phone.** The hint under the Timer's time said "Tap
     the time to change it" on the computer too. With a mouse or trackpad it now says "Click the time
     to change it"; touch screens keep "Tap". Checked on the computer (8140) and the iPhone simulator.
+70. **Two-step setup reads right on a computer.** Its first step said "scan this code, or tap Add to
+    authenticator on this device"; it now says "or use Add to authenticator", which fits a mouse and
+    a phone alike. That was the last "tap" left on the computer pages (checked by searching them).
+    Checked that the computer page (8140) serves the new words.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
