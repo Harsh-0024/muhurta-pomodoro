@@ -416,6 +416,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     says "No focus yet" / "… focus so far". Past days are unchanged. Same spirit as the streak
     (item 57) and the year chart's ring (item 58). Checked on the computer.
 
+Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
+"Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
+the Dashboard's charts label values on their bars, so they have no odd side scales.
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
