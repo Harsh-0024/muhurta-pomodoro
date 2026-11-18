@@ -171,10 +171,14 @@
     setText("activeDays", `${formatDays(s.active_days)} active`);
     updateToggleCard("streakCard", states.streakCard);
     updateToggleCard("averageCard", states.averageCard);
-    setText("consistencyRate", formatDayRate(s.consistency_days_per_week));
     // With no focus in the year, "0 of 321 days" reads like a judgement; say what's true instead.
     const none = !Number(s.active_days || 0);
-    setText("consistencyNote", none ? `No focus yet in ${year}` : `${s.active_days} of ${s.days_elapsed || 0} days`);
+    // Under a week of history, a weekly rate is a guess (one session on day one reads "7/wk"):
+    // show the days themselves until there's a week to go on.
+    const elapsed = Number(s.days_elapsed || 0);
+    const early = !none && elapsed < 7;
+    setText("consistencyRate", early ? `${s.active_days} of ${elapsed}` : formatDayRate(s.consistency_days_per_week));
+    setText("consistencyNote", none ? `No focus yet in ${year}` : early ? "days so far" : `${s.active_days} of ${elapsed} days`);
     const welcome = byId("dashWelcome");
     if (welcome) welcome.classList.toggle("hidden", !(none && Number(year) === new Date().getFullYear()));
     setText(

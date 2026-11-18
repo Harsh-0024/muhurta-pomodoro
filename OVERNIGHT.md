@@ -422,6 +422,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     back unnoticed. Phone tests: 8 pass. The computer's copy of the rule (`db.py`) has the same
     check in a new script, `tests/test_streak.py` (its own empty database; taking the fix out makes
     it fail "got 0, want 2"), added to the tests workflow on GitHub.
+63. **Consistency isn't guessed from a day or two.** The Dashboard's Consistency card turned the
+    days so far into a weekly rate, so one session on the year's first day read "7/wk" and one of
+    two days "3.5/wk". Under a week of history it now shows the days themselves ("1 of 2", "days
+    so far"); from a week on, the weekly rate as before. Checked on the computer (8140).
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
