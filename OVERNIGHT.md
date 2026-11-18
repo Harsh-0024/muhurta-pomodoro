@@ -435,6 +435,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     single Tuesday. Until there are two weeks of days (each weekday seen twice) it now says "Your
     strongest day shows after two weeks."; the chart and its highlighted bar are unchanged. Checked
     on the computer (8140) and the phone build (8141).
+66. **Screen readers hear the charts' numbers.** By weekday, By month and By time of day are read as
+    one picture, and their label was only the chart's name ("Average focus by weekday in 2026"),
+    so the numbers were lost. The label now goes on with the bars that have focus ("Tuesdays: 25m
+    on average"; "15:00 to 16:00: 16m; 16:00 to 17:00: 9m"), or "No focus yet". The Last 7 days
+    chart, whose days are buttons, already read each day. Checked on the computer (8140).
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

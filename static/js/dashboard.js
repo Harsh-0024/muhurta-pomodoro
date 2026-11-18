@@ -452,8 +452,14 @@
     const top = Math.max(...bars.map((b) => Number(b.minutes || 0)), goal, 1);
     el.innerHTML = "";
     el.style.setProperty("--bar-count", String(bars.length));
-    el.setAttribute("role", bars.some((b) => b.day) ? "group" : "img");
-    el.setAttribute("aria-label", options?.label || "");
+    const asImage = !bars.some((b) => b.day);
+    el.setAttribute("role", asImage ? "img" : "group");
+    // A chart read as one picture says its numbers too, not just its name: the bars that have
+    // focus ("Tuesdays: 25m on average"), or that there is none yet.
+    const said = asImage
+      ? bars.filter((b) => Number(b.minutes || 0) > 0).map((b) => b.title || `${b.label}: ${formatMinutes(b.minutes)}`)
+      : [];
+    el.setAttribute("aria-label", asImage && options?.label ? `${options.label}. ${said.length ? said.join("; ") : "No focus yet"}.` : options?.label || "");
 
     const values = document.createElement("div");
     values.className = "bar-values";
