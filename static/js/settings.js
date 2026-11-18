@@ -640,7 +640,10 @@
     const v = formValues();
     const ok = LIMITS.every(([, key, , max]) => Number.isInteger(v[key]) && v[key] >= 1 && v[key] <= max);
     if (!ok) {
-      el.textContent = "Fill in the durations to see the full cycle.";
+      // A length typed but out of range says which and why ("Focus must be 1–180 min"), and stays
+      // here, where the message strip after Save fades after a few seconds.
+      const off = LIMITS.find(([id, key, , max]) => $(id).value !== "" && !(Number.isInteger(v[key]) && v[key] >= 1 && v[key] <= max));
+      el.textContent = off ? `${off[2]} must be 1–${off[3]} min.` : "Fill in the durations to see the full cycle.";
       el.classList.remove("is-ready");
       return;
     }

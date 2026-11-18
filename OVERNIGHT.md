@@ -539,6 +539,13 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     Dashboard, Settings and History, in dark and light, measured against what is really behind
     it, is at least 4.5:1 (3:1 for large text); the gold buttons and chosen segments are 8:1 or
     better on both ends of their gradient.
+85. **Combinations says which length is out of range.** Typing Focus 300 left the line under the
+    form at "Fill in the durations to see the full cycle.", and the real reason showed only in the
+    message strip after Save, which fades after a few seconds. The line now says "Focus must be
+    1–180 min." (or Short rest 1–60, Long rest 1–120) while the number is out of range, and goes
+    back to the cycle summary once it is fixed. Checked on the computer (8140) without saving:
+    300 → the Focus message, 50/10/20 → "One cycle: 4h 10m …", Short rest 0 → its message.
+    Also checked and clean: History's add/edit form shows its problem as an alert and keeps it.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
