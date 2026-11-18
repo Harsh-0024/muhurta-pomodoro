@@ -489,6 +489,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     stop, and the arrows move the choice. The admin page's Open / Done / All filter got the same.
     Checked on the computer (8140): in Add a session, → on Focus chooses Rest; Escape closed the
     editor without saving. The admin filter wasn't tried live (same code).
+77. **History's two views work as tabs.** By day / Unusually long were marked as tabs but each was
+    a Tab stop and ← → did nothing. They are now one Tab stop, ← → and Home / End switch the view
+    with the focus following, and each tab names the list it controls. That leaves every choice
+    group on the computer pages answering the arrow keys (Settings', History's, the admin filter).
+    Checked on the computer (8140) with real key presses: → shows Unusually long ("Nothing looks out
+    of place"), Home goes back to By day.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

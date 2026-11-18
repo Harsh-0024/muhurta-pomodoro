@@ -693,6 +693,7 @@
         const on = b.dataset.view === next;
         b.classList.toggle("is-active", on);
         b.setAttribute("aria-selected", String(on));
+        b.tabIndex = on ? 0 : -1; // one Tab stop; ← → switch (below)
       });
     render();
   }
@@ -701,6 +702,18 @@
     $("historyTabs")?.addEventListener("click", (e) => {
       const b = e.target.closest(".segment");
       if (b) setView(b.dataset.view);
+    });
+    // As tabs do: ← → (Home / End) move to the other view and keep the focus on its tab.
+    $("historyTabs")?.addEventListener("keydown", (e) => {
+      const tabs = [...$("historyTabs").querySelectorAll(".segment")];
+      const at = tabs.indexOf(document.activeElement);
+      if (at < 0) return;
+      const to = { ArrowRight: at + 1, ArrowLeft: at - 1, Home: 0, End: tabs.length - 1 }[e.key];
+      if (to === undefined) return;
+      e.preventDefault();
+      const next = tabs[(to + tabs.length) % tabs.length];
+      setView(next.dataset.view);
+      next.focus();
     });
     $("btnAddSession")?.addEventListener("click", () => openEditor(null));
     $("btnEarlier")?.addEventListener("click", loadEarlier);

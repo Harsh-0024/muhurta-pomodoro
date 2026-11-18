@@ -11,8 +11,8 @@
 
 <div class="history-toolbar">
   <div class="segmented history-tabs" id="historyTabs" role="tablist" aria-label="Which sessions to show">
-    <button type="button" class="segment is-active" data-view="recent" role="tab" aria-selected="true">By day</button>
-    <button type="button" class="segment" data-view="long" role="tab" aria-selected="false">Unusually long <span class="history-count hidden" id="longCount"></span></button>
+    <button type="button" class="segment is-active" data-view="recent" role="tab" aria-selected="true" aria-controls="historyList" tabindex="0">By day</button>
+    <button type="button" class="segment" data-view="long" role="tab" aria-selected="false" aria-controls="historyList" tabindex="-1">Unusually long <span class="history-count hidden" id="longCount"></span></button>
   </div>
   <button type="button" class="btn btn-primary btn-small" id="btnAddSession">Add a session</button>
 </div>
