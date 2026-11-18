@@ -532,6 +532,9 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     call to look. Checked on the computer (8140): a flowing ring breathes as before, and with the
     reduce-motion rule applied it holds still at full strength. Also checked and clean: the
     quick lengths and the "i" already get a finger-sized tap area on touch screens.
+    Also checked and clean for Reduce Motion: the update bar and alarm slide-ins and the level
+    menu stop, the update and sync spinners slow down, and the rest (Preview pulse, History's row
+    flash, the message strip's short rise) are brief fades that move nothing.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
