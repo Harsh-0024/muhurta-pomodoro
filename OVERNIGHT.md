@@ -526,6 +526,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     outside and still show. Done by a small script that kept every rule in its place. Checked on
     the computer (8140): hovering a nav link still lights it; on the iPhone simulator (8141) the
     Timer page renders as before and says "Tap the time to change it".
+84. **Rings hold still for Reduce Motion.** Flow's ring, and Rhythm's in overtime, fade in and out
+    without end for the whole sitting, even with the device set to reduce motion. With that
+    setting on they now stay still at full strength; the alarm's quicker pulse is kept, as it is a
+    call to look. Checked on the computer (8140): a flowing ring breathes as before, and with the
+    reduce-motion rule applied it holds still at full strength. Also checked and clean: the
+    quick lengths and the "i" already get a finger-sized tap area on touch screens.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

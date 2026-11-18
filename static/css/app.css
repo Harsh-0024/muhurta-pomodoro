@@ -5735,6 +5735,14 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
   .bar-fill {
     transition: none;
   }
+
+  /* The rings that breathe for a whole Flow sitting or overtime hold still, at full strength.
+     The alarm's quicker pulse stays: it is a call to look. */
+  .page-flow .flow-ring-wrap.is-flowing .flow-ring-progress,
+  .timer-ring-wrap.ring-extend .ring-progress {
+    animation: none;
+    opacity: 1;
+  }
 }
 
 @media (max-width: 840px) {
