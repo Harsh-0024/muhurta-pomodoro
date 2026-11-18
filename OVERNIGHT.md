@@ -440,6 +440,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     so the numbers were lost. The label now goes on with the bars that have focus ("Tuesdays: 25m
     on average"; "15:00 to 16:00: 16m; 16:00 to 17:00: 9m"), or "No focus yet". The Last 7 days
     chart, whose days are buttons, already read each day. Checked on the computer (8140).
+67. **The year heatmap's days reach screen readers.** The heatmap was marked as one picture, yet the
+    days with focus inside it are buttons you can Tab to; a picture's insides are hidden from a
+    screen reader, so those buttons were reached by keyboard but said nothing useful. It is now a
+    group named "Daily focus activity for 2026: 1 day with focus", and each day says its date and
+    minutes and opens the day. Checked on the computer (8140): the day shows in the page's
+    accessibility tree as a button.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

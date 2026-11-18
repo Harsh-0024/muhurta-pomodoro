@@ -276,7 +276,14 @@
     const goal = Math.max(1, Number(data.goal_minutes || 1));
     const maxFocus = Math.max(...days.map((day) => Number(day.focus_minutes || 0)), goal);
     const stops = themeHeatStops();
-    grid.setAttribute("aria-label", `Daily focus activity for ${data.range?.year || selectedYear}`);
+    // The days with focus are buttons inside it, so it is a group (a picture would hide them from a
+    // screen reader), and its name says how many there are before you step through them.
+    const activeDays = days.filter((d) => Number(d.focus_minutes || 0) > 0).length;
+    grid.setAttribute("role", "group");
+    grid.setAttribute(
+      "aria-label",
+      `Daily focus activity for ${data.range?.year || selectedYear}: ${activeDays ? `${formatDays(activeDays)} with focus` : "no focus yet"}`
+    );
 
     grid.innerHTML = "";
     months.innerHTML = "";
