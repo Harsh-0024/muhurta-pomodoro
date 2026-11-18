@@ -96,7 +96,11 @@
 
   function markPick() {
     document.querySelectorAll("#timerQuick [data-min]").forEach((btn) => {
-      btn.classList.toggle("is-active", Number(btn.dataset.min) * 60 === enteredSec());
+      const on = Number(btn.dataset.min) * 60 === enteredSec();
+      btn.classList.toggle("is-active", on);
+      // The chosen length is said, not only shown (written only on a change: this runs every tick).
+      if (btn.getAttribute("aria-pressed") !== String(on)) btn.setAttribute("aria-pressed", String(on));
+      if (!btn.hasAttribute("aria-label")) btn.setAttribute("aria-label", `${btn.dataset.min} minutes`);
     });
   }
 

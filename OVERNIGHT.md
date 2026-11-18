@@ -471,6 +471,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     focus yet said "Nothing was timed on this day." It now says "Nothing timed yet today."; past
     days keep the old words. Checked on the computer (8140): 17 Nov shows its sitting, → to today
     gives the new line, ← ← to 16 Nov the old one.
+74. **The Timer's quick lengths say which is chosen.** The 6 / 12 / 24 / 36 / 48 / 60 buttons showed
+    the chosen one only by its look. Each is now "24 minutes" to a screen reader and says pressed
+    when it is the length set. Checked on the computer (8140): choosing 24 marks only 24 pressed
+    (the test account's length was set back to 25 afterwards). Also checked: Flow's buttons are
+    named, and the Timer's "ends at" keeps up with the clock while idle.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
