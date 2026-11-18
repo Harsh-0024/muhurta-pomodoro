@@ -504,6 +504,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     read "24:00 focus", the same as a running session. Flow and Timer show the page's name when
     idle; Rhythm now does too ("Rhythm · Muhurta Pomodoro"), and every running, paused, rest and
     done title is as before. Checked on the computer (8140) after a reload.
+80. **The Dashboard's average card is spoken in words.** A screen reader heard "Avg / active day:
+    25m. in 2026", and nothing said a press switches it. It now says "Average per active day: 25m
+    in 2026. Press for average over all days" (and the other way round once pressed). The card
+    looks the same. Checked on the computer (8140): pressing twice goes over and back.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

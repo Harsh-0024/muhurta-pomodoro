@@ -56,7 +56,12 @@
     setText(state.labelId, state.label);
     setText(state.valueId, state.value);
     setText(state.noteId, state.note);
-    card.setAttribute("aria-label", `${state.label}: ${state.value}. ${state.note}`);
+    // Spoken in words ("Average per active day: 25m in 2026"), not "Avg / active day: 25m. in
+    // 2026", and with what a press shows next, since the card only changes when pressed.
+    const say = (st) => st.spoken || st.label;
+    const note = /^[a-z]/.test(state.note) ? ` ${state.note}` : `. ${state.note}`;
+    const next = states.length > 1 ? `. Press for ${say(states[(index + 1) % states.length]).toLowerCase()}` : "";
+    card.setAttribute("aria-label", `${say(state)}: ${state.value}${note}${next}`);
     card.dataset.state = String(index);
     card.dataset.stateCount = String(states.length);
   }
@@ -89,6 +94,7 @@
           valueId: "averageFocus",
           noteId: "averageNote",
           label: "Avg / active day",
+          spoken: "Average per active day",
           value: formatMinutes(s.average_focus_active_day),
           note: `in ${year}`,
         },
@@ -97,6 +103,7 @@
           valueId: "averageFocus",
           noteId: "averageNote",
           label: "Avg / all days",
+          spoken: "Average over all days",
           value: formatMinutes(averageAllDays),
           note: `in ${year}`,
         },
