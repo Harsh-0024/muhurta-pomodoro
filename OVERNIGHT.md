@@ -535,6 +535,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     Also checked and clean for Reduce Motion: the update bar and alarm slide-ins and the level
     menu stop, the update and sync spinners slow down, and the rest (Preview pulse, History's row
     flash, the message strip's short rise) are brief fades that move nothing.
+    Also checked and clean for contrast: every piece of visible text on Rhythm, Timer, Flow,
+    Dashboard, Settings and History, in dark and light, measured against what is really behind
+    it, is at least 4.5:1 (3:1 for large text); the gold buttons and chosen segments are 8:1 or
+    better on both ends of their gradient.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
