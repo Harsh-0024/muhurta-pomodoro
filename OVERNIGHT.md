@@ -512,6 +512,9 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     readers, and lit up on hover, but it has one view only, so pressing did nothing. It is now a
     plain card like Focus this year and Consistency; the average card, which does switch, keeps
     all of that. Checked on the computer (8140).
+    Also checked and clean: Flow and Timer controls all named (quick lengths say pressed);
+    Timer's "ends at" matches the clock; History's timeline blocks are named by their hover text
+    and kept out of the Tab order, with Edit / Delete buttons named per session.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
