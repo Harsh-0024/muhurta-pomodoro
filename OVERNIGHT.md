@@ -457,6 +457,11 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     authenticator on this device"; it now says "or use Add to authenticator", which fits a mouse and
     a phone alike. That was the last "tap" left on the computer pages (checked by searching them).
     Checked that the computer page (8140) serves the new words.
+71. **"/history" finds History.** History lives at /settings/history, so typing /history gave
+    "This page doesn't exist". It now goes to History (computer app; the phone app has its own
+    pages). Also looked over the phone's Settings in the simulator: nothing to change. Checked:
+    /history answers with a redirect to /settings/history; all four Python scripts and the phone
+    tests pass.
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

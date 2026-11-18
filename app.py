@@ -405,6 +405,12 @@ def history_page():
     return render_template("history.html")
 
 
+# History lives under Settings; "/history" typed on its own goes there instead of "not found".
+@app.route("/history")
+def history_shortcut():
+    return redirect(url_for("history_page"))
+
+
 @app.route("/dashboard")
 def dashboard_page():
     return render_template("dashboard.html")
