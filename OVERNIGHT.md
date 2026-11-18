@@ -520,6 +520,12 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     on, pressed against "AVG / ACTIVE DAY" and "in 2026". The hover ring now shows only with a
     mouse; the keyboard focus ring is unchanged. Checked on the iPhone simulator (8141): a tap
     switches to Avg / all days with no ring; tapped again to switch back.
+83. **No stuck highlights after a tap, anywhere.** Item 82 fixed one card; the other 31 hover
+    looks (nav links, buttons, level options, list rows) could also stay lit after a tap on the
+    phone. Each now applies only where there is a mouse; focus, chosen and open states are kept
+    outside and still show. Done by a small script that kept every rule in its place. Checked on
+    the computer (8140): hovering a nav link still lights it; on the iPhone simulator (8141) the
+    Timer page renders as before and says "Tap the time to change it".
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
