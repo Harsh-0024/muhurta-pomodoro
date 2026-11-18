@@ -431,6 +431,10 @@ Phone layout: add `MUHURATA_MOBILE_PREVIEW=1` in front.
     Three or more past days in a row with no focus and no rest now read as one row ("5 – 16 Nov",
     "No focus", "12 days"); one or two such days, and today, keep their own rows and still open
     the day. Checked on the computer (8140); on the phone this panel isn't shown.
+65. **"Strongest day" waits for two weeks.** By weekday said "Tuesday is your strongest day" after a
+    single Tuesday. Until there are two weeks of days (each weekday seen twice) it now says "Your
+    strongest day shows after two weeks."; the chart and its highlighted bar are unchanged. Checked
+    on the computer (8140) and the phone build (8141).
 
 Checked and clean (no change needed): the not-found page; History (Settings → History) by day and
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;

@@ -655,9 +655,12 @@
     weekdayBars.forEach((b) => { b.current = b === bestWeekday && b.minutes > 0; });
     setText(
       "weekdaySubtitle",
-      bestWeekday.minutes > 0
+      // One good Tuesday isn't "your strongest day": name one once every weekday has come round twice.
+      bestWeekday.minutes > 0 && days.length >= 14
         ? `Average focus per day in ${year}. ${bestWeekday.long} is your strongest day.`
-        : `Average focus per day in ${year}.`
+        : bestWeekday.minutes > 0
+          ? `Average focus per day in ${year}. Your strongest day shows after two weeks.`
+          : `Average focus per day in ${year}.`
     );
     renderBars(byId("weekdayChart"), weekdayBars, { label: `Average focus by weekday in ${year}` });
 
