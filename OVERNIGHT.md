@@ -551,6 +551,19 @@ Checked and clean (no change needed): the not-found page; History (Settings → 
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
 the Dashboard's charts label values on their bars, so they have no odd side scales.
 
+## Checked in the real apps (19 Nov)
+
+- **Android app:** built from this branch (`mobile/`, debug build) and installed on a Pixel 8
+  emulator. It opens on the sign-in page with no start-up errors; Timer, Flow and the Dashboard
+  send you to sign in first, as they should. Phones get no hover effects (checked: no mouse).
+- **iPhone home-screen app:** built from this branch with `build_web.py --iphone` into a scratch
+  folder (`docs/app` was not touched) and served from this Mac. In Safari the "Use it as an app"
+  hint shows; Add to Home Screen names it "Muhurta" with the gold icon and "Open as Web App" on.
+  Opened from the home screen it has no Safari bar, the hint hides itself, the header clears the
+  camera cut-out and the whole sign-in form fits on one screen.
+- **Not checked:** anything after sign-in in either app. Both sign in to the live service, and I
+  did not sign in there. Those screens were checked in the browser instead (items above).
+
 ## If you release this: lines for "What's new"
 
 Drafts for `release_notes.py`, in the voice of the existing notes. Use, change or drop them.
