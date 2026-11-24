@@ -559,6 +559,13 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+## Waiting list
+
+Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
+
+- **iPhone check of round 2** (waits on: the iOS Simulator working again): the Dashboard's "0/wk"
+  and its lining figures ("0m", not "om") on a phone.
+
 ## Checked in the real apps (19 Nov)
 
 - **Android app:** built from this branch (`mobile/`, debug build) and installed on a Pixel 8
