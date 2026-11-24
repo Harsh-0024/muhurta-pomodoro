@@ -3375,6 +3375,24 @@ body[data-theme="light"] .rhythm-track {
     grid-template-columns: 1fr;
   }
 
+  /* Stacked, the two cards no longer need to match heights: each is as tall as
+     what it shows (no empty half-card under three recent days or the "1 / 15"
+     note). Recent days still scrolls inside past ~30rem; the rhythm chart,
+     drawn to its box, keeps room for itself. */
+  .dashboard-lower .dashboard-panel {
+    height: auto;
+    max-height: 30rem;
+  }
+
+  .bell-curve-container {
+    min-height: 15rem;
+  }
+
+  .bell-curve-container:has(.bell-curve-threshold, .empty-note) {
+    min-height: 0;
+    padding: 1.2rem 0 0.6rem;
+  }
+
   /* Phone: the day and its minutes on one line, the bar under both, so the
      minutes don't sit below the bar looking like the start of the next day. */
   .recent-row {

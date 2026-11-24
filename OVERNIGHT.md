@@ -567,6 +567,10 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   Checked on the iPhone simulator.
 - Also checked on the phone: Timer (its old-style "12" quick lengths are fixed on
   `design/numerals`) and the Today card ("Daily goal: 2h" before any focus, after a reload).
+- Recent days and Rhythm profile kept their desktop fixed height (20-23rem, set so the two
+  side-by-side cards match) when stacked on a phone, leaving half-empty cards under three recent
+  days and under "1 / 15". On phones they now fit their content (Recent days still scrolls past
+  30rem; the rhythm chart keeps 15rem to draw in). Checked on the iPhone simulator.
 
 ## Waiting list
 
