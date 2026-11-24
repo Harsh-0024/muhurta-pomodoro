@@ -555,6 +555,9 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
 
 1. **Consistency without the ".0".** With no focus yet the Dashboard's Consistency tile read
    "0.0/wk"; whole numbers now read "0/wk", "3/wk", and other rates keep one decimal under ten.
+2. **Dashboard zeros read as numbers.** Cormorant's old-style zero is a small round "o", so the big
+   figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
+   profile count now use lining figures. Checked in light and dark.
 
 ## Checked in the real apps (19 Nov)
 

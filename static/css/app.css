@@ -6235,3 +6235,11 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
     outline-offset: 2px;
   }
 }
+
+/* The Dashboard's big serif figures: Cormorant's old-style zero is a small round "o", so "0m" read
+   as "om" and "0/wk" as "o/wk". Lining figures stand at full height and read as numbers. */
+.metric-value,
+#todayFocus,
+.bell-curve-threshold-count {
+  font-variant-numeric: lining-nums;
+}
