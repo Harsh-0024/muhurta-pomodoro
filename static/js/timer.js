@@ -66,9 +66,9 @@
 
   /* ---------- the length fields ---------- */
 
-  // The length lives in one field showing "25:00". Typing a plain number
+  // The length lives in one field showing "24:00" (one ghadi on a first visit). Typing a plain number
   // means minutes; "m:ss" and "h:mm:ss" work too.
-  let entrySec = 25 * 60;
+  let entrySec = 24 * 60;
 
   function parseEntry(text) {
     const s = String(text || "").trim();
@@ -130,9 +130,9 @@
   function readLast() {
     try {
       const n = Number(localStorage.getItem(LAST_KEY));
-      return n > 0 ? n : 25 * 60;
+      return n > 0 ? n : 24 * 60;
     } catch (_) {
-      return 25 * 60;
+      return 24 * 60;
     }
   }
 

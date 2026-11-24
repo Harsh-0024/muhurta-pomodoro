@@ -559,6 +559,14 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `improve/timer-default` (from `improve/round-2-polish`)
+
+1. **Timer starts at one ghadi.** On a first visit the Timer read 25:00, the classic Pomodoro,
+   while everything else counts in 24-minute ghadis (Sparsha, the length chips 6 · 12 · 24 · 36 ·
+   48 · 60, the footer). It now starts at 24:00, so its chip lights up. A length you've used
+   before is still remembered. Easy to undo: three numbers in `static/js/timer.js` and one in
+   `templates/timer.html`.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
