@@ -566,6 +566,9 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   the profile has its sessions, both now fit their content (at least 12rem, at most the old height,
   with Recent days scrolling inside). Once the curve shows, nothing changes. Desktop only; phones
   keep mobile.css's sizing (phone check is on the Waiting list with the rest).
+- **The "i" buttons show as buttons.** Their ring used the divider colour, 8% white in dark mode,
+  so Rhythm profile's "i" read as a stray letter. The ring now follows the "i" at half strength:
+  visible in dark and light, gold on hover as before. Checked in both themes.
 
 ## Waiting list
 

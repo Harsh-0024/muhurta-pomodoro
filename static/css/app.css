@@ -3574,7 +3574,9 @@ body[data-theme="light"] .bell-peak-label {
   width: 1.15rem;
   height: 1.15rem;
   padding: 0;
-  border: 1px solid var(--line);
+  /* Its ring follows its "i": the divider colour (--line) was 8% white in dark mode, so the button
+     barely showed as a button. */
+  border: 1px solid color-mix(in srgb, currentColor 50%, transparent);
   border-radius: 50%;
   background: transparent;
   color: var(--muted);
