@@ -741,16 +741,20 @@
     const ul = $("shortcutGrid");
     const list = window.MuhuratShortcuts?.list;
     if (!ul || !list) return;
-    const keysHtml = (keys) =>
-      keys
-        .split(" · ")
-        .map((alt) =>
-          alt
+    // Each choice keeps its "/" on the same line, so a wrap never starts with a lone "/".
+    const keysHtml = (keys) => {
+      const alts = keys.split(" · ");
+      return alts
+        .map((alt, i) => {
+          const combo = alt
             .split(" + ")
             .map((k) => `<kbd>${escapeHtml(k)}</kbd>`)
-            .join('<span class="kbd-plus">+</span>')
-        )
-        .join('<span class="kbd-or">/</span>');
+            .join('<span class="kbd-plus">+</span>');
+          const or = i < alts.length - 1 ? '<span class="kbd-or">/</span>' : "";
+          return `<span class="kbd-alt">${combo}${or}</span>`;
+        })
+        .join("");
+    };
     ul.innerHTML = list
       .map((sc) => `<li><span class="shortcut-keys">${keysHtml(sc.keys)}</span><span>${escapeHtml(sc.action)}</span></li>`)
       .join("");
