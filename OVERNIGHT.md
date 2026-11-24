@@ -559,6 +559,15 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `design/dashboard-recent-phone` (from `improve/round-2-polish`)
+
+- Dashboard on the iPhone: Recent days stacked each row as date, bar, then minutes, so a day's
+  "40m / 0m rest" sat under its bar and read like the start of the next day. On phones each row is
+  now the day and status on the left, minutes and rest on the right, and the bar under both.
+  Checked on the iPhone simulator.
+- Also checked on the phone: Timer (its old-style "12" quick lengths are fixed on
+  `design/numerals`) and the Today card ("Daily goal: 2h" before any focus, after a reload).
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.

@@ -3375,13 +3375,21 @@ body[data-theme="light"] .rhythm-track {
     grid-template-columns: 1fr;
   }
 
+  /* Phone: the day and its minutes on one line, the bar under both, so the
+     minutes don't sit below the bar looking like the start of the next day. */
   .recent-row {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 0.45rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "date minutes" "bar bar";
+    gap: 0.45rem 0.8rem;
+    padding-bottom: 0.55rem;
   }
 
+  .recent-date { grid-area: date; }
+  .recent-bar { grid-area: bar; }
+
   .recent-minutes {
-    text-align: left;
+    grid-area: minutes;
+    text-align: right;
   }
 
   .rhythm-row {
