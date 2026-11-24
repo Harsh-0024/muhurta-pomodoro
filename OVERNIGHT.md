@@ -559,6 +559,13 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `fix/under-a-minute` (from `improve/round-2-polish`)
+
+- Under half a minute of focus today: the bars and ring rightly showed a sliver, but every number
+  rounded it to "0m" ("Today · So far · 0m", a lone "0m" over Wednesday in By weekday), and the
+  Today card said "2h to your 2h goal" since its test was `<= 0`. Now it reads "<1m", and the
+  Today card names the goal ("Daily goal: 2h") until half a minute is in. Checked on the iPhone.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.

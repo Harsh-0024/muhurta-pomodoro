@@ -31,7 +31,10 @@
   }
 
   function formatMinutes(minutes) {
-    const n = Math.round(Number(minutes || 0));
+    const raw = Number(minutes || 0);
+    const n = Math.round(raw);
+    // Some focus, but under half a minute: not "0m", which reads as none beside a bar that shows some.
+    if (n === 0 && raw > 0) return "<1m";
     if (n < 60) return `${n}m`;
     const h = Math.floor(n / 60);
     const m = n % 60;
@@ -607,7 +610,7 @@
       // Before any focus, "2h to your 2h goal" says the same thing twice: just name the goal.
       note = todayMinutes >= goal
         ? `Daily goal of ${formatMinutes(goal)} met`
-        : todayMinutes <= 0
+        : todayMinutes < 0.5 // under half a minute rounds to the whole goal still to go
           ? `Daily goal: ${formatMinutes(goal)}`
           : `${formatMinutes(Math.ceil(goal - todayMinutes))} to your ${formatMinutes(goal)} goal`;
     }
