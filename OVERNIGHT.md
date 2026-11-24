@@ -559,12 +559,23 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `design/dashboard-empty` (from `improve/round-2-polish`)
+
+From here on each kind of work has its own branch (design/, fix/, feature/, improve/ + topic).
+
+1. **Recent days and Rhythm profile, before there's a rhythm.** The pair kept a fixed 20-23rem for
+   a curve that isn't drawn until 15 sessions, so "0 / 15" sat in a tall empty box beside a
+   two-line Recent days (368px each). While the placeholder shows, the pair is only as tall as it
+   needs (176px here) and never taller than before; once the curve appears nothing changes.
+   Browsers without `:has()` keep the old height.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
 
 - **iPhone check of round 2** (waits on: the iOS Simulator working again): the Dashboard's "0/wk"
-  and its lining figures ("0m", not "om") on a phone.
+  and its lining figures ("0m", not "om") on a phone, and the shorter Recent days / Rhythm profile
+  pair before 15 sessions (branch `design/dashboard-empty`).
 
 ## Checked in the real apps (19 Nov)
 

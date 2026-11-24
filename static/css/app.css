@@ -6243,3 +6243,12 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
 .bell-curve-threshold-count {
   font-variant-numeric: lining-nums;
 }
+
+/* Before there's a rhythm to draw, the lower pair of panels held a fixed 20-23rem for a curve that
+   isn't there yet: a tall, nearly empty box beside a two-line Recent days. While the "0 / 15"
+   placeholder shows, the pair is only as tall as it needs (never taller than before). */
+.dashboard-lower:has(.bell-curve-threshold) .dashboard-panel {
+  height: auto;
+  min-height: 11rem;
+  max-height: clamp(20rem, 48vh, 23rem);
+}
