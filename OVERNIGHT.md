@@ -569,7 +569,7 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
 
 ## Waiting list
 
-- **Slow first paint on the iPhone simulator** (cause not pinned down): pages sometimes sit blank
+- ~~**Slow first paint on the iPhone simulator**~~ **Solved 25 Nov by `fix/font-blocking`**: the ~2 s gap was Safari waiting on the render-blocking Google Fonts stylesheet; on that branch HTML and app.css arrive in the same second. Original note (cause not pinned down): pages sometimes sit blank
   for 3-10 s. The server log shows the HTML served at once, then a ~2 s gap before the phone asks
   for app.css, then everything else at once. Google's font CSS no longer blocks (branch
   `fix/font-blocking`). The rest may be the simulator's DNS for fonts.googleapis.com, or several
