@@ -559,7 +559,21 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `design/level-menu` (from `improve/round-2-polish`)
+
+- **The level menu is solid.** On the phone the Rhythm page's level list (Agaman ... Ekagra) let the
+  timer behind it show through ("24:00", "DEEP WORK", Start), which looked messy and made the level
+  names harder to read. Its tinted background now sits on the solid page colour, so it is opaque in
+  both themes and keeps its tint. Checked on the iPhone simulator in dark mode. Choosing Sthiti set
+  the clock to 36:00, and choosing Sparsha set it back to 24:00.
+
 ## Waiting list
+
+- **Slow first paint on the iPhone simulator** (cause not pinned down): pages sometimes sit blank
+  for 3-10 s. The server log shows the HTML served at once, then a ~2 s gap before the phone asks
+  for app.css, then everything else at once. Google's font CSS no longer blocks (branch
+  `fix/font-blocking`). The rest may be the simulator's DNS for fonts.googleapis.com, or several
+  Safari tabs of the app polling `/api/cloud/remote-sync` every 3 s. To check on a real iPhone.
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
 
