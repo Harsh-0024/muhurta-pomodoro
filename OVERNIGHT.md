@@ -571,6 +571,9 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   side-by-side cards match) when stacked on a phone, leaving half-empty cards under three recent
   days and under "1 / 15". On phones they now fit their content (Recent days still scrolls past
   30rem; the rhythm chart keeps 15rem to draw in). Checked on the iPhone simulator.
+- Stacked on a phone, those two cards also wore their compact desktop look (0.85rem edge, a
+  1-1.15rem title) between cards with a 1.25rem edge and a 1.35rem title. On phones they now match
+  the rest. Checked on the iPhone: Recent days and Rhythm profile line up with Yearly consistency.
 
 ## Waiting list
 

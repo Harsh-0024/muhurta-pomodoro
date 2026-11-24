@@ -3382,6 +3382,16 @@ body[data-theme="light"] .rhythm-track {
   .dashboard-lower .dashboard-panel {
     height: auto;
     max-height: 30rem;
+    padding: 1.25rem;
+  }
+
+  /* Stacked among By weekday and By month, they wear the same title and edge. */
+  .dashboard-lower .panel-head {
+    margin-bottom: 0.75rem;
+  }
+
+  .dashboard-lower .panel-head .card-title {
+    font-size: 1.35rem;
   }
 
   .bell-curve-container {
