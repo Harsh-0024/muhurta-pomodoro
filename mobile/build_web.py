@@ -152,7 +152,8 @@ def render_pages(target: Target) -> None:
         # The fonts ship inside the app (mobile/web/fonts): no waiting on Google
         # before the page draws, and the same look offline.
         html = re.sub(r'\s*<link rel="preconnect" href="https://fonts\.(googleapis|gstatic)\.com"[^>]*/>', "", html)
-        html = re.sub(r'<link href="https://fonts\.googleapis\.com/css2[^"]*" rel="stylesheet" />',
+        html = re.sub(r'<noscript><link href="https://fonts\.googleapis\.com/css2[^"]*" rel="stylesheet" /></noscript>\n?', "", html)
+        html = re.sub(r'<link href="https://fonts\.googleapis\.com/css2[^"]*" rel="stylesheet"[^>]*/>',
                       f'<link href="{target.base}fonts/fonts.css" rel="stylesheet" />', html)
         # First in <head>: the router, then the phone's own /api (local-api.js).
         alerts = "web-alerts.js" if target.web else "alerts.js"

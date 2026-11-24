@@ -559,6 +559,18 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `fix/font-blocking` (from `improve/round-2-polish`)
+
+- **Pages draw without waiting on Google.** The Google Fonts stylesheet was a normal stylesheet in
+  the head, so the page stayed blank until Google answered. On the iPhone simulator, Dashboard and
+  Timer sat on a blank screen for about 10 s while the server replied in 7 ms. It now loads with
+  `media="print"` and switches itself on when it arrives (a `<noscript>` copy covers no-JS). With
+  `display=swap` the page draws straight away and the fonts swap in. After the change, Flow drew
+  fully in under 2 s (the fonts may already have been cached, so this is not a clean
+  before/after). The phone build already bundles its own fonts. Its swap in build_web.py now
+  matches the new tag and drops the `<noscript>` copy. Checked on the served page: no Google link
+  is left, and the local fonts.css link is in. Phone tests pass (16).
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
