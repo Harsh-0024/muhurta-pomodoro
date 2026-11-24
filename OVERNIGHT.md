@@ -575,13 +575,15 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   They now use the same 1.25rem inset and 1.35rem title there. Checked on the iPhone simulator;
   the rest of the Dashboard on the phone looked right (tiles, today ring, last 7 days, bars).
   The Timer page on the phone also looked right (summary strip, ring, minute marks, Start).
+  Flow, Rhythm and Settings checked too. Settings' section tabs follow the scroll correctly (a
+  section stays lit while it still fills the band 15-45% down the screen).
 
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
 
-- **iPhone check of round 2** (waits on: the iOS Simulator working again): the Dashboard's "0/wk"
-  and its lining figures ("0m", not "om") on a phone.
+- ~~**iPhone check of round 2**~~ Done 25 Nov on the iPhone 18 Pro simulator: the Dashboard's
+  figures are lining ("0m", "40m"), and Rhythm, Timer, Flow, Dashboard and Settings all lay out right.
 
 ## Checked in the real apps (19 Nov)
 
