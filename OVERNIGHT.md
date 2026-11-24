@@ -571,6 +571,8 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   matches the new tag and drops the `<noscript>` copy. Checked on the served page: no Google link
   is left, and the local fonts.css link is in. Phone tests pass (16).
 
+- Measured on the iPhone simulator (25 Nov): before this branch, app.css was requested ~2 s after the page HTML (Safari waited on the Google Fonts stylesheet first); on this branch HTML and app.css arrive in the same second, twice in a row, and the Timer page looks the same with its fonts. This settles the "slow first paint" Waiting-list item noted on `design/level-menu`.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
