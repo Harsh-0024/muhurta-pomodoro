@@ -287,7 +287,7 @@
     const stops = themeHeatStops();
     // The days with focus are buttons inside it, so it is a group (a picture would hide them from a
     // screen reader), and its name says how many there are before you step through them.
-    const activeDays = days.filter((d) => Number(d.focus_minutes || 0) > 0).length;
+    const activeDays = days.filter((d) => Number(d.focus_minutes || 0) >= 1).length; // as the server counts
     grid.setAttribute("role", "group");
     grid.setAttribute(
       "aria-label",

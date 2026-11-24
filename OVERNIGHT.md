@@ -559,6 +559,18 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `fix/active-day-minute` (from `improve/round-2-polish`)
+
+1. **A few seconds of focus no longer makes a day "active".** A timer started by mistake and
+   stopped seconds later counted the whole day as active: it lengthened the streak, raised
+   Consistency and halved "Avg / active day" (found by adding a 1h session the day after an
+   18-second one: "2 days active, 30m average"). History already treats under a minute as a
+   stray moment and won't add a session that short, so a day now counts as active from one
+   minute of focus, on the computer (`db.ACTIVE_DAY_MIN`) and in the phone app
+   (`mobile/web/local-api.js`), plus the year chart's count. The seconds still show in the day's
+   own total. Tests added to `tests/test_streak.py` and `tests/phone/phone.test.mjs`; all pass.
+   To undo, set `ACTIVE_DAY_MIN` back to a tiny value and the two `>= 1` checks to `> 0`.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.

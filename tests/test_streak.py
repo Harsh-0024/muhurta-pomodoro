@@ -1,7 +1,8 @@
 """The Dashboard's current streak on the computer (db.dashboard_summary).
 
 Today isn't over, so with no focus yet it neither adds to the run nor breaks it: the streak shows
-the run up to yesterday until you focus. A whole day that ended without focus still ends it.
+the run up to yesterday until you focus. A whole day that ended without focus still ends it, and
+so does a day with under a minute of it.
 (The phone app's copy of this rule is checked in tests/phone/phone.test.mjs.)
 
     python tests/test_streak.py
@@ -70,6 +71,16 @@ check(s == 3, f"a focus block today adds to it (got {s}, want 3)")
 
 s = streak(3)
 check(s == 0, f"a day that is over without focus (3 days ago) ends the run there (got {s}, want 0)")
+
+# A few seconds (a timer started by mistake) isn't a day of focus: under a minute doesn't count.
+blip = focus_on(day(3))
+blip.update({"ended_at": f"{day(3)}T09:00:20Z", "duration_sec": 20, "productive_sec": 20})
+backup.restore({"app": "muhurta-pomodoro", "kind": "backup", "format": 1, "custom_presets": [],
+                "focus_by_device": [], "settings": {}, "activity_segments": [blip]})
+s = streak(3)
+check(s == 0, f"20 seconds of focus doesn't make a day active (got {s}, want 0)")
+summary = db.dashboard_summary(end_day_iso=day(0), days=30, timezone_name="UTC")["summary"]
+check(summary["active_days"] == 3, f"nor count among the active days (got {summary['active_days']}, want 3)")
 
 print()
 print("ALL PASSED" if not failures else f"{len(failures)} FAILED: " + "; ".join(failures))

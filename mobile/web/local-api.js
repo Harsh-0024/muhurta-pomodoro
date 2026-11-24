@@ -850,7 +850,9 @@
       const focus = seg ? seg.productive_sec / 60 : 0;
       const rest = seg ? seg.rest_sec / 60 : 0;
       const tracked = Math.max(seg ? seg.duration_sec / 60 : 0, focus + rest);
-      if (focus > 0) {
+      // A day counts as active from one minute of focus, as on the computer (db.ACTIVE_DAY_MIN).
+      const active = focus >= 1;
+      if (active) {
         activeDays += 1;
         if (!firstActive) firstActive = day;
         running += 1;
@@ -859,7 +861,7 @@
         running = 0;
       }
       if (focus >= goal) goalDays += 1;
-      if (focus > 0 && (!bestDay || focus > bestDay.focus_minutes)) bestDay = { day: iso, focus_minutes: round(focus, 1) };
+      if (active && (!bestDay || focus > bestDay.focus_minutes)) bestDay = { day: iso, focus_minutes: round(focus, 1) };
       totalFocus += focus;
       totalRest += rest;
       totalTracked += tracked;
@@ -876,8 +878,8 @@
       records.push(record);
       if (iso <= calcEndIso) {
         // Today isn't over: with no focus yet it neither adds to the run nor breaks it.
-        const todayOpen = iso === calcEndIso && calcEnd === today && !(focus > 0);
-        if (!todayOpen) current = focus > 0 ? current + 1 : 0;
+        const todayOpen = iso === calcEndIso && calcEnd === today && !active;
+        if (!todayOpen) current = active ? current + 1 : 0;
         recent.unshift(record);
         if (recent.length > 14) recent.pop();
       }
