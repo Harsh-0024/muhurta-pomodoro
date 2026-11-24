@@ -569,6 +569,11 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
 - **The "i" buttons show as buttons.** Their ring used the divider colour, 8% white in dark mode,
   so Rhythm profile's "i" read as a stray letter. The ring now follows the "i" at half strength:
   visible in dark and light, gold on hover as before. Checked in both themes.
+- **Stacked cards match on a phone.** Under 720px Recent days and Rhythm profile stack into the
+  same column as By weekday and By month, but kept their compact side-by-side inset (0.85rem) and
+  smaller title, so Rhythm profile's heading sat smaller and further left than the card below it.
+  They now use the same 1.25rem inset and 1.35rem title there. Checked on the iPhone simulator;
+  the rest of the Dashboard on the phone looked right (tiles, today ring, last 7 days, bars).
 
 ## Waiting list
 

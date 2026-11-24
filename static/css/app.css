@@ -3384,6 +3384,16 @@ body[data-theme="light"] .rhythm-track {
     grid-template-columns: 1fr;
   }
 
+  /* Stacked, Recent days and Rhythm profile sit in the same column as By weekday and By month,
+     so they take the same inset and title size instead of the compact side-by-side ones. */
+  .dashboard-lower .dashboard-panel {
+    padding: 1.25rem;
+  }
+
+  .dashboard-lower .panel-head .card-title {
+    font-size: 1.35rem;
+  }
+
   .recent-row {
     grid-template-columns: minmax(0, 1fr);
     gap: 0.45rem;
