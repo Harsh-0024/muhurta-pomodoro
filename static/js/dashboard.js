@@ -577,10 +577,18 @@
       const sum = (i) => hours[i] + hours[(i + 1) % 24] + hours[(i + 2) % 24];
       if (sum(h) > sum(best)) best = h;
     }
+    // Trim the window's ends that hold next to nothing (under a tenth of it), so focus that all fell
+    // in one hour reads "22:00 and 23:00", not "22:00 and 1:00" because of a blip after midnight.
+    let from = best;
+    let span = 3;
+    const windowSum = hours[best] + hours[(best + 1) % 24] + hours[(best + 2) % 24];
+    const slight = (i) => hours[i % 24] < windowSum * 0.1;
+    while (span > 1 && slight(from)) { from += 1; span -= 1; }
+    while (span > 1 && slight(from + span - 1)) span -= 1;
     setText(
       "hourSubtitle",
       total > 0
-        ? `When your focus fell in the last ${HOUR_DAYS} days. Most between ${clockLabel(best)} and ${clockLabel((best + 3) % 24)}.`
+        ? `When your focus fell in the last ${HOUR_DAYS} days. Most between ${clockLabel(from % 24)} and ${clockLabel((from + span) % 24)}.`
         : `When your focus fell in the last ${HOUR_DAYS} days.`
     );
     renderBars(chart, bars, { label: `Focus by hour of the day, last ${HOUR_DAYS} days` });
