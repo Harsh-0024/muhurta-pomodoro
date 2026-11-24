@@ -618,9 +618,15 @@
     const problems = [];
     const nameEl = $("presetName");
     nameEl.removeAttribute("aria-invalid");
+    // Two levels with one name would sit side by side in the level menu, so a name is taken once:
+    // the built-in levels' (Sparsha, Tapas…) and your other combinations'.
+    const same = v.name && presets.find((p) => p.id !== editingId && String(p.name || "").trim().toLowerCase() === v.name.toLowerCase());
     if (!v.name) {
       nameEl.setAttribute("aria-invalid", "true");
       problems.push("Give it a name");
+    } else if (same) {
+      nameEl.setAttribute("aria-invalid", "true");
+      problems.push(`“${same.name}” is already ${String(same.id).startsWith("custom-") ? "one of your combinations" : "a built-in level"}. Pick another name`);
     }
     LIMITS.forEach(([id, key, label, max]) => {
       const el = $(id);

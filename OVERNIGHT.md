@@ -559,6 +559,13 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `fix/combination-names` (from `improve/round-2-polish`)
+
+- **No two levels with one name.** A combination named like a built-in level ("Sparsha", "tapas")
+  or like another of your combinations, ignoring case, showed twice in the level menu. Saving now
+  refuses it with a clear message ("“Sparsha” is already a built-in level. Pick another name").
+  Editing a combination without renaming it still saves. Checked in the browser on throwaway data.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
