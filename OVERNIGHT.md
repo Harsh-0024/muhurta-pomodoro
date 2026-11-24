@@ -574,6 +574,7 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   smaller title, so Rhythm profile's heading sat smaller and further left than the card below it.
   They now use the same 1.25rem inset and 1.35rem title there. Checked on the iPhone simulator;
   the rest of the Dashboard on the phone looked right (tiles, today ring, last 7 days, bars).
+  The Timer page on the phone also looked right (summary strip, ring, minute marks, Start).
 
 ## Waiting list
 
