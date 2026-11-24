@@ -3121,6 +3121,15 @@ body[data-theme="light"] .heat-level-0 {
   overflow: hidden;
 }
 
+/* Until the Rhythm profile has its 15 sessions it shows only "1 / 15", and Recent days a row or two:
+   at the full height both cards were mostly blank. They fit their content then, up to that height
+   (Recent days still scrolls inside it). Phones keep their own sizing in mobile.css. */
+body:not(.is-mobile) .dashboard-lower:has(.bell-curve-threshold) .dashboard-panel {
+  height: auto;
+  min-height: 12rem;
+  max-height: clamp(20rem, 48vh, 23rem);
+}
+
 .dashboard-lower .panel-head {
   display: block;
   margin-bottom: 0.55rem;

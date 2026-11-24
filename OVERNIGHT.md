@@ -559,6 +559,14 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `design/dashboard-empty-cards` (from `improve/round-2-polish`)
+
+- **No tall blank cards while the Rhythm profile is waiting.** Recent days and Rhythm profile sat at
+  a fixed ~23rem even when they held "1 / 15" and two rows, so most of both cards was empty. Until
+  the profile has its sessions, both now fit their content (at least 12rem, at most the old height,
+  with Recent days scrolling inside). Once the curve shows, nothing changes. Desktop only; phones
+  keep mobile.css's sizing (phone check is on the Waiting list with the rest).
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
