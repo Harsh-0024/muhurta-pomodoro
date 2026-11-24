@@ -570,6 +570,8 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    (`mobile/web/local-api.js`), plus the year chart's count. The seconds still show in the day's
    own total. Tests added to `tests/test_streak.py` and `tests/phone/phone.test.mjs`; all pass.
    To undo, set `ACTIVE_DAY_MIN` back to a tiny value and the two `>= 1` checks to `> 0`.
+2. **The recent days list says so too.** A past day with only a few seconds of focus was
+   labelled "Focus day"; it now reads "Under a minute" (today still says "So far"). JS tests pass.
 
 ## Waiting list
 

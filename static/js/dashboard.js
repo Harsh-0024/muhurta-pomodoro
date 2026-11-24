@@ -403,7 +403,11 @@
       const focused = Number(day.focus_minutes || 0) > 0;
       // Today isn't over, so it is "so far" or "nothing yet", not a day without focus.
       const isToday = day.day === todayKey;
-      const status = day.goal_met ? "Goal met" : focused ? (isToday ? "So far" : "Focus day") : isToday ? "Nothing yet" : "No focus";
+      // A past day needs a minute of focus to be a "Focus day" (as streaks count it); a few
+      // stray seconds say so instead.
+      const active = Number(day.focus_minutes || 0) >= 1;
+      const status = day.goal_met ? "Goal met" : isToday ? (focused ? "So far" : "Nothing yet")
+        : active ? "Focus day" : focused ? "Under a minute" : "No focus";
       row.innerHTML = `
         <div class="recent-date">
           <strong>${isToday ? "Today" : dayFormatter.format(parseDay(day.day))}</strong>
