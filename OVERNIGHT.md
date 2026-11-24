@@ -559,6 +559,16 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `design/topnav-phone` (from `improve/round-2-polish`)
+
+- On a phone the tab bar changed shape between pages: Rhythm (level picker + five tabs) was a
+  neat 3 + 3 grid, but Timer, Flow, Dashboard and Settings wrapped as four tabs and a lone
+  Settings on its own row. Now every page uses even rows of three equal pills, centred, in a
+  17rem-wide bar: Rhythm 3 + 3, the others 3 + 2. Checked on the iPhone simulator on Flow and
+  Rhythm, and the Sparsha level menu still drops under the bar.
+- Safari offers "Translation available" on some pages. The page already says `lang="en"`;
+  most likely Safari reacting to the Sanskrit words. Left as is.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
