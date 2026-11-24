@@ -559,6 +559,10 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `design/numerals` (from `improve/round-2-polish`)
+
+- Timer numbers use lining figures, as the Dashboard's already did: Cormorant's old-style "1" looks like a capital I (the length scale read "I2") and "0" a small "o" (FOCUSED read "o:oo"). The big time, the set-for/ends-at/focused strip and the length buttons now set `lining-nums tabular-nums` (tabular so the countdown doesn't jitter). Checked on the iPhone (light; Safari needed a reload to drop its cached CSS) and on the computer.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
