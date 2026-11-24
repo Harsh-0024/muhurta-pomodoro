@@ -1808,6 +1808,29 @@ body.mode-cumulative .phase-label {
   transition: background 0.15s;
 }
 
+/* The − and + are drawn, not typed: in the body font the minus is half the plus's width and sat
+   lower, so the pair looked lopsided. Two equal 0.8rem strokes, the plus adding an upright one. */
+.stepper-btn {
+  position: relative;
+}
+
+.stepper-btn::before,
+.stepper-plus::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.8rem;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.stepper-plus::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
 .stepper-btn:focus-visible {
   background: var(--surface-strong);
   outline: none;

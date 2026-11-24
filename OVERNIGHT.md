@@ -559,6 +559,17 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `design/settings` (from `improve/round-2-polish`)
+
+- **The daily-goal stepper's − and + match.** Typed in the body font, the minus was about half the
+  plus's width and sat low, so the pair looked lopsided. Both are now drawn as equal 0.8rem strokes
+  (the plus adds an upright one); the buttons keep their "Lower/Raise daily goal" names for screen
+  readers. Checked on the iPhone simulator in dark mode: + took the goal from 2h to 2h 30m with
+  "Saved", and − set it back.
+- Dark-mode pass on the phone: Dashboard and Settings read well. On 127.0.0.1 Safari kept a light
+  bar tint from an earlier light-mode visit; on a fresh origin (the Mac's address) the bars are dark
+  as the theme-color tags ask, so that was Safari's cache, not the app.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
