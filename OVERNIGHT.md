@@ -568,6 +568,10 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
    two-line Recent days (368px each). While the placeholder shows, the pair is only as tall as it
    needs (176px here) and never taller than before; once the curve appears nothing changes.
    Browsers without `:has()` keep the old height.
+2. **Empty charts say they're empty.** With no focus yet, By weekday, By month and By time of day
+   showed full-height grey tracks that read like bars of data. They now fade back with "No focus
+   yet" across them, until there's focus to show. (Last 7 days is left as it is: it already says
+   "0m of focus" and has its goal line.)
 
 ## Waiting list
 

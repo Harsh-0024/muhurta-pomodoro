@@ -6252,3 +6252,19 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
   min-height: 11rem;
   max-height: clamp(20rem, 48vh, 23rem);
 }
+
+/* An empty Weekday, Month or Time-of-day chart: the full-height grey tracks looked like bars of
+   data. Until there is focus to show they fade back, with "No focus yet" across them. */
+.bar-chart.is-empty .bar-tracks::after {
+  content: "No focus yet";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: 0.8rem;
+  color: var(--muted, #888);
+  pointer-events: none;
+}
+.bar-chart.is-empty .bar-track {
+  opacity: 0.45;
+}
