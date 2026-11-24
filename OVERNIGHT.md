@@ -565,6 +565,8 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   or like another of your combinations, ignoring case, showed twice in the level menu. Saving now
   refuses it with a clear message ("“Sparsha” is already a built-in level. Pick another name").
   Editing a combination without renaming it still saves. Checked in the browser on throwaway data.
+- **Whole minutes only.** "25.5" in a length box saved silently as 25. It is now refused, in the
+  preview and on Save, with "Focus must be whole minutes"; out-of-range values keep "1–180 min".
 
 ## Waiting list
 
