@@ -551,6 +551,11 @@ Checked and clean (no change needed): the not-found page; History (Settings → 
 "Unusually long" with its empty state, both tabs readable; Flow, Timer and Rhythm on the iPhone;
 the Dashboard's charts label values on their bars, so they have no odd side scales.
 
+## Round 2 (24 Nov, branch improve/round-2-polish)
+
+1. **Consistency without the ".0".** With no focus yet the Dashboard's Consistency tile read
+   "0.0/wk"; whole numbers now read "0/wk", "3/wk", and other rates keep one decimal under ten.
+
 ## Checked in the real apps (19 Nov)
 
 - **Android app:** built from this branch (`mobile/`, debug build) and installed on a Pixel 8

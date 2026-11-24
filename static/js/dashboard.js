@@ -45,7 +45,9 @@
 
   function formatDayRate(n) {
     const value = Number(n || 0);
-    return `${value.toFixed(value >= 10 ? 0 : 1)}/wk`;
+    // Whole numbers without a trailing ".0" ("0/wk", "3/wk"), otherwise one decimal under ten.
+    const text = value >= 10 || Number.isInteger(value) ? value.toFixed(0) : value.toFixed(1);
+    return `${text}/wk`;
   }
 
   function updateToggleCard(cardId, states) {
