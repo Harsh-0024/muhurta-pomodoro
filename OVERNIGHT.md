@@ -559,6 +559,19 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `feature/forgotten-timer` (26 Nov)
+
+- **A forgotten Rhythm block can no longer log a whole night as focus.** Overtime ran with no end:
+  a block left running on the iPhone reached +1099:46 (about 18 hours). Tapping Rest would have
+  saved all of it as work. One stretch of overtime now counts at most 3 hours. At the cap the clock pauses,
+  the stretch is saved as ending at 3 hours (Work done, the rest pool and the logged block all stop
+  there), and a note says "Paused after 3 hours of overtime, in case the clock was left running.
+  Resume if you're still working." Overtime had no Pause button, so a **Resume** button now shows
+  while overtime is paused; resuming starts a new stretch with its own 3 hours.
+- Checked on the iPhone with that runaway block: it opened at +180:00, Work done 3:24:00, paused, with
+  the note; Resume carried on from +180:02. 16 tests pass.
+- Still to do on this branch: the same guard for the Timer page's overtime and for Flow.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
