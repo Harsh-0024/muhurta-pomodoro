@@ -559,6 +559,15 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `design/rhythm-waiting-card` (26 Nov)
+
+- **Dashboard, Rhythm profile: the waiting card is only as tall as its count.** Before 15
+  sessions the card shows "1 / 15 · 14 more sessions to reveal your rhythm", but it kept the
+  chart height every lower panel gets (20-23rem), so on a phone most of it was empty. While it
+  waits (or has no data) it now takes the height it needs, with a little padding round the
+  count; beside another card on a wide screen the grid still stretches it to match. Checked on
+  the iPhone in dark mode. 16 tests pass.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
