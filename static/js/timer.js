@@ -391,6 +391,9 @@
     window.addEventListener("muhurta-timer-done", (e) => {
       if (e.detail?.end === "stop") showNotice(`Time's up. ${e.detail.label} timer done.`);
     });
+    window.addEventListener("muhurta-timer-capped", () => {
+      showNotice("Stopped after 3 hours of overtime, in case it was left running. 3 hours of it saved.");
+    });
     T().onChange(render);
     document.addEventListener("visibilitychange", render);
     wireKeys();

@@ -84,9 +84,17 @@
     return 0;
   }
 
+  // Overtime counts until you stop it, so a timer left running overnight would log the night as
+  // focus. It counts at most this long, then stops itself (as on Rhythm).
+  const OVERTIME_CAP_SEC = 3 * 60 * 60;
+
   function overtimeSec(data, now = Date.now()) {
     if (data?.mode !== "overtime" || !data.overtimeStartedAt) return 0;
-    return Math.max(0, (now - Number(data.overtimeStartedAt)) / 1000);
+    return Math.min(OVERTIME_CAP_SEC, Math.max(0, (now - Number(data.overtimeStartedAt)) / 1000));
+  }
+
+  function overtimeEnd(data, now) {
+    return Math.min(now, Number(data.overtimeStartedAt) + OVERTIME_CAP_SEC * 1000);
   }
 
   function chime() {
@@ -194,7 +202,7 @@
     if (!data) return;
     const now = Date.now();
     if (data.mode === "running") logFocus(data, Number(data.runStartedAt), now, extra);
-    if (data.mode === "overtime") logFocus(data, Number(data.overtimeStartedAt), now, { overtime: true, ...extra });
+    if (data.mode === "overtime") logFocus(data, Number(data.overtimeStartedAt), overtimeEnd(data, now), { overtime: true, ...extra });
     write(null);
   }
 
@@ -243,6 +251,10 @@
     const now = Date.now();
     if (data.mode === "running" && Number(data.endsAt) <= now) {
       finish(data);
+    } else if (data.mode === "overtime" && now - Number(data.overtimeStartedAt) >= OVERTIME_CAP_SEC * 1000) {
+      stop({ capped: true });
+      // After the page's own start-up, so the Timer page is listening when it opens to this.
+      window.setTimeout(() => window.dispatchEvent(new CustomEvent("muhurta-timer-capped")), 0);
     } else if (data.mode === "ringing") {
       if (now - Number(data.ringingSince) > RING_FOR_MS) write(null);
       else if (now - Number(data.lastRingAt || 0) >= RING_EVERY_MS) {

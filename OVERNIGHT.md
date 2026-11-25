@@ -570,7 +570,13 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   while overtime is paused; resuming starts a new stretch with its own 3 hours.
 - Checked on the iPhone with that runaway block: it opened at +180:00, Work done 3:24:00, paused, with
   the note; Resume carried on from +180:02. 16 tests pass.
-- Still to do on this branch: the same guard for the Timer page's overtime and for Flow.
+- **Timer page: the same guard.** When a timer is set to keep counting after zero, it now stops by itself
+  after 3 hours of overtime. It saves exactly 3 hours, and the Timer page says "Stopped after 3 hours of
+  overtime, in case it was left running. 3 hours of it saved." The check runs on every page, so a timer forgotten
+  while another page is open stops too. Tested in the browser with a timer whose overtime began 4 hours
+  earlier: it stopped on load, the note showed, and the saved block was 10,800 s ending at the 3-hour
+  mark. That test added two 3-hour blocks to the local dev server's database (not live data).
+- Still to do on this branch: Flow.
 
 ## Waiting list
 
