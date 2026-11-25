@@ -559,6 +559,13 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+## fix/today-minutes (25 Nov)
+
+1. **Today's focus agrees everywhere.** With 1.6 minutes done, the "Today" line under the clocks
+   said "1m of 2h" while the Dashboard's ring and Today bar said "2m", next to "1h 59m to your 2h
+   goal" (2m + 1h 59m is more than the goal). The Dashboard now counts today, and this month's
+   bar, in whole minutes done, like the clocks: "1m" in all three places. Checked on the iPhone.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
