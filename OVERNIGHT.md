@@ -559,6 +559,14 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+## improve/heatmap-today (25 Nov)
+
+1. **The year's grid opens on recent weeks.** On a phone the Yearly consistency grid is wider
+   than the screen and opened at January, so in November all you saw was Jan–Apr, empty. It now
+   opens with today's week near the right edge (Sep–Dec in late November), one faded week after
+   it; a past year opens at its end. Wide screens show the whole year and do not scroll. Checked
+   on the iPhone. The Mon/Wed/Fri labels scroll away with the grid, as before.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.

@@ -353,6 +353,23 @@
       }
       grid.appendChild(cell);
     });
+    showRecentWeeks(grid);
+  }
+
+  // On a phone the year is wider than the screen and opens at January, so in November the weeks
+  // that matter are out of sight. Bring today's week (or the year's last, for a past year) to
+  // the right edge; on a wide screen nothing scrolls and this does nothing.
+  function showRecentWeeks(grid) {
+    const scroller = grid.closest(".heatmap-scroll");
+    if (!scroller || scroller.scrollWidth <= scroller.clientWidth) return;
+    const mark = grid.querySelector(".heat-today") || grid.querySelector(".heat-cell:not(.heat-future):last-of-type");
+    requestAnimationFrame(() => {
+      if (!mark) { scroller.scrollLeft = scroller.scrollWidth; return; }
+      const box = scroller.getBoundingClientRect();
+      const cell = mark.getBoundingClientRect();
+      // A week of room after today, so the faded days to come show where the year goes on.
+      scroller.scrollLeft += cell.right - box.right + cell.width * 2.5;
+    });
   }
 
   // The day's own view (day-view.js): when the focus happened, and its sittings.
