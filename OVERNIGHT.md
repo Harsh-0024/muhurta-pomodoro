@@ -585,6 +585,10 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   title (session-monitor.js) and the "Today" line under the clocks (today.js) no longer climb past
   3 hours for a forgotten stretch before its own page stops it. Tested on the Dashboard with a Flow
   started 4 hours earlier: the title read "3:00:00 flow", not 4:00:00.
+- **Tests:** two new ones in tests/clocks.test.mjs for the Timer page. Overtime counts at most 3 hours,
+  and stopping overtime left running for 18 hours logs 3 hours. Both fail on the old timer-core.js and
+  pass now (18 tests in all). Rhythm (app.js) and Flow (flow.js) have no test harness yet, so their cap was
+  checked by hand: Rhythm on the iPhone, Flow in the browser.
 - Not covered: the Mac menu bar app counts on its own from the start time it is sent (menubar.js), so
   it can still run past 3 hours until a page stops the clock.
 
