@@ -565,7 +565,9 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    than the screen and opened at January, so in November all you saw was Jan–Apr, empty. It now
    opens with today's week near the right edge (Sep–Dec in late November), one faded week after
    it; a past year opens at its end. Wide screens show the whole year and do not scroll. Checked
-   on the iPhone. The Mon/Wed/Fri labels scroll away with the grid, as before.
+   on the iPhone.
+2. **Mon / Wed / Fri stay at the left edge** while the year scrolls sideways, on a solid backing
+   so the squares slide under them. Sticky labels checked on the iPhone; the solid backing (last change) and dark mode are not yet looked at.
 
 ## Waiting list
 

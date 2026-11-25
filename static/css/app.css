@@ -3013,6 +3013,14 @@ body[data-theme="light"].page-dashboard .day-sheet {
   font-size: 0.72rem;
   line-height: 0.82rem;
   text-align: right;
+  /* When the year scrolls sideways on a phone, Mon / Wed / Fri stay at the left edge; the panel's
+     own colour, carried a little past the labels, hides the squares sliding underneath. */
+  position: sticky;
+  left: 0;
+  z-index: 1;
+  /* The panel's see-through surface laid on the page colour, so it is solid. */
+  background: linear-gradient(var(--surface), var(--surface)), var(--bg1);
+  box-shadow: 0.55rem 0 0 var(--bg1);
 }
 
 .heatmap-grid {
