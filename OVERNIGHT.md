@@ -559,12 +559,20 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `fix/year-chart-latest` (from `improve/round-2-polish`)
+
+- On a phone's browser the Dashboard's year chart opened at January to April, all empty, with the
+  focus out of sight in November. Only the Android app (mobile.js) jumped to the latest weeks.
+  That jump now lives in dashboard.js, runs after each redraw (year change too) and only when the
+  grid is wider than its box, so wide screens are untouched; mobile.js no longer has its own copy.
+  Checked on the iPhone 18 Pro: it opens at Sep to Dec with today in view. 16 tests pass.
+- iPhone check of round 2 (was on the Waiting list): the Dashboard's figures are lining ("40m",
+  "20m", "2 of 2"), not old-style. Done.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
 
-- **iPhone check of round 2** (waits on: the iOS Simulator working again): the Dashboard's "0/wk"
-  and its lining figures ("0m", not "om") on a phone.
 
 ## Checked in the real apps (19 Nov)
 
