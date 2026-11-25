@@ -615,3 +615,6 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
+
+## fix/overtime-hours (from improve/round-2-polish)
+- Rhythm's overtime clock (and the tab title) counted minutes past 60: "+513:58". Now hours lead past an hour, "+8:33:58", as the Timer page already did. Checked on the iPhone.

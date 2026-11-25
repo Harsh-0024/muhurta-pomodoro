@@ -66,10 +66,13 @@
     return presets || [];
   }
 
+  // Past an hour, hours lead ("+8:33:58", not "+513:58"), as on the Timer page.
   function formatClock(sec) {
     const s = Math.max(0, Math.ceil(sec));
-    const m = Math.floor(s / 60);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
     const r = s % 60;
+    if (h > 0) return `${h}:${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
     return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
   }
 
