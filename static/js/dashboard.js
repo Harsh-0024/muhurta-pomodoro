@@ -228,9 +228,11 @@
   }
 
   function tooltipText(day, date) {
-    const focus = formatMinutes(day.focus_minutes);
-    const rest = formatMinutes(day.rest_minutes);
     const today = day.day === localDayKey(new Date());
+    // Today counts whole minutes done, like the clocks' "Today" line.
+    const whole = (m) => (today ? Math.floor(Number(m || 0)) : m);
+    const focus = formatMinutes(whole(day.focus_minutes));
+    const rest = formatMinutes(whole(day.rest_minutes));
     const status = Number(day.focus_minutes || 0) > 0 ? `${focus} focus${today ? " so far" : ""}` : today ? "No focus yet" : "No focus";
     return `${fullDayFormatter.format(date)} · ${status} · ${rest} rest`;
   }
@@ -411,8 +413,8 @@
         </div>
         <div class="recent-bar" aria-hidden="true"><span style="width: ${width}%"></span></div>
         <div class="recent-minutes">
-          <strong>${formatMinutes(day.focus_minutes)}</strong>
-          <span>${formatMinutes(day.rest_minutes)} rest</span>
+          <strong>${formatMinutes(isToday ? Math.floor(day.focus_minutes || 0) : day.focus_minutes)}</strong>
+          <span>${formatMinutes(isToday ? Math.floor(day.rest_minutes || 0) : day.rest_minutes)} rest</span>
         </div>
       `;
       makeDayButton(row, day.day, tooltipText(day, parseDay(day.day)));
