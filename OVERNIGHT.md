@@ -568,6 +568,12 @@ Tasks skipped because something they need isn't there yet; the work moved on mea
   "0/wk" on a phone (waits on: an account with a year of no focus; the demo has only 2026, and
   ?year=2025 falls back to it). The formatting itself is covered by the code path above.
 
+## design/stepper-glyphs (25 Nov)
+
+1. Settings, Daily focus goal: the stepper's minus came out as a short dash next to a full-size
+   plus (the font draws − smaller than +). Both are now drawn as matching icons, same size and
+   stroke. Checked on the iPhone: they match and still change the goal (it saves). 16 tests pass.
+
 ## Checked in the real apps (19 Nov)
 
 - **Android app:** built from this branch (`mobile/`, debug build) and installed on a Pixel 8
