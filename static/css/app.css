@@ -6250,3 +6250,14 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
     grid-template-columns: 1fr;
   }
 }
+
+/* Before there are enough sessions, Rhythm profile is one count and a line: its card takes their
+   height (on a phone it was a screen of blank card). Beside Recent, on a wide screen, the row
+   still makes the two the same height. */
+.dashboard-lower .bell-curve-panel:has(.bell-curve-threshold) {
+  height: auto;
+}
+
+.bell-curve-threshold {
+  padding: 1.75rem 0 1.5rem;
+}
