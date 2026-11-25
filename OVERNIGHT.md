@@ -559,6 +559,15 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `design/recent-days-narrow` (26 Nov)
+
+- **Dashboard, Recent days on a narrow screen: two lines a day, like the phone app.** Under 720px
+  each day stacked into four lines (date, status, bar, then minutes and rest left-aligned under
+  it), so three days filled the panel. Now the day and its minutes sit side by side, minutes on
+  the right, with the bar underneath, the layout the phone app (mobile.css) already used. Rows
+  also keep their height (`flex-shrink: 0`), which on its own fixes the overlap fixed on
+  `fix/recent-days-overlap`. Checked on the iPhone in dark mode. 16 tests pass.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
