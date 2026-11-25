@@ -566,8 +566,10 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    opens with today's week near the right edge (Sep–Dec in late November), one faded week after
    it; a past year opens at its end. Wide screens show the whole year and do not scroll. Checked
    on the iPhone.
-2. **Mon / Wed / Fri stay at the left edge** while the year scrolls sideways, on a solid backing
-   so the squares slide under them. Sticky labels checked on the iPhone; the solid backing (last change) and dark mode are not yet looked at.
+2. **Mon / Wed / Fri stay at the left edge** while the year scrolls sideways. The day names now
+   sit outside the scrolling part, beside it, so nothing has to cover the squares (a backing in
+   the card's colour showed as a lighter band, since the card is see-through). Checked on the
+   iPhone in light and dark.
 
 ## Waiting list
 

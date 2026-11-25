@@ -2970,24 +2970,32 @@ body[data-theme="light"].page-dashboard .day-sheet {
   height: 0.82rem;
 }
 
+/* Day names on the left, then the year, which scrolls sideways when it is wider than the panel. */
+.heatmap-frame {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.55rem;
+}
+
 .heatmap-scroll {
+  flex: 0 1 auto;
+  min-width: 0;
   overflow-x: auto;
   padding-bottom: 0.2rem;
   -webkit-overflow-scrolling: touch;
 }
 
 .heatmap-wrap {
-  width: calc(2.3rem + var(--heat-cols, 53) * 1.08rem);
-  min-width: calc(2.3rem + var(--heat-cols, 53) * 1.08rem);
-  margin: 0 auto;
+  width: calc(var(--heat-cols, 53) * 1.08rem);
+  min-width: calc(var(--heat-cols, 53) * 1.08rem);
 }
 
 .heatmap-months {
   display: grid;
   grid-template-columns: repeat(var(--heat-cols, 53), 0.82rem);
   gap: 0.26rem;
-  margin-left: 2.3rem;
-  min-height: 1.25rem;
+  height: 1.25rem;
   color: var(--muted);
   font-size: 0.78rem;
 }
@@ -2997,30 +3005,17 @@ body[data-theme="light"].page-dashboard .day-sheet {
   overflow: visible;
 }
 
-.heatmap-body {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.55rem;
-}
-
 .heatmap-days {
   display: grid;
   grid-template-rows: repeat(7, 0.82rem);
   gap: 0.26rem;
   width: 1.75rem;
   flex: 0 0 1.75rem;
+  margin-top: 1.25rem; /* level with the first row of squares, below the month names */
   color: var(--muted);
   font-size: 0.72rem;
   line-height: 0.82rem;
   text-align: right;
-  /* When the year scrolls sideways on a phone, Mon / Wed / Fri stay at the left edge; the panel's
-     own colour, carried a little past the labels, hides the squares sliding underneath. */
-  position: sticky;
-  left: 0;
-  z-index: 1;
-  /* The panel's see-through surface laid on the page colour, so it is solid. */
-  background: linear-gradient(var(--surface), var(--surface)), var(--bg1);
-  box-shadow: 0.55rem 0 0 var(--bg1);
 }
 
 .heatmap-grid {

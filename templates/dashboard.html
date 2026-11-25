@@ -76,19 +76,21 @@
       </div>
     </div>
   </div>
-  <div class="heatmap-scroll">
-    <div class="heatmap-wrap">
-      <div class="heatmap-months" id="heatmapMonths" aria-hidden="true"></div>
-      <div class="heatmap-body">
-        <div class="heatmap-days" aria-hidden="true">
-          <span></span>
-          <span>Mon</span>
-          <span></span>
-          <span>Wed</span>
-          <span></span>
-          <span>Fri</span>
-          <span></span>
-        </div>
+  <!-- The day names sit outside the part that scrolls, so on a phone they stay put while the year
+       slides beside them. -->
+  <div class="heatmap-frame">
+    <div class="heatmap-days" aria-hidden="true">
+      <span></span>
+      <span>Mon</span>
+      <span></span>
+      <span>Wed</span>
+      <span></span>
+      <span>Fri</span>
+      <span></span>
+    </div>
+    <div class="heatmap-scroll">
+      <div class="heatmap-wrap">
+        <div class="heatmap-months" id="heatmapMonths" aria-hidden="true"></div>
         <div class="heatmap-grid" id="heatmapGrid" role="group" aria-label="Daily focus activity for the selected year"></div>
       </div>
     </div>
