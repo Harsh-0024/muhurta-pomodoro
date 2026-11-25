@@ -576,7 +576,14 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   while another page is open stops too. Tested in the browser with a timer whose overtime began 4 hours
   earlier: it stopped on load, the note showed, and the saved block was 10,800 s ending at the 3-hour
   mark. That test added two 3-hour blocks to the local dev server's database (not live data).
-- Still to do on this branch: Flow.
+- **Flow: the same guard.** One unbroken Flow stretch counts at most 3 hours. At the cap Flow pauses,
+  saves the stretch as ending at 3 hours, and says "Paused after 3 hours without a break, in case Flow
+  was left running. Resume if you're still working." Flow already has Resume. Tested in the browser
+  with a Flow started 4 hours earlier: it opened paused at 3:00:00, with the note and a saved block of
+  10,800 s. That added two more 3-hour test blocks to the local dev server's database (not live data).
+- All three clocks now have the guard. Not covered: the window title on other pages
+  (session-monitor.js) still counts a running Flow or Rhythm past 3 hours until that clock's own page
+  is opened and pauses it.
 
 ## Waiting list
 

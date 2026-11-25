@@ -151,9 +151,25 @@
     return `${m}:${String(s).padStart(2, "0")}`;
   }
 
+  // Flow counts until you pause it, so a block left running overnight would log the night as focus.
+  // One unbroken stretch counts at most this long; at the cap Flow pauses (as on Rhythm and Timer).
+  const RUN_CAP_SEC = 3 * 60 * 60;
+
+  // When the running stretch ends if it is stopped now: now, or the cap.
+  function runEnd(now) {
+    return Math.min(now, state.runStartedAt + RUN_CAP_SEC * 1000);
+  }
+
   function focusedSec() {
-    const live = state.mode === "running" && state.runStartedAt ? (Date.now() - state.runStartedAt) / 1000 : 0;
+    const live = state.mode === "running" && state.runStartedAt ? (runEnd(Date.now()) - state.runStartedAt) / 1000 : 0;
     return state.focusedSec + live;
+  }
+
+  function capForgottenRun() {
+    if (state.mode !== "running" || !state.runStartedAt) return;
+    if (Date.now() - state.runStartedAt < RUN_CAP_SEC * 1000) return;
+    pauseFlow();
+    showNotice("Paused after 3 hours without a break, in case Flow was left running. Resume if you're still working.");
   }
 
   function elapsedSec() {
@@ -253,6 +269,7 @@
   function startTicking() {
     stopTicking();
     tickTimer = window.setInterval(() => {
+      capForgottenRun();
       render();
       persist();
     }, 250);
@@ -292,8 +309,9 @@
     if (state.mode !== "running") return;
     const now = Date.now();
     if (state.runStartedAt) {
-      state.focusedSec += Math.max(0, (now - state.runStartedAt) / 1000);
-      logFlowSegment(state.runStartedAt, now);
+      const end = runEnd(now);
+      state.focusedSec += Math.max(0, (end - state.runStartedAt) / 1000);
+      logFlowSegment(state.runStartedAt, end);
     }
     state.mode = "paused";
     state.runStartedAt = null;
@@ -323,8 +341,9 @@
     const now = Date.now();
     if (state.mode !== "idle") playWorkCompleteChime();
     if (state.mode === "running" && state.runStartedAt) {
-      state.focusedSec += Math.max(0, (now - state.runStartedAt) / 1000);
-      logFlowSegment(state.runStartedAt, now);
+      const end = runEnd(now);
+      state.focusedSec += Math.max(0, (end - state.runStartedAt) / 1000);
+      logFlowSegment(state.runStartedAt, end);
     }
     const done = state.focusedSec;
     state.mode = "idle";
