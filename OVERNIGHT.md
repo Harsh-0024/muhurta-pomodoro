@@ -617,4 +617,4 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 (see the end of this file as the list grows)
 
 ## improve/whole-percent (from improve/round-2-polish)
-- Productivity on Rhythm and Flow read "100.0%"; whole numbers now drop the ".0" ("100%", "87.5%"), like the Dashboard's "3/wk". Checked on the iPhone (Rhythm). Flow on the iPhone, 25 Nov: without this branch a running session shows "100.0%" there too, so the same fix applies.
+- Productivity on Rhythm and Flow read "100.0%"; whole numbers now drop the ".0" ("100%", "87.5%"), like the Dashboard's "3/wk". Checked on the iPhone (Rhythm). Flow on the iPhone, 25 Nov: a running session reads "100%" with this branch and "100.0%" without it.
