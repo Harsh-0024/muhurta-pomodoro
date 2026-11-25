@@ -618,3 +618,4 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 
 ## design/lining-figures (from improve/round-2-polish)
 - The live strip on Timer/Rhythm/Flow ("0:00 focused" read "o:oo", "25m" dipped) and the Timer's minute picks (24/48/72 sat lower than 12/36/60) now use lining figures, like the Dashboard. The big timer face keeps its old-style display figures. Checked on the iPhone.
+- The big clock faces too: Flow at rest read "oo:oo" in Cormorant's old-style figures. Rhythm, Timer and Flow faces now use lining figures, so the whole page reads one way. (Earlier I'd kept the faces old-style; the all-zeros Flow face changed my mind.) Checked Flow and Timer on the iPhone.
