@@ -559,6 +559,13 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+## design/dashboard-phone (25 Nov)
+
+- On a phone the Dashboard's four totals (Focus this year, Current streak, Avg / active day,
+  Consistency) were four full-width cards, a screen of short numbers. They now stay two by two, as
+  on a tablet, so Today's ring and the last 7 days come up sooner. Only a screen under 360px wide
+  stacks them. Checked on the iPhone.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
