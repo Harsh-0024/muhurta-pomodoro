@@ -169,7 +169,11 @@
   function formatRange(startMs, endMs) {
     const extraDays = Math.round((dayStartMs(localDayISO(endMs)) - dayStartMs(localDayISO(startMs))) / DAY_MS);
     const next = extraDays > 0 ? ` <span class="history-next-day">+${extraDays}d</span>` : "";
-    return `${formatClock(startMs)} – ${formatClock(endMs)}${next}`;
+    const start = formatClock(startMs);
+    const end = formatClock(endMs);
+    // A few seconds inside one minute: "12:13 AM", not "12:13 AM – 12:13 AM".
+    if (!extraDays && start === end) return start;
+    return `${start} – ${end}${next}`;
   }
 
   // For sentences: "yesterday" / "on Friday 9 October", and a range without markup.

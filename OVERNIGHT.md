@@ -565,6 +565,8 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   rounded it to "0m" ("Today · So far · 0m", a lone "0m" over Wednesday in By weekday), and the
   Today card said "2h to your 2h goal" since its test was `<= 0`. Now it reads "<1m", and the
   Today card names the goal ("Daily goal: 2h") until half a minute is in. Checked on the iPhone.
+- History: a few seconds inside one minute read "12:13 AM – 12:13 AM". Now one time, "12:13 AM"
+  (the list, the edit dialog's "Recorded …" line and Undo sentences). Checked on the iPhone; 16 tests pass.
 
 ## Waiting list
 
