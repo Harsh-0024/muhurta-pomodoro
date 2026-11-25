@@ -1834,6 +1834,11 @@ body.mode-cumulative .phase-label {
   transform: translate(-50%, -50%) rotate(90deg);
 }
 
+/* A fingertip needs about 44px; the 36px buttons were easy to miss on a phone. */
+@media (pointer: coarse) {
+  .stepper-btn { width: 2.75rem; height: 2.75rem; }
+}
+
 .stepper-btn:focus-visible {
   background: var(--surface-strong);
   outline: none;

@@ -640,3 +640,4 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
   "Count overtime" wrapped to two lines beside a one-line "Stop". On a phone the three now share the
   width by their words, one line each. The theme switch (Dark / Light / System) keeps equal thirds.
   Checked on the iPhone 18 Pro simulator; 16 tests pass.
+- Settings goal stepper: on a touch screen the − and + buttons are now 44px (were 36px), easier to hit with a thumb. Checked on the iPhone.
