@@ -2646,6 +2646,17 @@ body.mode-cumulative .phase-label {
     gap: 0.75rem;
   }
 
+  /* Stacked on a phone, each cue's switch moves to the right edge, in the same column as the
+     Sound and Minute pulse switches above it, instead of starting the row on the left. */
+  .cue-toggle .pref-text {
+    flex: 1;
+    order: 1;
+  }
+
+  .cue-toggle .toggle-ui {
+    order: 2;
+  }
+
   .preset-form {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
