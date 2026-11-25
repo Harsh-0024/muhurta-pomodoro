@@ -6243,3 +6243,15 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
 .bell-curve-threshold-count {
   font-variant-numeric: lining-nums;
 }
+
+/* Pages other than Rhythm have five tabs. On a phone they just missed one row, leaving "Settings"
+   alone on a second; slimmer pills fit all five on one row (they still wrap on narrower phones). */
+@media (max-width: 520px) {
+  body:not(.page-home) .topnav {
+    gap: 0.3rem;
+  }
+
+  body:not(.page-home) .topnav .nav-link {
+    padding: 0 0.5rem;
+  }
+}
