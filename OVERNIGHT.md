@@ -574,6 +574,9 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
 
 - The daily-goal stepper's drawn minus and plus match on the iPhone too (the font's own minus was
   shorter than its plus). Nothing more to change on the Rhythm part of Settings.
+- Sound: the cue pickers (Opening bells, Soothing bell...) had a small filled triangle, the
+  Default level picker a thin chevron. They now share the chevron, in each theme's muted ink.
+  Checked on the iPhone (light theme).
 
 ## Waiting list
 
