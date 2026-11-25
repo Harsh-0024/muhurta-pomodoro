@@ -559,6 +559,14 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `fix/recent-days-overlap` (26 Nov)
+
+- **Dashboard, Recent days: rows no longer run into each other on a phone.** The list is a
+  scrolling column of fixed height, and its rows were allowed to shrink to fit. Under 720px each
+  row stacks into four lines (date, bar, minutes, rest), so the squeezed rows drew "0m rest" over
+  the next day's "25 Nov". Rows (and the Rhythm list's rows) now keep their height and the list
+  scrolls. Checked on the iPhone in dark mode. 16 tests pass.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.

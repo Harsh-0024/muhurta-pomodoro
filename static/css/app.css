@@ -3180,6 +3180,13 @@ body[data-theme="light"] .heat-level-0 {
   border-top: 1px solid var(--line);
 }
 
+/* Rows keep their height in the scrolling list: on a narrow screen a row stacks into four lines,
+   and shrinking it to fit the list drew "0m rest" over the next day's date. */
+.recent-row,
+.rhythm-row {
+  flex-shrink: 0;
+}
+
 .recent-row:first-child,
 .rhythm-row:first-child {
   border-top: 0;
