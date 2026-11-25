@@ -563,8 +563,10 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
 
-- **iPhone check of round 2** (waits on: the iOS Simulator working again): the Dashboard's "0/wk"
-  and its lining figures ("0m", not "om") on a phone.
+- **iPhone check of round 2: half done (25 Nov).** Lining figures checked on iPhone 18 Pro: "20m",
+  "41m", "1m" and "2 of 2" all sit at full height, so "0m" no longer reads "om". Still waiting:
+  "0/wk" on a phone (waits on: an account with a year of no focus; the demo has only 2026, and
+  ?year=2025 falls back to it). The formatting itself is covered by the code path above.
 
 ## Checked in the real apps (19 Nov)
 
