@@ -2632,6 +2632,22 @@ body.mode-cumulative .phase-label {
     display: none;
   }
 
+  /* The side with more tabs past it fades out (settings.js sets the classes). */
+  .settings-nav.more-after {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+  }
+
+  .settings-nav.more-before {
+    -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to left, #000 calc(100% - 2.5rem), transparent);
+  }
+
+  .settings-nav.more-before.more-after {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+  }
+
   .settings-nav-link {
     white-space: nowrap;
     padding: 0.42rem 0.8rem;
@@ -2665,6 +2681,16 @@ body.mode-cumulative .phase-label {
   .volume-control {
     width: 100%;
     min-width: 0;
+  }
+
+  /* Three choices share the width by their words, so "Keep ringing" and "Count overtime" stay
+     on one line each beside a short "Stop", instead of three equal thirds that wrap two of them. */
+  .pref-row .segmented:not(.segmented-two):not(.segmented-theme) {
+    grid-template-columns: repeat(3, auto);
+  }
+
+  .pref-row .segmented:not(.segmented-two):not(.segmented-theme) .segment {
+    padding: 0 0.6rem;
   }
 
   .cue-row {

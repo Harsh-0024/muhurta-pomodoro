@@ -632,3 +632,11 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
+
+- Settings on a phone browser: the section strip (Rhythm, Timer, Sound, Appearance, Notif…) ended in a
+  hard cut mid-word. The side with more tabs past it now fades out over 2.5rem (settings.js sets
+  `more-before` / `more-after` as it scrolls), so the cut reads as "more this way".
+- Timer's "When it reaches zero" choice gave each option a third of the width, so "Keep ringing" and
+  "Count overtime" wrapped to two lines beside a one-line "Stop". On a phone the three now share the
+  width by their words, one line each. The theme switch (Dark / Light / System) keeps equal thirds.
+  Checked on the iPhone 18 Pro simulator; 16 tests pass.
