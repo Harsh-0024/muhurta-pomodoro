@@ -568,6 +568,13 @@ Tasks skipped because something they need isn't there yet; the work moved on mea
   "0/wk" on a phone (waits on: an account with a year of no focus; the demo has only 2026, and
   ?year=2025 falls back to it). The formatting itself is covered by the code path above.
 
+## design/timer-end-choice (26 Nov)
+
+1. Settings > Timer, "When it reaches zero": on a phone the three equal columns broke "Keep
+   ringing" and "Count overtime" over two lines next to a one-line "Stop". On phones each choice
+   now takes the width its words need, so all three sit on one line (they still wrap on the very
+   narrowest screens rather than spill). Checked on the iPhone; 16 tests pass.
+
 ## Checked in the real apps (19 Nov)
 
 - **Android app:** built from this branch (`mobile/`, debug build) and installed on a Pixel 8
