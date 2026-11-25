@@ -615,3 +615,8 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
+
+## Dashboard figures two by two on a phone (branch `design/dashboard-grid`)
+- Under 720px the four figures (Focus, Streak, Avg / active day, Consistency) stacked one per row, each short number filling a whole card and pushing Today's ring off the first screen.
+- They now stay in a 2×2 grid down to 340px wide (the installed app's `is-mobile` layout already did this). Only narrower screens stack them.
+- Checked on the iPhone 18 Pro simulator.
