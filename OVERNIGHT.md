@@ -559,6 +559,10 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+## design/gold-edges (25 Nov)
+- On the phone, every gold-gradient control (Add a session, the chosen segment, the active nav pill and others) showed a thin dark-gold sliver down its left edge: the gradient was laid out inside the border and repeated underneath it.
+- All eight gold fills now use `background-origin: border-box`. Checked on the iPhone simulator (Settings > History).
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
