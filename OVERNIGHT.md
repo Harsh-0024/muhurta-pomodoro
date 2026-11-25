@@ -567,6 +567,9 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   Today card names the goal ("Daily goal: 2h") until half a minute is in. Checked on the iPhone.
 - History: a few seconds inside one minute read "12:13 AM – 12:13 AM". Now one time, "12:13 AM"
   (the list, the edit dialog's "Recorded …" line and Undo sentences). Checked on the iPhone; 16 tests pass.
+- Today card past half a minute: the ring said "1m" but the note said "2h to your 2h goal"
+  (it took ceil of the unrounded 119.4 m). It now counts from the minutes the ring shows:
+  "1h 59m to your 2h goal". Checked on the iPhone; 16 tests pass.
 
 ## Waiting list
 
