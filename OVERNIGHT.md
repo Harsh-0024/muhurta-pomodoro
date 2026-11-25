@@ -615,3 +615,8 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
+
+## Time left to the daily goal (branch `fix/goal-remaining`)
+- With 1m of focus today the Dashboard said "2h to your 2h goal": the ring shows rounded minutes (0.6 → "1m") but the note rounded 120 − 0.6 = 119.4 up to 120.
+- The note now subtracts the same rounded minutes the ring shows: "1h 59m to your 2h goal".
+- Checked on the iPhone 18 Pro simulator.
