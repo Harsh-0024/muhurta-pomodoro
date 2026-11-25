@@ -559,6 +559,12 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+## design/timer-controls (25 Nov)
+
+- The timer's main button changes label (Start, Pause, Resume) and its width changed with it, so
+  "Reset" beside it shifted sideways each time. It now keeps one width for all three. Checked on
+  the iPhone through Start, Pause and Resume.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
