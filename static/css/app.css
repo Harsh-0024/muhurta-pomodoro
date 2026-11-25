@@ -6237,9 +6237,12 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
 }
 
 /* The Dashboard's big serif figures: Cormorant's old-style zero is a small round "o", so "0m" read
-   as "om" and "0/wk" as "o/wk". Lining figures stand at full height and read as numbers. */
+   as "om" and "0/wk" as "o/wk". Lining figures stand at full height and read as numbers. The same
+   for the timer strip ("0:00 focused" read "o:oo") and the minute picks, whose 24/48/72 dipped. */
 .metric-value,
 #todayFocus,
-.bell-curve-threshold-count {
+.bell-curve-threshold-count,
+.live-val,
+.countdown-pick {
   font-variant-numeric: lining-nums;
 }

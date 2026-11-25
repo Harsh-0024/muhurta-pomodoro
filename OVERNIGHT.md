@@ -615,3 +615,6 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
+
+## design/lining-figures (from improve/round-2-polish)
+- The live strip on Timer/Rhythm/Flow ("0:00 focused" read "o:oo", "25m" dipped) and the Timer's minute picks (24/48/72 sat lower than 12/36/60) now use lining figures, like the Dashboard. The big timer face keeps its old-style display figures. Checked on the iPhone.
