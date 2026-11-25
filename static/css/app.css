@@ -271,6 +271,7 @@ body[data-theme="light"] .ambient {
   color: #1a1208;
   border-color: rgba(255, 255, 255, 0.2);
   background: var(--gold-fill);
+  background-origin: border-box; /* the gradient runs under the border too: no dark sliver at the left edge */
   box-shadow: 0 10px 32px rgba(201, 169, 98, 0.16);
 }
 
@@ -342,6 +343,7 @@ body[data-theme="light"] .ambient {
 .level-option.is-active {
   color: #1a1208;
   background: var(--gold-fill);
+  background-origin: border-box;
 }
 
 .level-name {
@@ -1263,6 +1265,7 @@ body.mode-cumulative .phase-label {
 .btn-primary {
   color: #1a1208;
   background: linear-gradient(135deg, #f3e8cf, #c9a962);
+  background-origin: border-box;
   border-color: rgba(255, 255, 255, 0.2);
   box-shadow: 0 12px 40px rgba(201, 169, 98, 0.25);
 }
@@ -1975,6 +1978,7 @@ body.mode-cumulative .phase-label {
 .segment.is-active {
   color: #1a1208;
   background: var(--gold-fill);
+  background-origin: border-box;
 }
 
 .segment:disabled {
@@ -4669,6 +4673,7 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
   height: 1.6rem;
   border-radius: 50%;
   background: var(--gold-fill);
+  background-origin: border-box;
   color: #1a1208;
   font-size: 0.8rem;
   font-weight: 500;
@@ -5376,6 +5381,7 @@ body[data-theme="light"] .feedback-state[data-state="done"] { color: #3f7d47; }
   margin-left: 0.35rem;
   border-color: transparent;
   background: var(--gold-fill);
+  background-origin: border-box;
   color: #1a1208;
   font-family: var(--font-sans);
   letter-spacing: 0;
@@ -6178,12 +6184,14 @@ body[data-theme="light"] .admin-feedback-kind[data-kind="dislike"] { color: #a33
 .segment.is-active:focus-visible {
   color: #1a1208;
   background: var(--gold-fill);
+  background-origin: border-box;
 }
 
 @media (hover: hover) {
   .segment.is-active:hover:not(:disabled) {
     color: #1a1208;
     background: var(--gold-fill);
+    background-origin: border-box;
   }
 }
 
