@@ -565,6 +565,10 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   Consistency) were four full-width cards, a screen of short numbers. They now stay two by two, as
   on a tablet, so Today's ring and the last 7 days come up sooner. Only a screen under 360px wide
   stacks them. Checked on the iPhone.
+- Rhythm profile, before 15 sessions, shows only "1 / 15" and a line, but kept the full chart
+  height (about 23rem): on a phone, a screen of blank card. Its card now takes the count's own
+  height; on a wide screen, beside Recent, the row still makes both cards one height. Checked on
+  the iPhone.
 
 ## Waiting list
 
