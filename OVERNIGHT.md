@@ -615,3 +615,7 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
+
+## design/gold-edge (26 Nov)
+
+1. Every gold fill (the chosen nav page, chosen segment such as "By day", chosen level, the account initial, primary buttons such as "Add a session") showed a dark gold sliver down its left edge. The fill is a gradient painted inside the padding, the border is see-through white, and the gradient tiles under the border, so the left border strip showed the gradient's dark far end. `--gold-fill` (all three themes) and `.btn-primary` now paint at `border-box`. Checked on the iPhone 18 Pro simulator (Settings → history page).
