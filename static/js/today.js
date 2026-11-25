@@ -95,7 +95,10 @@
     }
     // Only the part of the running block that fell today counts for today.
     const midnight = new Date(now).setHours(0, 0, 0, 0);
-    const liveSec = start ? Math.max(0, (now - Math.max(start, midnight)) / 1000) : 0;
+    // A stretch counts at most 3 hours (the clocks pause or stop there), so a forgotten one
+    // doesn't keep adding here before its page has stopped it.
+    const liveEnd = start ? Math.min(now, start + 3 * 60 * 60 * 1000) : now;
+    const liveSec = start ? Math.max(0, (liveEnd - Math.max(start, midnight)) / 1000) : 0;
     let sec = loggedSec + liveSec;
     if (shown.day === today && settling && sec < shown.sec) sec = shown.sec;
     shown = { day: today, sec };

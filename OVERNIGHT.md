@@ -581,9 +581,12 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   was left running. Resume if you're still working." Flow already has Resume. Tested in the browser
   with a Flow started 4 hours earlier: it opened paused at 3:00:00, with the note and a saved block of
   10,800 s. That added two more 3-hour test blocks to the local dev server's database (not live data).
-- All three clocks now have the guard. Not covered: the window title on other pages
-  (session-monitor.js) still counts a running Flow or Rhythm past 3 hours until that clock's own page
-  is opened and pauses it.
+- All three clocks now have the guard. **The counts on other pages stop at 3 hours too**: the window
+  title (session-monitor.js) and the "Today" line under the clocks (today.js) no longer climb past
+  3 hours for a forgotten stretch before its own page stops it. Tested on the Dashboard with a Flow
+  started 4 hours earlier: the title read "3:00:00 flow", not 4:00:00.
+- Not covered: the Mac menu bar app counts on its own from the start time it is sent (menubar.js), so
+  it can still run past 3 hours until a page stops the clock.
 
 ## Waiting list
 
