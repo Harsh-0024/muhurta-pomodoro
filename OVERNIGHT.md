@@ -615,3 +615,6 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
+
+## improve/whole-percent (from improve/round-2-polish)
+- Productivity on Rhythm and Flow read "100.0%"; whole numbers now drop the ".0" ("100%", "87.5%"), like the Dashboard's "3/wk". Checked on the iPhone (Rhythm).
