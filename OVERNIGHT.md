@@ -559,6 +559,16 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+### Branch `improve/today-live` (26 Nov)
+
+- **Dashboard's Today ring counts the block running now.** The line under every clock ("Today 1h
+  14m of 2h") counts logged focus plus the block running now; the Dashboard's Today ring only
+  counted logged focus, so mid-session it said "0m" while the clock page said "1h 14m".
+  today.js now shares `MuhurtaToday.liveTodaySec()` (the part of the running block that fell
+  today), the ring adds it, and the note says "· counting now" while a block runs. The 7-day bars
+  and totals still count logged focus only. Checked on the iPhone in dark mode: the ring read
+  "1h 16m · 45m to your 2h goal · counting now". 16 tests pass.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.

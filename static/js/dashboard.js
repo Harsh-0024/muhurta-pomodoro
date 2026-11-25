@@ -591,7 +591,9 @@
     const recent = data.recent_days || [];
     const goal = Number(data.goal_minutes || 0);
     const today = recent[0] || { focus_minutes: 0 };
-    const todayMinutes = Number(today.focus_minutes || 0);
+    // What is logged plus the block running now, as the Today line under the clock counts it.
+    const liveMinutes = (window.MuhurtaToday?.liveTodaySec?.() || 0) / 60;
+    const todayMinutes = Number(today.focus_minutes || 0) + liveMinutes;
 
     setText("todayFocus", formatMinutes(todayMinutes));
     const fill = byId("goalRingFill");
@@ -611,6 +613,7 @@
           ? `Daily goal: ${formatMinutes(goal)}`
           : `${formatMinutes(Math.ceil(goal - todayMinutes))} to your ${formatMinutes(goal)} goal`;
     }
+    if (liveMinutes >= 1) note = note ? `${note} · counting now` : "Counting now";
     setText("todayNote", note);
     if (ring) ring.setAttribute("aria-label", `Today: ${formatMinutes(todayMinutes)} of focus. ${note}`);
 
