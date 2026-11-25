@@ -3370,7 +3370,6 @@ body[data-theme="light"] .rhythm-track {
 }
 
 @media (max-width: 720px) {
-  .dashboard-stats,
   .dashboard-lower {
     grid-template-columns: 1fr;
   }
@@ -6242,4 +6241,12 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
 #todayFocus,
 .bell-curve-threshold-count {
   font-variant-numeric: lining-nums;
+}
+
+/* The four totals stay two by two on a phone (a short number each, so half the width is plenty),
+   rather than four full-width cards filling the screen. Only a very narrow screen stacks them. */
+@media (max-width: 359px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
 }
