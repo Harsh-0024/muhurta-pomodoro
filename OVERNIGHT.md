@@ -570,6 +570,11 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   bar tint from an earlier light-mode visit; on a fresh origin (the Mac's address) the bars are dark
   as the theme-color tags ask, so that was Safari's cache, not the app.
 
+## design/settings: checked on the iPhone (25 Nov)
+
+- The daily-goal stepper's drawn minus and plus match on the iPhone too (the font's own minus was
+  shorter than its plus). Nothing more to change on the Rhythm part of Settings.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
