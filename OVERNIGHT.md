@@ -615,3 +615,6 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
+
+## improve/notify-wording (from improve/round-2-polish)
+- Settings → Notifications on a phone said "Desktop notifications" and "This browser can't show desktop notifications." Now "Browser notifications", and the unsupported note adds that bells still ring if sound is on. No "add to Home Screen" hint: Muhurta has no web manifest, so that wouldn't work yet. Checked on the iPhone.
