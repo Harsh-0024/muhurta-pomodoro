@@ -612,7 +612,9 @@
         ? `Daily goal of ${formatMinutes(goal)} met`
         : todayMinutes < 0.5 // under half a minute rounds to the whole goal still to go
           ? `Daily goal: ${formatMinutes(goal)}`
-          : `${formatMinutes(Math.ceil(goal - todayMinutes))} to your ${formatMinutes(goal)} goal`;
+          // Count from the rounded minutes the ring shows: with 0.6 m done the ring says 1m,
+          // so the rest is 1h 59m, not ceil(119.4) = "2h" as if nothing had happened.
+          : `${formatMinutes(Math.max(1, goal - Math.round(todayMinutes)))} to your ${formatMinutes(goal)} goal`;
     }
     setText("todayNote", note);
     if (ring) ring.setAttribute("aria-label", `Today: ${formatMinutes(todayMinutes)} of focus. ${note}`);
