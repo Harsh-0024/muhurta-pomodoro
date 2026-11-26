@@ -661,6 +661,21 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   Rhythm, and the Sparsha level menu still drops under the bar.
 - Safari offers "Translation available" on some pages. The page already says `lang="en"`;
   most likely Safari reacting to the Sanskrit words. Left as is.
+### Branch `design/dashboard-recent-phone` (from `improve/round-2-polish`)
+
+- Dashboard on the iPhone: Recent days stacked each row as date, bar, then minutes, so a day's
+  "40m / 0m rest" sat under its bar and read like the start of the next day. On phones each row is
+  now the day and status on the left, minutes and rest on the right, and the bar under both.
+  Checked on the iPhone simulator.
+- Also checked on the phone: Timer (its old-style "12" quick lengths are fixed on
+  `design/numerals`) and the Today card ("Daily goal: 2h" before any focus, after a reload).
+- Recent days and Rhythm profile kept their desktop fixed height (20-23rem, set so the two
+  side-by-side cards match) when stacked on a phone, leaving half-empty cards under three recent
+  days and under "1 / 15". On phones they now fit their content (Recent days still scrolls past
+  30rem; the rhythm chart keeps 15rem to draw in). Checked on the iPhone simulator.
+- Stacked on a phone, those two cards also wore their compact desktop look (0.85rem edge, a
+  1-1.15rem title) between cards with a 1.25rem edge and a 1.35rem title. On phones they now match
+  the rest. Checked on the iPhone: Recent days and Rhythm profile line up with Yearly consistency.
 
 ## Waiting list
 
