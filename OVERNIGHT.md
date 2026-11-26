@@ -605,6 +605,12 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   Editing a combination without renaming it still saves. Checked in the browser on throwaway data.
 - **Whole minutes only.** "25.5" in a length box saved silently as 25. It is now refused, in the
   preview and on Save, with "Focus must be whole minutes"; out-of-range values keep "1–180 min".
+### Branch `fix/time-of-day-range` (from `improve/round-2-polish`)
+
+- **"Most between" names the right hours.** The By time of day caption always named a three-hour
+  window, so 40 minutes all at 22:00 plus a few seconds after midnight read "Most between 22:00
+  and 1:00". Hours at either end that hold under a tenth of the window are now dropped: it reads
+  "22:00 and 23:00", and focus spread over three hours still reads as three. Checked in the browser.
 
 ## Waiting list
 
