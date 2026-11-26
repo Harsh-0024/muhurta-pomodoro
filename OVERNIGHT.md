@@ -1028,3 +1028,11 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Checked on the iPhone simulator. Note: the scratch demo data now holds a few seconds of focus
   from the Flow ring check (shown as "<1m"); that is the scratchpad data dir, not live data.
 - Tests: node 18/18, unittest ALL PASSED.
+
+## improve/rhythm-reset (26 Nov)
+- Rhythm showed a "Reset" button beside Start on a fresh session (Session 1 of 4, 24:00, nothing
+  done), where pressing it did nothing. It now hides until the session has started
+  (state.session.active), like Timer and Flow, which show only Start at rest. Once started it is
+  back, still asks to confirm, and after a reset it hides again.
+- Checked on the iPhone simulator: Start only → Start pressed: Pause + Reset → Reset confirmed:
+  Start only (test session cleared). Tests: node 18/18, unittest ALL PASSED.
