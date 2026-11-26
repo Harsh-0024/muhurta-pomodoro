@@ -1061,3 +1061,8 @@ month and time-of-day charts), Timer and Settings (stepper).
 ## design/history-tabs-even (27 Nov)
 - Settings → History: the "By day" / "Unusually long" switch sized each half to its words, so the gold pill was 350px on one tab and 464px on the other.
 - The two halves are now equal, like the other two-way switches. Checked on the iPhone.
+
+## fix/hour-peak-needs-data (27 Nov)
+- Dashboard → By time of day: 15 seconds of focus was enough to say "Most between 11:00 PM and 12:00 AM".
+- The best hours are now named only after half an hour of focus in the 60 days. Before that it says "Your best hours show after a little more focus", like the weekday chart.
+- Checked on the iPhone with the demo's 15 s. Tests pass (node 18, Python all).

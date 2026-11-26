@@ -626,11 +626,12 @@
     const slight = (i) => hours[i % 24] < windowSum * 0.1;
     while (span > 1 && slight(from)) { from += 1; span -= 1; }
     while (span > 1 && slight(from + span - 1)) span -= 1;
+    // A few seconds of focus would crown a "best" hour; name one only after half an hour in all.
     setText(
       "hourSubtitle",
-      total > 0
+      total >= 30
         ? `When your focus fell in the last ${HOUR_DAYS} days. Most between ${clockLabel(from % 24)} and ${clockLabel((from + span) % 24)}.`
-        : `When your focus fell in the last ${HOUR_DAYS} days.`
+        : `When your focus fell in the last ${HOUR_DAYS} days. Your best hours show after a little more focus.`
     );
     renderBars(chart, bars, { label: `Focus by hour of the day, last ${HOUR_DAYS} days` });
     chart.classList.add("bar-chart-dense", "bar-chart-hours");
