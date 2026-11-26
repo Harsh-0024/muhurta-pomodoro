@@ -569,6 +569,7 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
   height (about 23rem): on a phone, a screen of blank card. Its card now takes the count's own
   height; on a wide screen, beside Recent, the row still makes both cards one height. Checked on
   the iPhone.
+- The average card's lone green dot read as a status light. It is now a two-dot pager at the card's bottom right: filled for the view on show, a ring for the one a press brings; the dots swap on each press. At the top they touched the label in the phone's 2 x 2, so they sit by the short note. Checked on the iPhone.
 
 ## Waiting list
 
