@@ -577,6 +577,13 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
 1. **Keyboard list keeps "/" with its key.** In Settings → Keyboard, "⌘R / Ctrl+R / F5" wrapped
    so that "/ F5" started its own line. Each key choice now keeps its "/" beside it, so a wrapped
    line never starts with a separator. Checked on desktop; the phone check waits on the simulator.
+### Branch `improve/timer-default` (from `improve/round-2-polish`)
+
+1. **Timer starts at one ghadi.** On a first visit the Timer read 25:00, the classic Pomodoro,
+   while everything else counts in 24-minute ghadis (Sparsha, the length chips 6 · 12 · 24 · 36 ·
+   48 · 60, the footer). It now starts at 24:00, so its chip lights up. A length you've used
+   before is still remembered. Easy to undo: three numbers in `static/js/timer.js` and one in
+   `templates/timer.html`.
 
 ## Waiting list
 
