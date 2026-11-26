@@ -837,6 +837,13 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   name, while every other switch on the page sits at the right. They now sit at the right too
   (phone only; the desktop's two-column cue rows are unchanged). Checked on the iPhone.
 
+- fix/notify-unsupported: in a browser that can't show notifications (Safari on the iPhone), the
+  Desktop notifications switch showed on while the note under it said the browser can't show
+  them. There it now shows off, dimmed, and can't be moved; the saved choice is left alone, for the
+  account's other browsers. Checked on the iPhone.
+- Seen, not yet fixed: on a phone, Settings > Account squeezes "Signed in · no name added yet"
+  into a column one word wide beside "Add your name" and "Sign out".
+
 ## Waiting list
 
 - ~~**Slow first paint on the iPhone simulator**~~ **Solved 25 Nov by `fix/font-blocking`**: the ~2 s gap was Safari waiting on the render-blocking Google Fonts stylesheet; on that branch HTML and app.css arrive in the same second. Original note (cause not pinned down): pages sometimes sit blank

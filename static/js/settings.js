@@ -379,6 +379,13 @@
     const row = $("notifyStatusRow");
     if (!text || !btn || !row) return;
     const perm = notifyPermission();
+    // A browser that can't show them can't have them on: the switch shows off and can't be moved.
+    // The saved choice stays as it is, for the other browsers on this account.
+    const toggle = $("setNotify");
+    if (toggle) {
+      toggle.disabled = perm === "unsupported";
+      toggle.checked = perm !== "unsupported" && !!s.notifications_enabled;
+    }
     let msg = "";
     let action = "";
     let tone = "";
