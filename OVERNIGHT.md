@@ -833,6 +833,10 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   it, so on the phone it read as a sixth page. It now has a small chevron (up while its menu is
   open) and a faint gold edge. Checked on the iPhone, closed and open.
 
+- design/cue-switches: on a phone, Settings > Sound's four cue rows had their switch before the
+  name, while every other switch on the page sits at the right. They now sit at the right too
+  (phone only; the desktop's two-column cue rows are unchanged). Checked on the iPhone.
+
 ## Waiting list
 
 - ~~**Slow first paint on the iPhone simulator**~~ **Solved 25 Nov by `fix/font-blocking`**: the ~2 s gap was Safari waiting on the render-blocking Google Fonts stylesheet; on that branch HTML and app.css arrive in the same second. Original note (cause not pinned down): pages sometimes sit blank
