@@ -476,6 +476,8 @@
       ? bars.filter((b) => Number(b.minutes || 0) > 0).map((b) => b.title || `${b.label}: ${formatMinutes(b.minutes)}`)
       : [];
     el.setAttribute("aria-label", asImage && options?.label ? `${options.label}. ${said.length ? said.join("; ") : "No focus yet"}.` : options?.label || "");
+    // A chart with nothing in it yet says so over faded tracks, so the grey bars don't read as data.
+    el.classList.toggle("is-empty", asImage && !said.length);
 
     const values = document.createElement("div");
     values.className = "bar-values";
