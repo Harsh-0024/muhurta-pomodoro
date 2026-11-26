@@ -611,6 +611,24 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   window, so 40 minutes all at 22:00 plus a few seconds after midnight read "Most between 22:00
   and 1:00". Hours at either end that hold under a tenth of the window are now dropped: it reads
   "22:00 and 23:00", and focus spread over three hours still reads as three. Checked in the browser.
+### Branch `design/dashboard-empty-cards` (from `improve/round-2-polish`)
+
+- **No tall blank cards while the Rhythm profile is waiting.** Recent days and Rhythm profile sat at
+  a fixed ~23rem even when they held "1 / 15" and two rows, so most of both cards was empty. Until
+  the profile has its sessions, both now fit their content (at least 12rem, at most the old height,
+  with Recent days scrolling inside). Once the curve shows, nothing changes. Desktop only; phones
+  keep mobile.css's sizing (phone check is on the Waiting list with the rest).
+- **The "i" buttons show as buttons.** Their ring used the divider colour, 8% white in dark mode,
+  so Rhythm profile's "i" read as a stray letter. The ring now follows the "i" at half strength:
+  visible in dark and light, gold on hover as before. Checked in both themes.
+- **Stacked cards match on a phone.** Under 720px Recent days and Rhythm profile stack into the
+  same column as By weekday and By month, but kept their compact side-by-side inset (0.85rem) and
+  smaller title, so Rhythm profile's heading sat smaller and further left than the card below it.
+  They now use the same 1.25rem inset and 1.35rem title there. Checked on the iPhone simulator;
+  the rest of the Dashboard on the phone looked right (tiles, today ring, last 7 days, bars).
+  The Timer page on the phone also looked right (summary strip, ring, minute marks, Start).
+  Flow, Rhythm and Settings checked too. Settings' section tabs follow the scroll correctly (a
+  section stays lit while it still fills the band 15-45% down the screen).
 
 ## Waiting list
 
@@ -623,6 +641,8 @@ Tasks skipped because something they need isn't there yet; the work moved on mea
 - **iPhone check of round 2** (waits on: the iOS Simulator working again): the Dashboard's "0/wk"
   and its lining figures ("0m", not "om") on a phone, and the shorter Recent days / Rhythm profile
   pair before 15 sessions (branch `design/dashboard-empty`).
+- ~~**iPhone check of round 2**~~ Done 25 Nov on the iPhone 18 Pro simulator: the Dashboard's
+  figures are lining ("0m", "40m"), and Rhythm, Timer, Flow, Dashboard and Settings all lay out right.
 
 ## Checked in the real apps (19 Nov)
 

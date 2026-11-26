@@ -3128,6 +3128,15 @@ body[data-theme="light"] .heat-level-0 {
   overflow: hidden;
 }
 
+/* Until the Rhythm profile has its 15 sessions it shows only "1 / 15", and Recent days a row or two:
+   at the full height both cards were mostly blank. They fit their content then, up to that height
+   (Recent days still scrolls inside it). Phones keep their own sizing in mobile.css. */
+body:not(.is-mobile) .dashboard-lower:has(.bell-curve-threshold) .dashboard-panel {
+  height: auto;
+  min-height: 12rem;
+  max-height: clamp(20rem, 48vh, 23rem);
+}
+
 .dashboard-lower .panel-head {
   display: block;
   margin-bottom: 0.55rem;
@@ -3382,6 +3391,16 @@ body[data-theme="light"] .rhythm-track {
     grid-template-columns: 1fr;
   }
 
+  /* Stacked, Recent days and Rhythm profile sit in the same column as By weekday and By month,
+     so they take the same inset and title size instead of the compact side-by-side ones. */
+  .dashboard-lower .dashboard-panel {
+    padding: 1.25rem;
+  }
+
+  .dashboard-lower .panel-head .card-title {
+    font-size: 1.35rem;
+  }
+
   .recent-row {
     grid-template-columns: minmax(0, 1fr);
     gap: 0.45rem;
@@ -3572,7 +3591,9 @@ body[data-theme="light"] .bell-peak-label {
   width: 1.15rem;
   height: 1.15rem;
   padding: 0;
-  border: 1px solid var(--line);
+  /* Its ring follows its "i": the divider colour (--line) was 8% white in dark mode, so the button
+     barely showed as a button. */
+  border: 1px solid color-mix(in srgb, currentColor 50%, transparent);
   border-radius: 50%;
   background: transparent;
   color: var(--muted);
