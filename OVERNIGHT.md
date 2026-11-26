@@ -1097,5 +1097,5 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Timer: the quick lengths (6 … 60 MIN) were centred as one row with the "min" label, so the
   numbers sat about 20 points left of the ring and Start. An unseen twin of the label now balances
   it on the left, and the numbers centre under the ring (6 to 60 spans the middle exactly on the
-  iPhone). It still wraps the same way on narrow screens.
+  iPhone). Not checked on a screen narrow enough to wrap the row: the unseen twin adds a little width.
 - Checks: diff --check, marker grep, node tests 18 pass, Python tests all pass.
