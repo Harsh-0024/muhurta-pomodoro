@@ -4116,8 +4116,9 @@ a.btn {
   margin-bottom: 1.25rem;
 }
 
+/* Two equal halves, so the pill is the same size on either tab. */
 .history-tabs {
-  grid-template-columns: repeat(2, auto);
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .segmented-two {

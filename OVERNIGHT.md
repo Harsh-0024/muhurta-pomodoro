@@ -1057,3 +1057,7 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Dashboard charts with only seconds of focus: "By weekday" said "Thursday is your strongest day" and "By month" said "Most in November: <1m". Its "two weeks" check counted calendar days in the year, not days with focus. A strongest day now needs 3 days with a minute or more of focus too (until then: "Your strongest day shows after a few days of focus."), and a best month needs a whole minute.
 - The same 15 seconds were a thin sliver as a Thursday average but a quarter-high pill as November's total, because bars scaled to at least 1 minute. They now scale to at least 30 minutes, so seconds are a sliver in both. The goal charts are unchanged (their scale already starts at the goal).
 - Node 18 pass, Python ALL PASSED. Checked on the iPhone.
+
+## design/history-tabs-even (27 Nov)
+- Settings → History: the "By day" / "Unusually long" switch sized each half to its words, so the gold pill was 350px on one tab and 464px on the other.
+- The two halves are now equal, like the other two-way switches. Checked on the iPhone.
