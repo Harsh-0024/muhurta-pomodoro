@@ -2646,6 +2646,13 @@ body.mode-cumulative .phase-label {
     gap: 0.75rem;
   }
 
+  /* One column on a phone: the cue's switch sits at the right like every other switch on the page,
+     not before its name. */
+  .cue-toggle .toggle-ui {
+    order: 2;
+    margin-left: auto;
+  }
+
   .preset-form {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

@@ -559,6 +559,10 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+- design/cue-switches: on a phone, Settings > Sound's four cue rows had their switch before the
+  name, while every other switch on the page sits at the right. They now sit at the right too
+  (phone only; the desktop's two-column cue rows are unchanged). Checked on the iPhone.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
