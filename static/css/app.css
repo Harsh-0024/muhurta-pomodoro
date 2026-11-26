@@ -4257,6 +4257,8 @@ a.btn {
   border-top: 1px solid var(--line);
 }
 
+/* Each row draws its own top rule; the list's rule doubled it under the day's strip. */
+.history-items,
 .history-items-flat {
   border-top: 0;
 }
@@ -4336,6 +4338,8 @@ a.btn {
   font-size: 1.25rem;
   font-weight: 500;
   line-height: 1.1;
+  /* The serif's old-style figures made "10s" read as "IOS". */
+  font-variant-numeric: lining-nums tabular-nums;
 }
 
 .history-item.is-long .history-length strong {
