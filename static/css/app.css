@@ -3,6 +3,7 @@
   --bg1: #0f0d0a;
   --ink: #f7f3ec;
   --muted: rgba(247, 243, 236, 0.55);
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='rgba(247,243,236,0.55)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --faint: rgba(247, 243, 236, 0.12);
   --gold: #c9a962;
   --gold2: #e8d9b4;
@@ -36,6 +37,7 @@ body[data-theme="light"] {
   --bg1: #fcfbf7;
   --ink: #211d18;
   --muted: rgba(33, 29, 24, 0.66);
+  --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='rgba(33,29,24,0.66)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
   --faint: rgba(33, 29, 24, 0.1);
   --gold: #a98237;
   --gold2: #5f4721;
@@ -66,6 +68,7 @@ body[data-theme="light"] {
     --bg1: #fcfbf7;
     --ink: #211d18;
     --muted: rgba(33, 29, 24, 0.66);
+    --select-chevron: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='rgba(33,29,24,0.66)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
     --faint: rgba(33, 29, 24, 0.1);
     --gold: #a98237;
     --gold2: #5f4721;
@@ -1824,6 +1827,34 @@ body.mode-cumulative .phase-label {
   transition: background 0.15s;
 }
 
+/* The − and + are drawn, not typed: in the body font the minus is half the plus's width and sat
+   lower, so the pair looked lopsided. Two equal 0.8rem strokes, the plus adding an upright one. */
+.stepper-btn {
+  position: relative;
+}
+
+.stepper-btn::before,
+.stepper-plus::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 0.8rem;
+  height: 1.5px;
+  border-radius: 1px;
+  background: currentColor;
+  transform: translate(-50%, -50%);
+}
+
+.stepper-plus::after {
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* A fingertip needs about 44px; the 36px buttons were easy to miss on a phone. */
+@media (pointer: coarse) {
+  .stepper-btn { width: 2.75rem; height: 2.75rem; }
+}
+
 .stepper-btn:focus-visible {
   background: var(--surface-strong);
   outline: none;
@@ -2051,10 +2082,10 @@ body.mode-cumulative .phase-label {
   border-radius: 10px;
   border: 1px solid var(--field-line);
   background-color: var(--control-bg);
-  background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-  background-position: calc(100% - 1.05rem) 55%, calc(100% - 0.75rem) 55%;
-  background-size: 0.3rem 0.3rem;
+  /* The same thin chevron as the level picker's (.select-caret), in the theme's muted ink */
+  background-image: var(--select-chevron);
+  background-position: calc(100% - 0.7rem) 50%;
+  background-size: 0.85rem 0.85rem;
   background-repeat: no-repeat;
   color: var(--ink);
   font: inherit;
@@ -2630,6 +2661,22 @@ body.mode-cumulative .phase-label {
     display: none;
   }
 
+  /* The side with more tabs past it fades out (settings.js sets the classes). */
+  .settings-nav.more-after {
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, #000 calc(100% - 2.5rem), transparent);
+  }
+
+  .settings-nav.more-before {
+    -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to left, #000 calc(100% - 2.5rem), transparent);
+  }
+
+  .settings-nav.more-before.more-after {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 2.5rem, #000 calc(100% - 2.5rem), transparent);
+  }
+
   .settings-nav-link {
     white-space: nowrap;
     padding: 0.42rem 0.8rem;
@@ -2663,6 +2710,16 @@ body.mode-cumulative .phase-label {
   .volume-control {
     width: 100%;
     min-width: 0;
+  }
+
+  /* Three choices share the width by their words, so "Keep ringing" and "Count overtime" stay
+     on one line each beside a short "Stop", instead of three equal thirds that wrap two of them. */
+  .pref-row .segmented:not(.segmented-two):not(.segmented-theme) {
+    grid-template-columns: repeat(3, auto);
+  }
+
+  .pref-row .segmented:not(.segmented-two):not(.segmented-theme) .segment {
+    padding: 0 0.6rem;
   }
 
   .cue-row {

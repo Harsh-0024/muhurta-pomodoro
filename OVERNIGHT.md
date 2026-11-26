@@ -710,6 +710,24 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
 - Today card past half a minute: the ring said "1m" but the note said "2h to your 2h goal"
   (it took ceil of the unrounded 119.4 m). It now counts from the minutes the ring shows:
   "1h 59m to your 2h goal". Checked on the iPhone; 16 tests pass.
+### Branch `design/settings` (from `improve/round-2-polish`)
+
+- **The daily-goal stepper's − and + match.** Typed in the body font, the minus was about half the
+  plus's width and sat low, so the pair looked lopsided. Both are now drawn as equal 0.8rem strokes
+  (the plus adds an upright one); the buttons keep their "Lower/Raise daily goal" names for screen
+  readers. Checked on the iPhone simulator in dark mode: + took the goal from 2h to 2h 30m with
+  "Saved", and − set it back.
+- Dark-mode pass on the phone: Dashboard and Settings read well. On 127.0.0.1 Safari kept a light
+  bar tint from an earlier light-mode visit; on a fresh origin (the Mac's address) the bars are dark
+  as the theme-color tags ask, so that was Safari's cache, not the app.
+
+## design/settings: checked on the iPhone (25 Nov)
+
+- The daily-goal stepper's drawn minus and plus match on the iPhone too (the font's own minus was
+  shorter than its plus). Nothing more to change on the Rhythm part of Settings.
+- Sound: the cue pickers (Opening bells, Soothing bell...) had a small filled triangle, the
+  Default level picker a thin chevron. They now share the chevron, in each theme's muted ink.
+  Checked on the iPhone (light theme).
 
 ## Waiting list
 
@@ -790,3 +808,11 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 - Under 720px the four figures (Focus, Streak, Avg / active day, Consistency) stacked one per row, each short number filling a whole card and pushing Today's ring off the first screen.
 - They now stay in a 2×2 grid down to 340px wide (the installed app's `is-mobile` layout already did this). Only narrower screens stack them.
 - Checked on the iPhone 18 Pro simulator.
+- Settings on a phone browser: the section strip (Rhythm, Timer, Sound, Appearance, Notif…) ended in a
+  hard cut mid-word. The side with more tabs past it now fades out over 2.5rem (settings.js sets
+  `more-before` / `more-after` as it scrolls), so the cut reads as "more this way".
+- Timer's "When it reaches zero" choice gave each option a third of the width, so "Keep ringing" and
+  "Count overtime" wrapped to two lines beside a one-line "Stop". On a phone the three now share the
+  width by their words, one line each. The theme switch (Dark / Light / System) keeps equal thirds.
+  Checked on the iPhone 18 Pro simulator; 16 tests pass.
+- Settings goal stepper: on a touch screen the − and + buttons are now 44px (were 36px), easier to hit with a thumb. Checked on the iPhone.

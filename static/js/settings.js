@@ -785,6 +785,18 @@
     const sections = links.map((a) => document.querySelector(a.getAttribute("href"))).filter(Boolean);
     if (!("IntersectionObserver" in window) || !sections.length) return;
     const nav = document.querySelector(".settings-nav");
+    // A strip that scrolls sideways fades out on the side with more tabs past it, so a tab cut at
+    // the edge ("Notif") reads as "more this way" rather than a mistake.
+    if (nav) {
+      const edges = () => {
+        const more = nav.scrollWidth - nav.clientWidth;
+        nav.classList.toggle("more-before", more > 1 && nav.scrollLeft > 1);
+        nav.classList.toggle("more-after", more > 1 && nav.scrollLeft < more - 1);
+      };
+      nav.addEventListener("scroll", edges, { passive: true });
+      window.addEventListener("resize", edges);
+      edges();
+    }
     const setActive = (id) => {
       links.forEach((a) => {
         const on = a.getAttribute("href") === `#${id}`;
