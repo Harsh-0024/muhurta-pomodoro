@@ -1099,3 +1099,14 @@ month and time-of-day charts), Timer and Settings (stepper).
   it on the left, and the numbers centre under the ring (6 to 60 spans the middle exactly on the
   iPhone). Not checked on a screen narrow enough to wrap the row: the unseen twin adds a little width.
 - Checks: diff --check, marker grep, node tests 18 pass, Python tests all pass.
+
+## fix/muhurta-spelling (27 Nov)
+
+- The unit was spelled two ways on the same line: "Muhurta Pomodoro · … 1 Muhurat = 48 min". Every
+  place it shows now says "muhurta", like the app's name: the footer line, Settings → About, the
+  History "1 muhurta" chip, and the daily-goal readout ("≈ 2½ muhurta").
+- Left as they are: the built copies in docs/app and mobile/*/public (the next build makes them
+  from these sources), and presets.py's muhurat_note fields (stored, never shown). Code names such
+  as formatMuhurat are unchanged.
+- Checked on the iPhone: About reads "1 Muhurta = 48 min".
+- Checks: diff --check, marker grep, node tests 18 pass, Python tests all pass.
