@@ -82,6 +82,7 @@
     const year = data.range?.year || selectedYear;
     const elapsedDays = Number(s.days_elapsed || 0);
     const averageAllDays = elapsedDays ? Number(s.total_focus_minutes || 0) / elapsedDays : 0;
+    const activeDays = Number(s.active_days || 0);
     return {
       streakCard: [
         {
@@ -90,7 +91,8 @@
           noteId: "longestStreak",
           label: "Current streak",
           value: formatDays(s.current_streak),
-          note: `Best this year: ${formatDays(s.longest_streak)}`,
+          // "Best this year: 0 days" only repeats the 0 above it: say how a streak starts instead.
+          note: Number(s.longest_streak || 0) ? `Best this year: ${formatDays(s.longest_streak)}` : "A day of focus starts one",
         },
       ],
       averageCard: [
@@ -100,8 +102,9 @@
           noteId: "averageNote",
           label: "Avg / active day",
           spoken: "Average per active day",
-          value: formatMinutes(s.average_focus_active_day),
-          note: `in ${year}`,
+          // An average over no active days isn't 0m; there's nothing to average yet.
+          value: activeDays ? formatMinutes(s.average_focus_active_day) : "–",
+          note: activeDays ? `in ${year}` : "No active day yet",
         },
         {
           labelId: "averageLabel",
