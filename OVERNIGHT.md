@@ -559,6 +559,13 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+## design/account-row (26 Nov)
+
+1. **Account row on a phone browser.** Settings' Account row squeezed "Signed in · no name added
+   yet" into a column a word wide beside the buttons. On a narrow screen the picture and name now
+   share a line with "Add your name" and "Sign out" underneath, and with no email the line reads
+   "No name added yet" (no stray leading dot). Checked on the iPhone.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.

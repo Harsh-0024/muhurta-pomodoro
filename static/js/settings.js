@@ -919,7 +919,7 @@
     accountEmail = email || "";
     const full = profile ? [profile.first_name, profile.last_name].filter(Boolean).join(" ") : "";
     $("accountName").textContent = full || "Signed in";
-    $("syncSignedInAs").textContent = profile ? `@${profile.username} · ${email}` : `${email || ""} · no name added yet`;
+    $("syncSignedInAs").textContent = profile ? `@${profile.username} · ${email}` : (email ? `${email} · no name added yet` : "No name added yet");
     $("accountAvatar").textContent = ((profile && profile.first_name) || email || "?").charAt(0).toUpperCase();
     $("btnEditProfile").textContent = profile ? "Edit profile" : "Add your name";
   }
