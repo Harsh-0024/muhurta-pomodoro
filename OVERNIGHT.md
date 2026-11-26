@@ -781,6 +781,13 @@ Tasks skipped because something they need isn't there yet; the work moved on mea
    now takes the width its words need, so all three sit on one line (they still wrap on the very
    narrowest screens rather than spill). Checked on the iPhone; 16 tests pass.
 
+## design/phone-nav (26 Nov)
+
+1. Top tabs on a phone (Timer, Flow, Dashboard, Settings pages): the five pills just missed one row,
+   so "Settings" sat alone on a second line. Slimmer pills on phones fit all five on one row, which
+   also gives the page a row back. Rhythm keeps its two rows of three; narrower phones still wrap.
+   Checked on the iPhone; 16 tests pass.
+
 ## Checked in the real apps (19 Nov)
 
 - **Android app:** built from this branch (`mobile/`, debug build) and installed on a Pixel 8
