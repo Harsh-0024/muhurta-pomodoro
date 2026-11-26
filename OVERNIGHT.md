@@ -1066,3 +1066,8 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Dashboard → By time of day: 15 seconds of focus was enough to say "Most between 11:00 PM and 12:00 AM".
 - The best hours are now named only after half an hour of focus in the 60 days. Before that it says "Your best hours show after a little more focus", like the weekday chart.
 - Checked on the iPhone with the demo's 15 s. Tests pass (node 18, Python all).
+
+## design/quote-balance (27 Nov)
+- Rhythm, Timer and Flow quote: a two-line quote ran a full first line and left two words on the second ("…just get / up and go to work.").
+- Quotes now wrap into balanced lines (text-wrap: balance on blockquote), so the Stephen King one splits at its comma.
+- Checked on the iPhone. Tests pass (node 18, Python all).

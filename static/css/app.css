@@ -123,6 +123,8 @@ body {
    pulls a word down when the last line would be one short word ("like."). */
 h1, h2, h3 { text-wrap: balance; }
 p, li, label, small { text-wrap: pretty; }
+/* A two-line quote splits into two even lines, not a full line and a short tail. */
+blockquote { text-wrap: balance; }
 
 body[data-theme="light"],
 body[data-theme="system"] {
