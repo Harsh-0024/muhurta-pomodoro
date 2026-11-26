@@ -515,20 +515,22 @@ body.is-mobile .metric-card-primary {
   box-shadow: none;
 }
 
-/* The average card's two-dot pager, moved into the corner: on a phone these cards have no padding,
-   so the desktop spot left the dots floating in the gap between columns. Hiding one dot (from
-   before the pager) left a lone green dot that read as a status light. */
+/* The average card's two-dot pager sits under its own note, on the left: on a phone these cards
+   have no padding, so in the bottom-right corner the dots sat against the Consistency column and
+   read as part of it. Hiding one dot (from before the pager) left a lone green dot that read as a
+   status light. */
 body.is-mobile .metric-card-toggle[data-state-count="2"]::before,
 body.is-mobile .metric-card-toggle[data-state-count="2"]::after {
-  bottom: 0.4rem;
+  bottom: -0.85rem;
+  right: auto;
 }
 
 body.is-mobile .metric-card-toggle[data-state-count="2"]::before {
-  right: 0.6rem;
+  left: 0;
 }
 
 body.is-mobile .metric-card-toggle[data-state-count="2"]::after {
-  right: 0;
+  left: 0.6rem;
 }
 
 body.is-mobile .metric-value {
