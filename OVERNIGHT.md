@@ -844,6 +844,13 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
 - Seen, not yet fixed: on a phone, Settings > Account squeezes "Signed in · no name added yet"
   into a column one word wide beside "Add your name" and "Sign out".
 
+## design/account-row (26 Nov)
+
+1. **Account row on a phone browser.** Settings' Account row squeezed "Signed in · no name added
+   yet" into a column a word wide beside the buttons. On a narrow screen the picture and name now
+   share a line with "Add your name" and "Sign out" underneath, and with no email the line reads
+   "No name added yet" (no stray leading dot). Checked on the iPhone.
+
 ## Waiting list
 
 - ~~**Slow first paint on the iPhone simulator**~~ **Solved 25 Nov by `fix/font-blocking`**: the ~2 s gap was Safari waiting on the render-blocking Google Fonts stylesheet; on that branch HTML and app.css arrive in the same second. Original note (cause not pinned down): pages sometimes sit blank
