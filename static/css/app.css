@@ -1825,6 +1825,13 @@ body.mode-cumulative .phase-label {
   line-height: 1;
   cursor: pointer;
   transition: background 0.15s;
+  /* The − and + are drawn the same size and weight: the font's minus came out shorter than its plus. */
+  display: inline-grid;
+  place-items: center;
+}
+
+.stepper-btn svg {
+  display: block;
 }
 
 /* The − and + are drawn, not typed: in the body font the minus is half the plus's width and sat

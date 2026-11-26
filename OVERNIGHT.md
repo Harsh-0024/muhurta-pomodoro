@@ -768,6 +768,12 @@ Tasks skipped because something they need isn't there yet; the work moved on mea
 - ~~**iPhone check of round 2**~~ Done 25 Nov on the iPhone 18 Pro simulator: the Dashboard's
   figures are lining ("0m", "40m"), and Rhythm, Timer, Flow, Dashboard and Settings all lay out right.
 
+## design/stepper-glyphs (25 Nov)
+
+1. Settings, Daily focus goal: the stepper's minus came out as a short dash next to a full-size
+   plus (the font draws − smaller than +). Both are now drawn as matching icons, same size and
+   stroke. Checked on the iPhone: they match and still change the goal (it saves). 16 tests pass.
+
 ## Checked in the real apps (19 Nov)
 
 - **Android app:** built from this branch (`mobile/`, debug build) and installed on a Pixel 8
