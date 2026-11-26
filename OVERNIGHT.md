@@ -783,3 +783,7 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 - Headings use `text-wrap: balance`; paragraphs, list items, labels and small notes use `text-wrap: pretty`.
 - No single short word alone on a last line (Settings > Rhythm: "…what a good day looks like." used to leave "like." by itself).
 - Checked on the iPhone 18 Pro simulator. Browsers without support wrap as before.
+## Time left to the daily goal (branch `fix/goal-remaining`)
+- With 1m of focus today the Dashboard said "2h to your 2h goal": the ring shows rounded minutes (0.6 → "1m") but the note rounded 120 − 0.6 = 119.4 up to 120.
+- The note now subtracts the same rounded minutes the ring shows: "1h 59m to your 2h goal".
+- Checked on the iPhone 18 Pro simulator.
