@@ -41,7 +41,7 @@
     if (Number.isNaN(d.getTime())) return "";
     const now = new Date();
     if (d.toDateString() === now.toDateString()) {
-      return `Today, ${d.toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" })}`;
+      return `Today, ${d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })}`;
     }
     const opts = { day: "numeric", month: "short" };
     if (d.getFullYear() !== now.getFullYear()) opts.year = "numeric";

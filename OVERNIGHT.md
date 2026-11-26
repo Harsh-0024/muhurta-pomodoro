@@ -559,6 +559,10 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+## design/history-times
+
+- History (Mend the record) and the feedback timestamp show clock times without a leading zero: "5:05 AM – 8:05 AM", not "05:05 AM – 08:05 AM". Checked on the phone.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
