@@ -383,7 +383,7 @@
     let action = "";
     let tone = "";
     if (perm === "unsupported") {
-      msg = "This browser can't show desktop notifications.";
+      msg = "This browser can't show notifications. Bells still ring if sound is on.";
       tone = "warn";
     } else if (!s.notifications_enabled) {
       msg = "Off. Bells still ring if sound is on.";

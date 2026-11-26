@@ -816,3 +816,5 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
   width by their words, one line each. The theme switch (Dark / Light / System) keeps equal thirds.
   Checked on the iPhone 18 Pro simulator; 16 tests pass.
 - Settings goal stepper: on a touch screen the − and + buttons are now 44px (were 36px), easier to hit with a thumb. Checked on the iPhone.
+## improve/notify-wording (from improve/round-2-polish)
+- Settings → Notifications on a phone said "Desktop notifications" and "This browser can't show desktop notifications." Now "Browser notifications", and the unsupported note adds that bells still ring if sound is on. No "add to Home Screen" hint: Muhurta has no web manifest, so that wouldn't work yet. Checked on the iPhone.
