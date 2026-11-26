@@ -6298,3 +6298,11 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
 .bar-chart.is-empty .bar-track {
   opacity: 0.45;
 }
+
+/* The Timer's serif numbers, same reason: old-style "1" looks like a capital I ("12" read "I2")
+   and "0:00" read "o:oo". Tabular too, so the countdown doesn't jitter as digits change. */
+.time-display,
+.live-val,
+.countdown-pick {
+  font-variant-numeric: lining-nums tabular-nums;
+}

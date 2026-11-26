@@ -649,6 +649,9 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   is left, and the local fonts.css link is in. Phone tests pass (16).
 
 - Measured on the iPhone simulator (25 Nov): before this branch, app.css was requested ~2 s after the page HTML (Safari waited on the Google Fonts stylesheet first); on this branch HTML and app.css arrive in the same second, twice in a row, and the Timer page looks the same with its fonts. This settles the "slow first paint" Waiting-list item noted on `design/level-menu`.
+### Branch `design/numerals` (from `improve/round-2-polish`)
+
+- Timer numbers use lining figures, as the Dashboard's already did: Cormorant's old-style "1" looks like a capital I (the length scale read "I2") and "0" a small "o" (FOCUSED read "o:oo"). The big time, the set-for/ends-at/focused strip and the length buttons now set `lining-nums tabular-nums` (tabular so the countdown doesn't jitter). Checked on the iPhone (light; Safari needed a reload to drop its cached CSS) and on the computer.
 
 ## Waiting list
 
