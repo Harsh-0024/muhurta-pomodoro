@@ -820,3 +820,5 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 - Settings → Notifications on a phone said "Desktop notifications" and "This browser can't show desktop notifications." Now "Browser notifications", and the unsupported note adds that bells still ring if sound is on. No "add to Home Screen" hint: Muhurta has no web manifest, so that wouldn't work yet. Checked on the iPhone.
 ## fix/overtime-hours (from improve/round-2-polish)
 - Rhythm's overtime clock (and the tab title) counted minutes past 60: "+513:58". Now hours lead past an hour, "+8:33:58", as the Timer page already did. Checked on the iPhone.
+## improve/whole-percent (from improve/round-2-polish)
+- Productivity on Rhythm and Flow read "100.0%"; whole numbers now drop the ".0" ("100%", "87.5%"), like the Dashboard's "3/wk". Checked on the iPhone (Rhythm). Flow on the iPhone, 25 Nov: a running session reads "100%" with this branch and "100.0%" without it.

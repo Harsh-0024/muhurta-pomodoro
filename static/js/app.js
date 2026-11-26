@@ -617,7 +617,7 @@
     if (workEl) workEl.textContent = formatPool(liveWorkSec());
     if (prodEl) {
       const p = productivityPct();
-      prodEl.textContent = p === null ? "—" : `${p.toFixed(1)}%`;
+      prodEl.textContent = p === null ? "—" : `${p.toFixed(1).replace(/\.0$/, "")}%`;
     }
     updateControlVisibility();
   }

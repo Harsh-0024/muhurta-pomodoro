@@ -204,7 +204,7 @@
     const productivityEl = document.getElementById("flowProductivityDisplay");
     if (focusedEl) focusedEl.textContent = formatDuration(focused);
     if (elapsedEl) elapsedEl.textContent = formatDuration(elapsed);
-    if (productivityEl) productivityEl.textContent = pct == null ? "—" : `${pct.toFixed(1)}%`;
+    if (productivityEl) productivityEl.textContent = pct == null ? "—" : `${pct.toFixed(1).replace(/\.0$/, "")}%`;
   }
 
   function renderTimer() {
