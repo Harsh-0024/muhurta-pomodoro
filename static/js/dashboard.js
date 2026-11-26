@@ -180,7 +180,10 @@
     setText("goalValue", formatMinutes(goal));
     setText("totalFocusLabel", `Focus in ${year}`);
     setText("totalFocus", formatMinutes(s.total_focus_minutes));
-    setText("activeDays", `${formatDays(s.active_days)} active`);
+    // Seconds of focus (a Start tapped and stopped) make the total "<1m" but no active day:
+    // "0 days active" and "No focus yet" under "<1m" read as a contradiction.
+    const secondsOnly = !Number(s.active_days || 0) && Number(s.total_focus_minutes || 0) > 0;
+    setText("activeDays", secondsOnly ? "Only seconds so far" : `${formatDays(s.active_days)} active`);
     updateToggleCard("streakCard", states.streakCard);
     updateToggleCard("averageCard", states.averageCard);
     // With no focus in the year, "0 of 321 days" reads like a judgement; say what's true instead.
@@ -190,7 +193,7 @@
     const elapsed = Number(s.days_elapsed || 0);
     const early = !none && elapsed < 7;
     setText("consistencyRate", early ? `${s.active_days} of ${elapsed}` : formatDayRate(s.consistency_days_per_week));
-    setText("consistencyNote", none ? `No focus yet in ${year}` : early ? "days so far" : `${s.active_days} of ${elapsed} days`);
+    setText("consistencyNote", none ? (secondsOnly ? `No day of focus yet in ${year}` : `No focus yet in ${year}`) : early ? "days so far" : `${s.active_days} of ${elapsed} days`);
     const welcome = byId("dashWelcome");
     if (welcome) welcome.classList.toggle("hidden", !(none && Number(year) === new Date().getFullYear()));
     setText(
