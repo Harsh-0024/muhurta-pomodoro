@@ -483,6 +483,7 @@
       }
       renderLiveStats();
       if (state.mode === "extend") {
+        capForgottenOvertime();
         if (state.running && !tickTimer) startTicking();
         repaintExtendFocus();
         persistSession();
@@ -507,6 +508,7 @@
       state.remainingSec <= 0 &&
       (s.segKind === "work" || s.segKind === "rest" || s.segKind === "cumulative");
     let endedAt = Date.now();
+    if (s.segKind === "extend") endedAt = Math.min(endedAt, startedAt + OVERTIME_CAP_SEC * 1000);
     if (completedTimedSegment) {
       // A finished block ends when it was due, never later. After a pause the
       // part still to run is shorter than the full block, so "start + full
@@ -545,10 +547,27 @@
     s.segDurationSec = durationSec || 0;
   }
 
+  // Overtime runs until you stop it, so a block left running overnight would log the whole night
+  // as focus. One stretch of overtime counts at most this long; at the cap the clock pauses.
+  const OVERTIME_CAP_SEC = 3 * 60 * 60;
+
   function liveSegmentElapsed() {
     const s = state.session;
     if (!s.segStartedAt || !s.segKind) return 0;
-    return (Date.now() - s.segStartedAt) / 1000;
+    const sec = (Date.now() - s.segStartedAt) / 1000;
+    return s.segKind === "extend" ? Math.min(sec, OVERTIME_CAP_SEC) : sec;
+  }
+
+  // A forgotten overtime stretch: save it as ending at the cap and pause there.
+  function capForgottenOvertime() {
+    const s = state.session;
+    if (state.mode !== "extend" || !state.running || s.segKind !== "extend" || !s.segStartedAt) return;
+    if ((Date.now() - s.segStartedAt) / 1000 < OVERTIME_CAP_SEC) return;
+    const capEnd = s.segStartedAt + OVERTIME_CAP_SEC * 1000;
+    pauseTimer();
+    state.pauseStartedAt = capEnd;
+    persistSession();
+    showTimerNotice("Paused after 3 hours of overtime, in case the clock was left running. Resume if you're still working.");
   }
 
   function completedWorkFloorSec() {
@@ -1550,7 +1569,8 @@
     }
 
     if (primary) {
-      primary.classList.toggle("hidden", inRest || inExtend || poolRestReplacesPause);
+      // Overtime has no Pause, but after the 3-hour cap it is paused and needs a way back.
+      primary.classList.toggle("hidden", inRest || (inExtend && state.running) || poolRestReplacesPause);
       primary.disabled = false;
       if (state.running) {
         primary.textContent = "Pause";

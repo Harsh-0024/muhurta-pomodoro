@@ -1,5 +1,7 @@
 (function () {
   "use strict";
+  // One stretch of overtime or Flow counts at most this long (app.js, flow.js, timer-core.js).
+  const OVERTIME_CAP_SEC = 3 * 60 * 60;
 
   const SESSION_STORAGE_KEY = "muhurat_timer_session_v1";
   // The page's own title ("Flow · Muhurta Pomodoro"), set in base.html.
@@ -159,7 +161,8 @@
       flow = JSON.parse(localStorage.getItem("muhurat_flow_session_v1") || "null");
     } catch (_) {}
     if (flow && (flow.mode === "running" || flow.mode === "paused")) {
-      const live = flow.mode === "running" && flow.runStartedAt ? (Date.now() - Number(flow.runStartedAt)) / 1000 : 0;
+      // At most 3 hours a stretch, as flow.js counts it.
+      const live = flow.mode === "running" && flow.runStartedAt ? Math.min(OVERTIME_CAP_SEC, (Date.now() - Number(flow.runStartedAt)) / 1000) : 0;
       const text = `${hms(Number(flow.focusedSec || 0) + live)} flow${flow.mode === "paused" ? " paused" : ""}`;
       return { running: flow.mode === "running", text };
     }
@@ -194,7 +197,7 @@
       const started = Number(data.session?.segStartedAt || Date.now());
       const extendSec = Number(data.session?.extendSec || 0);
       const base = Number(data.extendBaseSec || 0);
-      const live = data.running ? (Date.now() - started) / 1000 : 0;
+      const live = data.running ? Math.min(OVERTIME_CAP_SEC, (Date.now() - started) / 1000) : 0;
       document.title = `+${formatClock(Math.max(0, extendSec + live - base))} focus`;
       return;
     }

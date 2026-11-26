@@ -50,7 +50,10 @@
   function liveTodaySec(now = Date.now()) {
     const start = liveStart();
     const midnight = new Date(now).setHours(0, 0, 0, 0);
-    return start ? Math.max(0, (now - Math.max(start, midnight)) / 1000) : 0;
+    // A stretch counts at most 3 hours (the clocks pause or stop there), so a forgotten one
+    // doesn't keep adding here before its page has stopped it.
+    const liveEnd = start ? Math.min(now, start + 3 * 60 * 60 * 1000) : now;
+    return start ? Math.max(0, (liveEnd - Math.max(start, midnight)) / 1000) : 0;
   }
   // The Dashboard's Today ring counts the running block too, so it agrees with this line.
   window.MuhurtaToday = { liveTodaySec };

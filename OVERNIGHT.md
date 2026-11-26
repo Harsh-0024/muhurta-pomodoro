@@ -779,6 +779,38 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   waits (or has no data) it now takes the height it needs, with a little padding round the
   count; beside another card on a wide screen the grid still stretches it to match. Checked on
   the iPhone in dark mode. 16 tests pass.
+### Branch `feature/forgotten-timer` (26 Nov)
+
+- **A forgotten Rhythm block can no longer log a whole night as focus.** Overtime ran with no end:
+  a block left running on the iPhone reached +1099:46 (about 18 hours). Tapping Rest would have
+  saved all of it as work. One stretch of overtime now counts at most 3 hours. At the cap the clock pauses,
+  the stretch is saved as ending at 3 hours (Work done, the rest pool and the logged block all stop
+  there), and a note says "Paused after 3 hours of overtime, in case the clock was left running.
+  Resume if you're still working." Overtime had no Pause button, so a **Resume** button now shows
+  while overtime is paused; resuming starts a new stretch with its own 3 hours.
+- Checked on the iPhone with that runaway block: it opened at +180:00, Work done 3:24:00, paused, with
+  the note; Resume carried on from +180:02. 16 tests pass.
+- **Timer page: the same guard.** When a timer is set to keep counting after zero, it now stops by itself
+  after 3 hours of overtime. It saves exactly 3 hours, and the Timer page says "Stopped after 3 hours of
+  overtime, in case it was left running. 3 hours of it saved." The check runs on every page, so a timer forgotten
+  while another page is open stops too. Tested in the browser with a timer whose overtime began 4 hours
+  earlier: it stopped on load, the note showed, and the saved block was 10,800 s ending at the 3-hour
+  mark. That test added two 3-hour blocks to the local dev server's database (not live data).
+- **Flow: the same guard.** One unbroken Flow stretch counts at most 3 hours. At the cap Flow pauses,
+  saves the stretch as ending at 3 hours, and says "Paused after 3 hours without a break, in case Flow
+  was left running. Resume if you're still working." Flow already has Resume. Tested in the browser
+  with a Flow started 4 hours earlier: it opened paused at 3:00:00, with the note and a saved block of
+  10,800 s. That added two more 3-hour test blocks to the local dev server's database (not live data).
+- All three clocks now have the guard. **The counts on other pages stop at 3 hours too**: the window
+  title (session-monitor.js) and the "Today" line under the clocks (today.js) no longer climb past
+  3 hours for a forgotten stretch before its own page stops it. Tested on the Dashboard with a Flow
+  started 4 hours earlier: the title read "3:00:00 flow", not 4:00:00.
+- **Tests:** two new ones in tests/clocks.test.mjs for the Timer page. Overtime counts at most 3 hours,
+  and stopping overtime left running for 18 hours logs 3 hours. Both fail on the old timer-core.js and
+  pass now (18 tests in all). Rhythm (app.js) and Flow (flow.js) have no test harness yet, so their cap was
+  checked by hand: Rhythm on the iPhone, Flow in the browser.
+- Not covered: the Mac menu bar app counts on its own from the start time it is sent (menubar.js), so
+  it can still run past 3 hours until a page stops the clock.
 
 ## Waiting list
 

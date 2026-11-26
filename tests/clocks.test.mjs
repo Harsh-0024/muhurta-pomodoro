@@ -166,3 +166,22 @@ test("quick lengths: six steps with the usual length third", () => {
   // Near the long end too.
   assert.deepEqual(Q.pick({ segments: [seg("flow", "09:00", 95)], presets, fallbackMin: 24 }).lengths, [36, 48, 60, 72, 84, 96]);
 });
+
+test("overtime counts at most 3 hours, so a forgotten timer doesn't log the night", () => {
+  const p = page();
+  p.set({ mode: "overtime", durationSec: 25 * 60, overtimeStartedAt: p.now() });
+  p.wait(2 * 3600);
+  assert.equal(Math.round(p.T.overtimeSec(p.read(), p.now())), 2 * 3600);
+  p.wait(10 * 3600); // left running all night
+  assert.equal(Math.round(p.T.overtimeSec(p.read(), p.now())), 3 * 3600);
+});
+
+test("stopping overtime left running logs 3 hours, not the whole time since", () => {
+  const p = page();
+  p.set({ mode: "overtime", durationSec: 25 * 60, overtimeStartedAt: p.now() });
+  p.wait(18 * 3600);
+  p.T.stop();
+  assert.equal(p.read(), null);
+  assert.equal(p.logged.length, 1);
+  assert.equal(p.logged[0].sec, 3 * 3600);
+});
