@@ -1110,3 +1110,9 @@ month and time-of-day charts), Timer and Settings (stepper).
   as formatMuhurat are unchanged.
 - Checked on the iPhone: About reads "1 Muhurta = 48 min".
 - Checks: diff --check, marker grep, node tests 18 pass, Python tests all pass.
+
+## design/rhythm-ring-dot
+- The idle Rhythm ring showed a lone gold dot at the top: a zero-length stroke with a rounded end still draws one.
+  The Timer ring already hides it until it moves; Rhythm now does the same (static/js/app.js updateRing).
+- Checked on the iPhone at 192.168.29.209:8141: the idle ring is a clean track. A running block was not watched
+  past its first seconds; the dot comes back once progress passes 0.1%.

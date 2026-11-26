@@ -714,6 +714,8 @@
     const el = document.getElementById("ringProgress");
     const wrap = document.querySelector(".timer-ring-wrap");
     if (!el) return;
+    // At zero length the rounded end still draws a dot; hide it until it moves, as the Timer does.
+    el.style.opacity = "";
     if (state.mode === "extend") {
       el.style.strokeDashoffset = "0";
       wrap?.classList.add("ring-extend");
@@ -729,6 +731,7 @@
     }
     if (state.mode === "work_choice" || state.mode === "rest_choice") {
       el.style.strokeDashoffset = String(RING_LEN);
+      el.style.opacity = "0";
       return;
     }
     const p = currentPreset();
@@ -739,6 +742,7 @@
     }
     const frac = total > 0 ? 1 - state.remainingSec / total : 0;
     el.style.strokeDashoffset = String(RING_LEN * (1 - Math.min(1, Math.max(0, frac))));
+    if (frac <= 0.001) el.style.opacity = "0";
   }
 
   function updateLabels() {
