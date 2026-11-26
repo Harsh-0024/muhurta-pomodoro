@@ -629,8 +629,21 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   The Timer page on the phone also looked right (summary strip, ring, minute marks, Start).
   Flow, Rhythm and Settings checked too. Settings' section tabs follow the scroll correctly (a
   section stays lit while it still fills the band 15-45% down the screen).
+### Branch `design/level-menu` (from `improve/round-2-polish`)
+
+- **The level menu is solid.** On the phone the Rhythm page's level list (Agaman ... Ekagra) let the
+  timer behind it show through ("24:00", "DEEP WORK", Start), which looked messy and made the level
+  names harder to read. Its tinted background now sits on the solid page colour, so it is opaque in
+  both themes and keeps its tint. Checked on the iPhone simulator in dark mode. Choosing Sthiti set
+  the clock to 36:00, and choosing Sparsha set it back to 24:00.
 
 ## Waiting list
+
+- ~~**Slow first paint on the iPhone simulator**~~ **Solved 25 Nov by `fix/font-blocking`**: the ~2 s gap was Safari waiting on the render-blocking Google Fonts stylesheet; on that branch HTML and app.css arrive in the same second. Original note (cause not pinned down): pages sometimes sit blank
+  for 3-10 s. The server log shows the HTML served at once, then a ~2 s gap before the phone asks
+  for app.css, then everything else at once. Google's font CSS no longer blocks (branch
+  `fix/font-blocking`). The rest may be the simulator's DNS for fonts.googleapis.com, or several
+  Safari tabs of the app polling `/api/cloud/remote-sync` every 3 s. To check on a real iPhone.
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
 

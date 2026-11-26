@@ -283,7 +283,9 @@ body[data-theme="light"] .ambient {
   padding: 0.5rem;
   border: 1px solid rgba(232, 217, 180, 0.16);
   border-radius: calc(var(--radius) + 4px);
-  background: var(--menu-bg);
+  /* Laid over the solid page colour: on the phone the timer behind ("24:00", Start) showed
+     through the list and made the level names harder to read. */
+  background: linear-gradient(var(--menu-bg), var(--menu-bg)), var(--bg0);
   box-shadow: var(--menu-shadow);
   backdrop-filter: blur(18px);
   max-height: calc(100vh - 10rem);
