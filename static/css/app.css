@@ -8,7 +8,9 @@
   --gold: #c9a962;
   --gold2: #e8d9b4;
   /* The gold behind dark words (the chosen page, level, choice, the account initial). */
-  --gold-fill: linear-gradient(135deg, var(--gold2), var(--gold));
+  /* Gold fills paint under the border too (border-box): a see-through border over a fill that stops at
+     the padding showed the far end of the gradient as a dark sliver on the left edge. */
+  --gold-fill: linear-gradient(135deg, var(--gold2), var(--gold)) border-box;
   --line: rgba(255, 255, 255, 0.08);
   --field-line: #6e6452; /* a box you type into or pick from: warm, 3:1+ on every dark surface */
   --shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
@@ -43,7 +45,7 @@ body[data-theme="light"] {
   --gold2: #5f4721;
   /* The light theme's own golds are dark, too dark behind dark words (about 2:1), so the
      filled gold stays light, as on the Start buttons (about 8:1). */
-  --gold-fill: linear-gradient(135deg, #f3e8cf, #c9a962);
+  --gold-fill: linear-gradient(135deg, #f3e8cf, #c9a962) border-box;
   --line: rgba(43, 35, 24, 0.13);
   --field-line: #8f826b; /* 3.3:1+ on every light surface */
   --shadow: 0 24px 72px rgba(71, 58, 39, 0.15);
@@ -74,7 +76,7 @@ body[data-theme="light"] {
     --gold2: #5f4721;
     /* The light theme's own golds are dark, too dark behind dark words (about 2:1), so the
        filled gold stays light, as on the Start buttons (about 8:1). */
-    --gold-fill: linear-gradient(135deg, #f3e8cf, #c9a962);
+    --gold-fill: linear-gradient(135deg, #f3e8cf, #c9a962) border-box;
     --line: rgba(43, 35, 24, 0.13);
     --field-line: #8f826b;
     --shadow: 0 24px 72px rgba(71, 58, 39, 0.15);
