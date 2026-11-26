@@ -676,6 +676,15 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
 - Stacked on a phone, those two cards also wore their compact desktop look (0.85rem edge, a
   1-1.15rem title) between cards with a 1.25rem edge and a 1.35rem title. On phones they now match
   the rest. Checked on the iPhone: Recent days and Rhythm profile line up with Yearly consistency.
+### Branch `fix/year-chart-latest` (from `improve/round-2-polish`)
+
+- On a phone's browser the Dashboard's year chart opened at January to April, all empty, with the
+  focus out of sight in November. Only the Android app (mobile.js) jumped to the latest weeks.
+  That jump now lives in dashboard.js, runs after each redraw (year change too) and only when the
+  grid is wider than its box, so wide screens are untouched; mobile.js no longer has its own copy.
+  Checked on the iPhone 18 Pro: it opens at Sep to Dec with today in view. 16 tests pass.
+- iPhone check of round 2 (was on the Waiting list): the Dashboard's figures are lining ("40m",
+  "20m", "2 of 2"), not old-style. Done.
 
 ## Waiting list
 

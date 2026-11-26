@@ -353,6 +353,27 @@
       }
       grid.appendChild(cell);
     });
+    showLatestWeeks(grid);
+  }
+
+  // The year grid is wider than a phone: open it at the latest weeks (today a little in from the
+  // right edge), not January. Wide screens show the whole year and don't scroll.
+  function showLatestWeeks(grid) {
+    const scroll = grid.closest(".heatmap-scroll");
+    if (!scroll) return;
+    requestAnimationFrame(() => {
+      if (scroll.scrollWidth <= scroll.clientWidth + 1) return;
+      const d = new Date();
+      const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+      const today = grid.querySelector(`[data-day="${iso}"]`);
+      if (!today) {
+        scroll.scrollLeft = scroll.scrollWidth;
+        return;
+      }
+      const box = scroll.getBoundingClientRect();
+      const cell = today.getBoundingClientRect();
+      scroll.scrollLeft += cell.right - box.right + box.width * 0.15;
+    });
   }
 
   // The day's own view (day-view.js): when the focus happened, and its sittings.
