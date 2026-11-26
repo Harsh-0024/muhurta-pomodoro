@@ -786,4 +786,7 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## Time left to the daily goal (branch `fix/goal-remaining`)
 - With 1m of focus today the Dashboard said "2h to your 2h goal": the ring shows rounded minutes (0.6 → "1m") but the note rounded 120 − 0.6 = 119.4 up to 120.
 - The note now subtracts the same rounded minutes the ring shows: "1h 59m to your 2h goal".
+## Dashboard figures two by two on a phone (branch `design/dashboard-grid`)
+- Under 720px the four figures (Focus, Streak, Avg / active day, Consistency) stacked one per row, each short number filling a whole card and pushing Today's ring off the first screen.
+- They now stay in a 2×2 grid down to 340px wide (the installed app's `is-mobile` layout already did this). Only narrower screens stack them.
 - Checked on the iPhone 18 Pro simulator.

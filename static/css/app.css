@@ -3414,7 +3414,8 @@ body[data-theme="light"] .rhythm-track {
 }
 
 @media (max-width: 720px) {
-  .dashboard-stats,
+  /* The four figures stay two by two on a phone: one per row gave each short number a whole
+     card and pushed Today's ring below the fold. */
   .dashboard-lower {
     grid-template-columns: 1fr;
   }
@@ -6368,4 +6369,11 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
 .live-val,
 .countdown-pick {
   font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* Only the narrowest phones stack the four figures. */
+@media (max-width: 340px) {
+  .dashboard-stats {
+    grid-template-columns: 1fr;
+  }
 }
