@@ -5163,6 +5163,7 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
 
 /* The quick lengths are bare numbers; a quiet unit after them, styled like the labels above
    the timer, says what they are. Screen readers already hear "Quick lengths in minutes". */
+#timerQuick::before,
 #timerQuick::after {
   content: "min";
   content: "min" / "";
@@ -5171,6 +5172,14 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
   font-size: 0.68rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
+}
+
+/* An unseen twin of "min" on the left, so the numbers centre under the ring and Start instead of
+   sitting a unit's width to the left. */
+#timerQuick::before {
+  visibility: hidden;
+  margin-left: 0;
+  margin-right: 0.3rem;
 }
 
 .countdown-pick {

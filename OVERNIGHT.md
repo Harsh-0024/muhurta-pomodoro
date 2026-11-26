@@ -1091,3 +1091,11 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Light mode checked on the iPhone at the Mac's address: the bars are light as they should be. The
   black bars on 127.0.0.1 are Safari's cached tint again, not the app.
 - Checks: diff --check, marker grep, node tests 18 pass, Python tests all pass.
+
+## design/quick-lengths-centred (27 Nov)
+
+- Timer: the quick lengths (6 … 60 MIN) were centred as one row with the "min" label, so the
+  numbers sat about 20 points left of the ring and Start. An unseen twin of the label now balances
+  it on the left, and the numbers centre under the ring (6 to 60 spans the middle exactly on the
+  iPhone). It still wraps the same way on narrow screens.
+- Checks: diff --check, marker grep, node tests 18 pass, Python tests all pass.
