@@ -991,3 +991,15 @@ Where two branches changed the same thing:
 Tests: clocks 10/10, sign-in, shared time, devices and streak pass, phone tests 8/8. Checked on the
 iPhone 18 Pro simulator: Dashboard (tabs, 2×2 figures, ring, last 7 days, recent days, year grid,
 month and time-of-day charts), Timer and Settings (stepper).
+
+## fix/phone-pager-dots (26 Nov)
+
+- On the phone Dashboard a lone green dot floated between "Avg / active day" and
+  "Consistency". It was half of the average card's two-dot pager: mobile.css still hid `::after`
+  from before the pager (when one dot was a status light), and the remaining `::before` sat at
+  the desktop spot, out in the column gap because phone cards have no padding. Now both dots show
+  on the phone, in the card's bottom-right corner, level with the note; a tap swaps which is
+  filled ("Avg / all days").
+- Checked on the iPhone 18 Pro simulator (http://127.0.0.1:8141/dashboard). `git diff --check`
+  clean; Node tests 18/18 (with the app's venv python on PATH, which the phone build needs for
+  jinja2), Python tests pass.
