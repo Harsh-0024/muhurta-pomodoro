@@ -558,6 +558,7 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
 2. **Dashboard zeros read as numbers.** Cormorant's old-style zero is a small round "o", so the big
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
+- Settings goal stepper: "2h" in lining figures too (Cormorant's old-style 2 dipped below the h). Checked on the iPhone.
 
 ### Branch `design/dashboard-empty` (from `improve/round-2-polish`)
 
@@ -928,3 +929,6 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## design/gold-edge (26 Nov)
 
 1. Every gold fill (the chosen nav page, chosen segment such as "By day", chosen level, the account initial, primary buttons such as "Add a session") showed a dark gold sliver down its left edge. The fill is a gradient painted inside the padding, the border is see-through white, and the gradient tiles under the border, so the left border strip showed the gradient's dark far end. `--gold-fill` (all three themes) and `.btn-primary` now paint at `border-box`. Checked on the iPhone 18 Pro simulator (Settings → history page).
+## design/lining-figures (from improve/round-2-polish)
+- The live strip on Timer/Rhythm/Flow ("0:00 focused" read "o:oo", "25m" dipped) and the Timer's minute picks (24/48/72 sat lower than 12/36/60) now use lining figures, like the Dashboard. The big timer face keeps its old-style display figures. Checked on the iPhone.
+- The big clock faces too: Flow at rest read "oo:oo" in Cormorant's old-style figures. Rhythm, Timer and Flow faces now use lining figures, so the whole page reads one way. (Earlier I'd kept the faces old-style; the all-zeros Flow face changed my mind.) Checked Flow and Timer on the iPhone.
