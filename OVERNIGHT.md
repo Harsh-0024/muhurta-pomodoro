@@ -1082,3 +1082,12 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Liftbook's footer hid under its tab bar because Safari's 100vh counts its hidden toolbar. Muhurta had two caps with the same 100vh and no 100dvh partner: the History editor sheet (Add a session / edit) and the level menu.
 - Both now also set the 100dvh version (100vh stays as the fallback), like the two sheets that already did.
 - Preventive: on this iPhone the editor's Cancel and Save already fit, and still do. Tests pass (node 18, Python all).
+
+## fix/week-compare-under-minute (27 Nov)
+
+- Dashboard → Last 7 days said "<1m of focus · same as the 7 days before" when the week before had
+  no focus at all: both weeks rounded to 0m, so the difference was 0. It now compares only once
+  either week has a whole minute, so this case reads "<1m of focus."
+- Light mode checked on the iPhone at the Mac's address: the bars are light as they should be. The
+  black bars on 127.0.0.1 are Safari's cached tint again, not the app.
+- Checks: diff --check, marker grep, node tests 18 pass, Python tests all pass.

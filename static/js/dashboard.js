@@ -683,7 +683,9 @@
     // than the 7 days before" is just this week's total said twice.
     const firstDay = data.range?.calc_start || "";
     const hadBefore = !firstDay || before.some((d) => d.day >= firstDay);
-    if (before.length === 7 && hadBefore && (total > 0 || diff !== 0)) {
+    // Both weeks under a minute round to 0m apiece: "same as the 7 days before" beside "<1m" reads
+    // as if last week had some too, so compare only once either week has a whole minute.
+    if (before.length === 7 && hadBefore && (Math.round(total) > 0 || diff !== 0)) {
       parts.push(diff === 0 ? "same as the 7 days before" : `${formatMinutes(Math.abs(diff))} ${diff > 0 ? "more" : "less"} than the 7 days before`);
     }
     if (goal > 0 && met > 0) parts.push(`goal met on ${formatDays(met)}`);
