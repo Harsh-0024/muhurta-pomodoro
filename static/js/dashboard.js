@@ -231,9 +231,11 @@
   }
 
   function tooltipText(day, date) {
-    const focus = formatMinutes(day.focus_minutes);
-    const rest = formatMinutes(day.rest_minutes);
     const today = day.day === localDayKey(new Date());
+    // Today counts whole minutes done, like the clocks' "Today" line.
+    const whole = (m) => (today ? Math.floor(Number(m || 0)) : m);
+    const focus = formatMinutes(whole(day.focus_minutes));
+    const rest = formatMinutes(whole(day.rest_minutes));
     const status = Number(day.focus_minutes || 0) > 0 ? `${focus} focus${today ? " so far" : ""}` : today ? "No focus yet" : "No focus";
     return `${fullDayFormatter.format(date)} · ${status} · ${rest} rest`;
   }
@@ -439,8 +441,8 @@
         </div>
         <div class="recent-bar" aria-hidden="true"><span style="width: ${width}%"></span></div>
         <div class="recent-minutes">
-          <strong>${formatMinutes(day.focus_minutes)}</strong>
-          <span>${formatMinutes(day.rest_minutes)} rest</span>
+          <strong>${formatMinutes(isToday ? Math.floor(day.focus_minutes || 0) : day.focus_minutes)}</strong>
+          <span>${formatMinutes(isToday ? Math.floor(day.rest_minutes || 0) : day.rest_minutes)} rest</span>
         </div>
       `;
       makeDayButton(row, day.day, tooltipText(day, parseDay(day.day)));
@@ -518,7 +520,8 @@
       const minutes = Number(bar.minutes || 0);
       const value = document.createElement("span");
       if (bar.valueText !== undefined) value.textContent = bar.valueText;
-      else value.textContent = minutes <= 0 ? "" : options?.compact && minutes >= 60 ? `${Math.round(minutes / 60)}h` : formatMinutes(minutes);
+      // The bar still filling (today, this month) counts whole minutes done, like the Today ring.
+      else value.textContent = minutes <= 0 ? "" : options?.compact && minutes >= 60 ? `${Math.round(minutes / 60)}h` : formatMinutes(bar.live ? Math.floor(minutes) : minutes);
       const track = document.createElement("div");
       track.className = "bar-track";
       track.title = bar.title || "";
@@ -631,7 +634,10 @@
     const today = recent[0] || { focus_minutes: 0 };
     const todayMinutes = Number(today.focus_minutes || 0);
 
-    setText("todayFocus", formatMinutes(todayMinutes));
+    // Whole minutes only, counted down like the "Today" line under the clocks (today.js):
+    // 1.6 minutes reads "1m" on both pages, and "1m" plus "1h 59m to go" adds up to the goal.
+    const todayShown = Math.floor(todayMinutes);
+    setText("todayFocus", formatMinutes(todayShown));
     const fill = byId("goalRingFill");
     const ratio = goal > 0 ? clamp(todayMinutes / goal, 0, 1) : todayMinutes > 0 ? 1 : 0;
     if (fill) {
@@ -652,7 +658,7 @@
           : `${formatMinutes(Math.max(1, goal - Math.round(todayMinutes)))} to your ${formatMinutes(goal)} goal`;
     }
     setText("todayNote", note);
-    if (ring) ring.setAttribute("aria-label", `Today: ${formatMinutes(todayMinutes)} of focus. ${note}`);
+    if (ring) ring.setAttribute("aria-label", `Today: ${formatMinutes(todayShown)} of focus. ${note}`);
 
     const last7 = recent.slice(0, 7).reverse();
     const before = recent.slice(7, 14);
@@ -682,6 +688,7 @@
           title: tooltipText(d, date),
           day: d.day,
           current: i === last7.length - 1,
+          live: i === last7.length - 1,
           met: goal > 0 && minutes >= goal,
         };
       }),
@@ -740,6 +747,7 @@
       minutes: m.minutes,
       title: `${longMonthFormatter.format(new Date(year, i, 1))}: ${formatMinutes(m.minutes)} on ${formatDays(m.active)}`,
       current: i === thisMonth,
+      live: i === thisMonth,
     }));
     const bestMonth = monthBars.reduce((best, b) => (b.minutes > best.minutes ? b : best), monthBars[0]);
     setText(

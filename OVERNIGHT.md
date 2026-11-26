@@ -728,6 +728,14 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
 - Sound: the cue pickers (Opening bells, Soothing bell...) had a small filled triangle, the
   Default level picker a thin chevron. They now share the chevron, in each theme's muted ink.
   Checked on the iPhone (light theme).
+## fix/today-minutes (25 Nov)
+
+1. **Today's focus agrees everywhere.** With 1.6 minutes done, the "Today" line under the clocks
+   said "1m of 2h" while the Dashboard's ring and Today bar said "2m", next to "1h 59m to your 2h
+   goal" (2m + 1h 59m is more than the goal). The Dashboard now counts today, and this month's
+   bar, in whole minutes done, like the clocks: "1m" in all three places. Checked on the iPhone.
+2. **The same for Recent days and the day pop-up.** Today's row in Recent days and its pop-up
+   ("… · 2m focus so far") also count whole minutes now. Past days are unchanged.
 
 ## Waiting list
 
