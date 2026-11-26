@@ -69,6 +69,15 @@
     card.setAttribute("aria-label", `${say(state)}: ${state.value}${note}${next}`);
     card.dataset.state = String(index);
     card.dataset.stateCount = String(states.length);
+    // A single view is a plain card: no Tab stop or button role for a press that does nothing.
+    if (states.length > 1) {
+      card.setAttribute("tabindex", "0");
+      card.setAttribute("role", "button");
+    } else {
+      card.removeAttribute("tabindex");
+      card.removeAttribute("role");
+    }
+    card.classList.toggle("metric-card-toggle", states.length > 1);
   }
 
   function cycleToggleCard(cardId, states) {
@@ -95,6 +104,7 @@
           note: Number(s.longest_streak || 0) ? `Best this year: ${formatDays(s.longest_streak)}` : "A day of focus starts one",
         },
       ],
+      // With no active day both views are "nothing yet": one view, so no pager dots or press.
       averageCard: [
         {
           labelId: "averageLabel",
@@ -115,7 +125,7 @@
           value: formatMinutes(averageAllDays),
           note: `in ${year}`,
         },
-      ],
+      ].slice(0, activeDays ? 2 : 1),
     };
   }
 

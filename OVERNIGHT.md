@@ -1116,3 +1116,11 @@ month and time-of-day charts), Timer and Settings (stepper).
   The Timer ring already hides it until it moves; Rhythm now does the same (static/js/app.js updateRing).
 - Checked on the iPhone at 192.168.29.209:8141: the idle ring is a clean track. A running block was not watched
   past its first seconds; the dot comes back once progress passes 0.1%.
+
+## design/average-tile-quiet-when-empty
+- Before any active day, the Dashboard's Avg / active day tile still showed its two pager dots and took a press,
+  though both its views were empty ("—", "No active day yet").
+- Now it has one view until there is an active day: no dots, no Tab stop or button role (static/js/dashboard.js,
+  summaryCardStates and updateToggleCard). With active days it is the same two-view card as before.
+- Checked on the iPhone at 192.168.29.209:8141 with no active day. The two-view case was not seen on the phone
+  (this account has no active day); it runs through the same code as before.
