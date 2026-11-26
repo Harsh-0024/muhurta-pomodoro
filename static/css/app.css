@@ -6444,3 +6444,15 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
     grid-template-columns: 1fr;
   }
 }
+
+/* Settings > Timer, "When it reaches zero": on a phone three equal columns broke "Keep ringing" and
+   "Count overtime" over two lines beside a one-line "Stop". Each choice takes the room its words need. */
+@media (max-width: 520px) {
+  #setTimerEnd {
+    grid-template-columns: repeat(3, auto);
+  }
+
+  #setTimerEnd .segment {
+    padding: 0 0.6rem;
+  }
+}
