@@ -1090,9 +1090,16 @@ body.mode-cumulative .phase-label {
   transition: stroke-dashoffset 0.35s ease;
 }
 
+/* At rest the open-ended Flow ring is a faint full circle; Start lights it (and it breathes), as
+   the Rhythm and Timer rings fill once they run. At 0.55 at rest it already looked running. */
 .page-flow .flow-ring-progress {
   stroke: url(#flowRingGrad);
   stroke-dashoffset: 0;
+  opacity: 0.22;
+  transition: opacity 0.6s ease;
+}
+
+.page-flow .flow-ring-wrap.is-flowing .flow-ring-progress {
   opacity: 0.55;
 }
 
