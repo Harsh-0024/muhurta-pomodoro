@@ -760,6 +760,9 @@ def api_cloud_delete_account():
     return _cloud_call(sync.delete_account, str(body.get("confirm") or ""))
 
 
+UNCREDITED_AUTHORS = {"unknown", "anonymous", "anon", "unknown author", "zenquotes.io"}
+
+
 @app.get("/api/quote")
 def api_quote():
     fallback = random.choice(FALLBACK_QUOTES)
@@ -774,7 +777,8 @@ def api_quote():
         item = data[0] if isinstance(data, list) and data else {}
         quote = str(item.get("q") or "").strip()
         author = str(item.get("a") or "").strip()
-        if quote and author:
+        # "Unknown"/"Anonymous" is no credit at all; our own list is checked.
+        if quote and author and author.lower() not in UNCREDITED_AUTHORS:
             return jsonify({"quote": quote, "author": author, "source": "zenquotes"})
     except (urllib.error.URLError, TimeoutError, ValueError, KeyError, TypeError):
         pass

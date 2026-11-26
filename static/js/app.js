@@ -156,7 +156,7 @@
       state.resumeAfterPoolRest = data.resumeAfterPoolRest ?? null;
       state.extendBaseSec = data.extendBaseSec ?? 0;
       state.pauseStartedAt = data.pauseStartedAt ?? null;
-      state.currentQuote = data.currentQuote ?? null;
+      state.currentQuote = credited(data.currentQuote);
       state.lastMinuteBucket = data.lastMinuteBucket ?? null;
       state.phaseNotificationKey = data.phaseNotificationKey ?? null;
       state.monitorNotifiedPhase = data.monitorNotifiedPhase ?? null;
@@ -857,6 +857,12 @@
   function askConfirm(options) {
     if (window.MuhurataDialog?.confirm) return window.MuhurataDialog.confirm(options);
     return Promise.resolve(window.confirm(options?.message || options?.title || "Continue?"));
+  }
+
+  // A quote saved before the server dropped "Unknown" credits: let the page's own checked quote show.
+  const UNCREDITED = new Set(["unknown", "anonymous", "anon", "unknown author", "zenquotes.io"]);
+  function credited(quote) {
+    return quote?.author && !UNCREDITED.has(String(quote.author).trim().toLowerCase()) ? quote : null;
   }
 
   function readDisplayedQuote() {

@@ -1036,3 +1036,8 @@ month and time-of-day charts), Timer and Settings (stepper).
   back, still asks to confirm, and after a reset it hides again.
 - Checked on the iPhone simulator: Start only → Start pressed: Pause + Reset → Reset confirmed:
   Start only (test session cleared). Tests: node 18/18, unittest ALL PASSED.
+
+## fix/quote-unknown-author
+- Online quotes from zenquotes sometimes credit "Unknown" (seen on Rhythm: "People think about what they don't want…" — UNKNOWN). /api/quote now falls back to our checked list when the online author is Unknown/Anonymous/zenquotes.io.
+- A quote saved with a running session kept showing after the fix, so Rhythm and Flow drop an uncredited saved quote on restore and show the page's own checked one.
+- New tests/test_quote.py (2 tests); Python suite ALL PASSED, node 18 pass. Checked on the iPhone: the restored session now shows Stephen King instead of UNKNOWN.
