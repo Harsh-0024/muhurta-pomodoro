@@ -756,6 +756,13 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   today), the ring adds it, and the note says "· counting now" while a block runs. The 7-day bars
   and totals still count logged focus only. Checked on the iPhone in dark mode: the ring read
   "1h 16m · 45m to your 2h goal · counting now". 16 tests pass.
+### Branch `fix/recent-days-overlap` (26 Nov)
+
+- **Dashboard, Recent days: rows no longer run into each other on a phone.** The list is a
+  scrolling column of fixed height, and its rows were allowed to shrink to fit. Under 720px each
+  row stacks into four lines (date, bar, minutes, rest), so the squeezed rows drew "0m rest" over
+  the next day's "25 Nov". Rows (and the Rhythm list's rows) now keep their height and the list
+  scrolls. Checked on the iPhone in dark mode. 16 tests pass.
 
 ## Waiting list
 
