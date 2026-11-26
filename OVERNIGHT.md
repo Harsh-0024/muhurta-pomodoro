@@ -825,6 +825,10 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   the iPhone.
 - The average card's lone green dot read as a status light. It is now a two-dot pager at the card's bottom right: filled for the view on show, a ring for the one a press brings; the dots swap on each press. At the top they touched the label in the phone's 2 x 2, so they sit by the short note. Checked on the iPhone.
 
+## design/history-times
+
+- History (Mend the record) and the feedback timestamp show clock times without a leading zero: "5:05 AM – 8:05 AM", not "05:05 AM – 08:05 AM". Checked on the phone.
+
 ## Waiting list
 
 - ~~**Slow first paint on the iPhone simulator**~~ **Solved 25 Nov by `fix/font-blocking`**: the ~2 s gap was Safari waiting on the render-blocking Google Fonts stylesheet; on that branch HTML and app.css arrive in the same second. Original note (cause not pinned down): pages sometimes sit blank
