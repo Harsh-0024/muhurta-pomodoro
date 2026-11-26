@@ -2441,6 +2441,13 @@ body.mode-cumulative .phase-label {
   text-align: center;
 }
 
+.kbd-alt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  white-space: nowrap;
+}
+
 .kbd-plus,
 .kbd-or {
   color: var(--muted);
