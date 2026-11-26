@@ -287,7 +287,7 @@
     const stops = themeHeatStops();
     // The days with focus are buttons inside it, so it is a group (a picture would hide them from a
     // screen reader), and its name says how many there are before you step through them.
-    const activeDays = days.filter((d) => Number(d.focus_minutes || 0) > 0).length;
+    const activeDays = days.filter((d) => Number(d.focus_minutes || 0) >= 1).length; // as the server counts
     grid.setAttribute("role", "group");
     grid.setAttribute(
       "aria-label",
@@ -403,7 +403,11 @@
       const focused = Number(day.focus_minutes || 0) > 0;
       // Today isn't over, so it is "so far" or "nothing yet", not a day without focus.
       const isToday = day.day === todayKey;
-      const status = day.goal_met ? "Goal met" : focused ? (isToday ? "So far" : "Focus day") : isToday ? "Nothing yet" : "No focus";
+      // A past day needs a minute of focus to be a "Focus day" (as streaks count it); a few
+      // stray seconds say so instead.
+      const active = Number(day.focus_minutes || 0) >= 1;
+      const status = day.goal_met ? "Goal met" : isToday ? (focused ? "So far" : "Nothing yet")
+        : active ? "Focus day" : focused ? "Under a minute" : "No focus";
       row.innerHTML = `
         <div class="recent-date">
           <strong>${isToday ? "Today" : dayFormatter.format(parseDay(day.day))}</strong>

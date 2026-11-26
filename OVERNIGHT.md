@@ -584,6 +584,19 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
    48 · 60, the footer). It now starts at 24:00, so its chip lights up. A length you've used
    before is still remembered. Easy to undo: three numbers in `static/js/timer.js` and one in
    `templates/timer.html`.
+### Branch `fix/active-day-minute` (from `improve/round-2-polish`)
+
+1. **A few seconds of focus no longer makes a day "active".** A timer started by mistake and
+   stopped seconds later counted the whole day as active: it lengthened the streak, raised
+   Consistency and halved "Avg / active day" (found by adding a 1h session the day after an
+   18-second one: "2 days active, 30m average"). History already treats under a minute as a
+   stray moment and won't add a session that short, so a day now counts as active from one
+   minute of focus, on the computer (`db.ACTIVE_DAY_MIN`) and in the phone app
+   (`mobile/web/local-api.js`), plus the year chart's count. The seconds still show in the day's
+   own total. Tests added to `tests/test_streak.py` and `tests/phone/phone.test.mjs`; all pass.
+   To undo, set `ACTIVE_DAY_MIN` back to a tiny value and the two `>= 1` checks to `> 0`.
+2. **The recent days list says so too.** A past day with only a few seconds of focus was
+   labelled "Focus day"; it now reads "Under a minute" (today still says "So far"). JS tests pass.
 
 ## Waiting list
 

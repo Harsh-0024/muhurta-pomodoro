@@ -51,6 +51,8 @@ DEFAULT_SETTINGS = {
 
 PROJECT_ROOT = Path(__file__).resolve().parent
 LEGACY_DB_PATH = PROJECT_ROOT / "data" / "focus_timer.db"
+# The least focus that makes a day count as active (minutes).
+ACTIVE_DAY_MIN = 1.0
 # MUHURATA_DATA_DIR: a separate data folder, for tests and side-by-side copies.
 DB_PATH = Path(os.environ.get("MUHURATA_DATA_DIR") or user_data_dir("MuhurataTimer", appauthor=False)) / "focus_timer.db"
 BACKUP_DIR = DB_PATH.parent / "backups"
@@ -1207,7 +1209,10 @@ def dashboard_summary(
             float(seg["duration_sec"] or 0) / 60 if seg else 0.0,
             focus_minutes + rest_minutes,
         )
-        productive = focus_minutes > 0
+        # A day counts as active (for streaks, consistency and the average) from one minute of
+        # focus: a few seconds from a timer started by mistake isn't a day of focus. History tucks
+        # those moments away and won't add a session under a minute, for the same reason.
+        productive = focus_minutes >= ACTIVE_DAY_MIN
         if productive:
             active_days += 1
             if first_active_day is None:
@@ -1218,7 +1223,7 @@ def dashboard_summary(
             running_streak = 0
         if focus_minutes >= goal_minutes:
             goal_days += 1
-        if focus_minutes > 0 and (best_day is None or focus_minutes > best_day["focus_minutes"]):
+        if productive and (best_day is None or focus_minutes > best_day["focus_minutes"]):
             best_day = {"day": day_iso, "focus_minutes": round(focus_minutes, 1)}
 
         total_focus += focus_minutes
@@ -1237,9 +1242,9 @@ def dashboard_summary(
         records.append(record)
         if day_iso <= calc_end_iso:
             # Today isn't over: with no focus yet it neither adds to the run nor breaks it.
-            today_open = day_iso == calc_end_iso and calc_end_day == today and focus_minutes <= 0
+            today_open = day_iso == calc_end_iso and calc_end_day == today and not productive
             if not today_open:
-                current_streak = current_streak + 1 if focus_minutes > 0 else 0
+                current_streak = current_streak + 1 if productive else 0
             recent_days.insert(0, record)
             if len(recent_days) > 14:
                 recent_days.pop()

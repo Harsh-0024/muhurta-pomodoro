@@ -565,4 +565,13 @@ test("the streak holds until today is over, and a whole missed day still ends it
   await restore([dayOf(0)]);
   assert.equal(await streak(), 3, "a focus block today adds to it");
   assert.equal(await streak(3), 0, "a day that is over without focus (3 days ago) ends the run there");
+  // A few seconds (a timer started by mistake) isn't a day of focus.
+  const blip = { ...focusOn(dayOf(3)), ended_at: `${dayOf(3)}T09:00:20Z`, duration_sec: 20, productive_sec: 20 };
+  await p.call("POST", "/api/backup/restore", {
+    app: "muhurta-pomodoro", kind: "backup", format: 1, activity_segments: [blip],
+    custom_presets: [], focus_by_device: [], settings: {},
+  });
+  assert.equal(await streak(3), 0, "20 seconds of focus doesn't make a day active");
+  const summary = (await p.call("GET", `/api/dashboard?day=${dayOf(0)}&days=30`)).data.summary;
+  assert.equal(summary.active_days, 3, "nor count among the active days");
 });
