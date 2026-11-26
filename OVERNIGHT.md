@@ -1047,3 +1047,8 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Current streak's note said "Best this year: 0 days" under "0 days"; with no streak this year it now says "A day of focus starts one".
 - Also checked: Muhurta's text boxes are already 16px on touch screens (no iOS zoom). The two dots under the Avg tile are its tap-to-switch indicator, kept.
 - Node 18 pass, Python ALL PASSED. Checked on the iPhone.
+
+## improve/history-card-copy
+- Settings → History: the section promises "add one the timer missed", but its card was titled "Edit past sessions" and spoke only of changing times, so adding looked missing (it's the "Add a session" button inside the history page). The card is now "Edit or add sessions", and its text mentions adding one the timer missed.
+- Also looked at this round: Timer, Flow (its faint ring at rest and "00:00" are deliberate) and the Settings list; nothing else to change. The Timer's Marcus Aurelius quote is correctly credited (Meditations 12.17).
+- Node 18 pass, Python ALL PASSED. Checked on the iPhone.
