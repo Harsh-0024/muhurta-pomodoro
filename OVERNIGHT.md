@@ -1071,3 +1071,9 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Rhythm, Timer and Flow quote: a two-line quote ran a full first line and left two words on the second ("…just get / up and go to work.").
 - Quotes now wrap into balanced lines (text-wrap: balance on blockquote), so the Stephen King one splits at its comma.
 - Checked on the iPhone. Tests pass (node 18, Python all).
+
+## design/empty-value-dash (27 Nov)
+- Dashboard → Avg / active day showed "–" (en dash) with no active day, while Rhythm, Timer and Flow show "—" (em dash) for a figure with no value yet.
+- The dashboard now uses "—" too. (Admin's stat tiles still use "–"; admin only, left as is.)
+- Looked at, left alone: the 404 page's two buttons look a little left of centre because the "Dashboard" ghost button has invisible padding; as boxes they are centred.
+- Checked on the iPhone. Tests pass (node 18, Python all).

@@ -103,7 +103,7 @@
           label: "Avg / active day",
           spoken: "Average per active day",
           // An average over no active days isn't 0m; there's nothing to average yet.
-          value: activeDays ? formatMinutes(s.average_focus_active_day) : "–",
+          value: activeDays ? formatMinutes(s.average_focus_active_day) : "—",
           note: activeDays ? `in ${year}` : "No active day yet",
         },
         {
