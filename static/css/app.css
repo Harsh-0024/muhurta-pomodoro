@@ -114,6 +114,11 @@ body {
   flex-direction: column;
 }
 
+/* No single word left alone on the last line: headings even out their lines, and running text
+   pulls a word down when the last line would be one short word ("like."). */
+h1, h2, h3 { text-wrap: balance; }
+p, li, label, small { text-wrap: pretty; }
+
 body[data-theme="light"],
 body[data-theme="system"] {
   color-scheme: light dark;

@@ -778,3 +778,8 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## Ideas not done yet
 
 (see the end of this file as the list grows)
+
+## Even line breaks (branch `design/text-wrap`)
+- Headings use `text-wrap: balance`; paragraphs, list items, labels and small notes use `text-wrap: pretty`.
+- No single short word alone on a last line (Settings > Rhythm: "…what a good day looks like." used to leave "like." by itself).
+- Checked on the iPhone 18 Pro simulator. Browsers without support wrap as before.
