@@ -1020,3 +1020,11 @@ month and time-of-day charts), Timer and Settings (stepper).
   Start, like the Rhythm and Timer rings filling as they run.
 - Checked on the iPhone simulator: dim at rest, lit after Start; stopped again after.
 - Tests: node 18/18, unittest ALL PASSED.
+
+## fix/pager-dots-left (26 Nov)
+- On the phone dashboard the Avg / active day card's two pager dots sat in its bottom-right
+  corner, right against the Consistency column, so they read as Consistency's. They now sit just
+  under the card's own note ("in 2026"), on the left.
+- Checked on the iPhone simulator. Note: the scratch demo data now holds a few seconds of focus
+  from the Flow ring check (shown as "<1m"); that is the scratchpad data dir, not live data.
+- Tests: node 18/18, unittest ALL PASSED.
