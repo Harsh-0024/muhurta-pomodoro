@@ -813,6 +813,18 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
 - Not covered: the Mac menu bar app counts on its own from the start time it is sent (menubar.js), so
   it can still run past 3 hours until a page stops the clock.
 
+## design/dashboard-phone (25 Nov)
+
+- On a phone the Dashboard's four totals (Focus this year, Current streak, Avg / active day,
+  Consistency) were four full-width cards, a screen of short numbers. They now stay two by two, as
+  on a tablet, so Today's ring and the last 7 days come up sooner. Only a screen under 360px wide
+  stacks them. Checked on the iPhone.
+- Rhythm profile, before 15 sessions, shows only "1 / 15" and a line, but kept the full chart
+  height (about 23rem): on a phone, a screen of blank card. Its card now takes the count's own
+  height; on a wide screen, beside Recent, the row still makes both cards one height. Checked on
+  the iPhone.
+- The average card's lone green dot read as a status light. It is now a two-dot pager at the card's bottom right: filled for the view on show, a ring for the one a press brings; the dots swap on each press. At the top they touched the label in the phone's 2 x 2, so they sit by the short note. Checked on the iPhone.
+
 ## Waiting list
 
 - ~~**Slow first paint on the iPhone simulator**~~ **Solved 25 Nov by `fix/font-blocking`**: the ~2 s gap was Safari waiting on the render-blocking Google Fonts stylesheet; on that branch HTML and app.css arrive in the same second. Original note (cause not pinned down): pages sometimes sit blank

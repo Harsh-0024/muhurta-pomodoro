@@ -2918,16 +2918,33 @@ body[data-theme="light"].page-dashboard .day-sheet {
   transform: translateY(1px);
 }
 
+/* A card with two views shows two small dots, like a pager: the filled one is the view on show,
+   the ring is the one a press brings. One lone dot read as a status light, not "press me". They
+   sit bottom right, by the short note: at the top they touched the label in the phone's 2 x 2. */
+.metric-card-toggle[data-state-count="2"]::before,
 .metric-card-toggle[data-state-count="2"]::after {
   content: "";
   position: absolute;
-  top: 0.85rem;
-  right: 0.85rem;
-  width: 0.42rem;
-  height: 0.42rem;
+  bottom: 1.25rem;
+  width: 0.38rem;
+  height: 0.38rem;
   border-radius: 999px;
+  border: 1px solid var(--growth-2);
+  background: transparent;
+  transition: background-color 160ms ease;
+}
+
+.metric-card-toggle[data-state-count="2"]::before {
+  right: 1.45rem;
+}
+
+.metric-card-toggle[data-state-count="2"]::after {
+  right: 0.85rem;
+}
+
+.metric-card-toggle[data-state="0"]::before,
+.metric-card-toggle[data-state="1"]::after {
   background: var(--growth-2);
-  box-shadow: 0 0 0 0.22rem var(--growth-wash);
 }
 
 .metric-label,
@@ -6479,4 +6496,15 @@ body[data-theme="light"] .toggle input:not(:checked) + .toggle-ui {
   #setTimerEnd .segment {
     padding: 0 0.6rem;
   }
+}
+
+/* Before there are enough sessions, Rhythm profile is one count and a line: its card takes their
+   height (on a phone it was a screen of blank card). Beside Recent, on a wide screen, the row
+   still makes the two the same height. */
+.dashboard-lower .bell-curve-panel:has(.bell-curve-threshold) {
+  height: auto;
+}
+
+.bell-curve-threshold {
+  padding: 1.75rem 0 1.5rem;
 }
