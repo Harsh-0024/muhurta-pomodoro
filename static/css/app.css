@@ -1621,6 +1621,10 @@ body.mode-cumulative .phase-label {
   cursor: default;
 }
 
+.toggle:has(#setNotify:disabled) .toggle-ui {
+  opacity: 0.45;
+}
+
 /* Default level picker */
 
 .select-button {

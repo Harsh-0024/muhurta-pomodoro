@@ -559,6 +559,13 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+- fix/notify-unsupported: in a browser that can't show notifications (Safari on the iPhone), the
+  Desktop notifications switch showed on while the note under it said the browser can't show
+  them. There it now shows off, dimmed, and can't be moved; the saved choice is left alone, for the
+  account's other browsers. Checked on the iPhone.
+- Seen, not yet fixed: on a phone, Settings > Account squeezes "Signed in · no name added yet"
+  into a column one word wide beside "Add your name" and "Sign out".
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.
