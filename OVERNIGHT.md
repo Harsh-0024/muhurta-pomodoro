@@ -636,6 +636,19 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   names harder to read. Its tinted background now sits on the solid page colour, so it is opaque in
   both themes and keeps its tint. Checked on the iPhone simulator in dark mode. Choosing Sthiti set
   the clock to 36:00, and choosing Sparsha set it back to 24:00.
+### Branch `fix/font-blocking` (from `improve/round-2-polish`)
+
+- **Pages draw without waiting on Google.** The Google Fonts stylesheet was a normal stylesheet in
+  the head, so the page stayed blank until Google answered. On the iPhone simulator, Dashboard and
+  Timer sat on a blank screen for about 10 s while the server replied in 7 ms. It now loads with
+  `media="print"` and switches itself on when it arrives (a `<noscript>` copy covers no-JS). With
+  `display=swap` the page draws straight away and the fonts swap in. After the change, Flow drew
+  fully in under 2 s (the fonts may already have been cached, so this is not a clean
+  before/after). The phone build already bundles its own fonts. Its swap in build_web.py now
+  matches the new tag and drops the `<noscript>` copy. Checked on the served page: no Google link
+  is left, and the local fonts.css link is in. Phone tests pass (16).
+
+- Measured on the iPhone simulator (25 Nov): before this branch, app.css was requested ~2 s after the page HTML (Safari waited on the Google Fonts stylesheet first); on this branch HTML and app.css arrive in the same second, twice in a row, and the Timer page looks the same with its fonts. This settles the "slow first paint" Waiting-list item noted on `design/level-menu`.
 
 ## Waiting list
 

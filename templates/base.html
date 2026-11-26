@@ -19,7 +19,10 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23040302'/%3E%3Cg fill='none' stroke='%23d8bd79' stroke-width='4' stroke-linecap='round'%3E%3Ccircle cx='32' cy='32' r='22'/%3E%3Ccircle cx='32' cy='32' r='6'/%3E%3Cpath d='M32 6v14M32 44v14M6 32h14M44 32h14M13.6 13.6l10 10M40.4 40.4l10 10M50.4 13.6l-10 10M23.6 40.4l-10 10'/%3E%3C/g%3E%3C/svg%3E" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  {# Google's font CSS no longer holds up the first paint: on a slow line the page sat blank
+     until Google answered. It loads alongside and swaps in (display=swap); the page draws at once. #}
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" media="print" onload="this.media='all'" />
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" /></noscript>
   <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}?v={{ asset_version }}" />
   {% if mobile %}<link rel="stylesheet" href="{{ url_for('static', filename='css/mobile.css') }}?v={{ asset_version }}" />{% endif %}
 </head>
