@@ -112,7 +112,7 @@
     const frac = ["", "¼", "½", "¾"][quarters % 4];
     const text = `${whole || (frac ? "" : "0")}${frac}`;
     const exact = quarters * (MUHURAT_MIN / 4) === min;
-    return `${exact ? "" : "≈ "}${text} muhurat`;
+    return `${exact ? "" : "≈ "}${text} muhurta`;
   }
 
   function cycleOf(p) {
