@@ -1041,3 +1041,9 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Online quotes from zenquotes sometimes credit "Unknown" (seen on Rhythm: "People think about what they don't want…" — UNKNOWN). /api/quote now falls back to our checked list when the online author is Unknown/Anonymous/zenquotes.io.
 - A quote saved with a running session kept showing after the fix, so Rhythm and Flow drop an uncredited saved quote on restore and show the page's own checked one.
 - New tests/test_quote.py (2 tests); Python suite ALL PASSED, node 18 pass. Checked on the iPhone: the restored session now shows Stephen King instead of UNKNOWN.
+
+## improve/dashboard-empty-tiles
+- Empty Dashboard (no active day yet): "Avg / active day" said "0m", an average over nothing. It now shows "–" with "No active day yet" (the "Avg / all days" view is unchanged).
+- Current streak's note said "Best this year: 0 days" under "0 days"; with no streak this year it now says "A day of focus starts one".
+- Also checked: Muhurta's text boxes are already 16px on touch screens (no iOS zoom). The two dots under the Avg tile are its tap-to-switch indicator, kept.
+- Node 18 pass, Python ALL PASSED. Checked on the iPhone.
