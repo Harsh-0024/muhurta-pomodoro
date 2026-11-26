@@ -5084,16 +5084,23 @@ body.timer-ringing .countdown-ring-wrap .ring-progress {
     font-size: 1.15rem;
   }
 
-  /* Rhythm's six buttons (level picker + tabs) as two even rows of three. */
-  .page-home .topnav {
-    display: grid;
-    grid-template-columns: repeat(3, auto);
+  /* Every page: even rows of three equal pills, centred, so the bar keeps one
+     shape when switching tabs (Rhythm's six: 3 + 3; the other pages' five:
+     3 + 2, not 4 and a lone Settings). */
+  .topnav {
+    width: min(100%, 17rem);
     justify-content: center;
   }
 
-  .page-home .topnav .nav-link,
-  .page-home .topnav .nav-level-button {
+  .topnav > .nav-link,
+  .topnav > .nav-level {
+    flex: 0 0 calc((100% - 0.7rem) / 3);
+  }
+
+  .topnav .nav-link,
+  .topnav .nav-level-button {
     width: 100%;
+    padding: 0 0.4rem;
   }
 
   .session-live {

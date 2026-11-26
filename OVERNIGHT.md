@@ -652,6 +652,15 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
 ### Branch `design/numerals` (from `improve/round-2-polish`)
 
 - Timer numbers use lining figures, as the Dashboard's already did: Cormorant's old-style "1" looks like a capital I (the length scale read "I2") and "0" a small "o" (FOCUSED read "o:oo"). The big time, the set-for/ends-at/focused strip and the length buttons now set `lining-nums tabular-nums` (tabular so the countdown doesn't jitter). Checked on the iPhone (light; Safari needed a reload to drop its cached CSS) and on the computer.
+### Branch `design/topnav-phone` (from `improve/round-2-polish`)
+
+- On a phone the tab bar changed shape between pages: Rhythm (level picker + five tabs) was a
+  neat 3 + 3 grid, but Timer, Flow, Dashboard and Settings wrapped as four tabs and a lone
+  Settings on its own row. Now every page uses even rows of three equal pills, centred, in a
+  17rem-wide bar: Rhythm 3 + 3, the others 3 + 2. Checked on the iPhone simulator on Flow and
+  Rhythm, and the Sparsha level menu still drops under the bar.
+- Safari offers "Translation available" on some pages. The page already says `lang="en"`;
+  most likely Safari reacting to the Sanskrit words. Left as is.
 
 ## Waiting list
 
