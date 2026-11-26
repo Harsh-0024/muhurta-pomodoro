@@ -597,6 +597,14 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
    To undo, set `ACTIVE_DAY_MIN` back to a tiny value and the two `>= 1` checks to `> 0`.
 2. **The recent days list says so too.** A past day with only a few seconds of focus was
    labelled "Focus day"; it now reads "Under a minute" (today still says "So far"). JS tests pass.
+### Branch `fix/combination-names` (from `improve/round-2-polish`)
+
+- **No two levels with one name.** A combination named like a built-in level ("Sparsha", "tapas")
+  or like another of your combinations, ignoring case, showed twice in the level menu. Saving now
+  refuses it with a clear message ("“Sparsha” is already a built-in level. Pick another name").
+  Editing a combination without renaming it still saves. Checked in the browser on throwaway data.
+- **Whole minutes only.** "25.5" in a length box saved silently as 25. It is now refused, in the
+  preview and on Save, with "Focus must be whole minutes"; out-of-range values keep "1–180 min".
 
 ## Waiting list
 

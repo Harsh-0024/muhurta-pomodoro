@@ -602,10 +602,22 @@
     const fd = new FormData(form);
     return {
       name: String(fd.get("preset_label") || "").trim(),
-      work_min: parseInt(String(fd.get("work_min")), 10),
-      short_rest_min: parseInt(String(fd.get("short_rest_min")), 10),
-      long_rest_min: parseInt(String(fd.get("long_rest_min")), 10),
+      work_min: minutesOf(fd.get("work_min")),
+      short_rest_min: minutesOf(fd.get("short_rest_min")),
+      long_rest_min: minutesOf(fd.get("long_rest_min")),
     };
+  }
+
+  // Number, not parseInt: parseInt read "25.5" as 25 and saved it without a word. A blank box is
+  // NaN, so it fails the check like any other bad value.
+  function minutesOf(raw) {
+    const t = String(raw ?? "").trim();
+    return t === "" ? NaN : Number(t);
+  }
+  // "Focus must be 1–180 min", or "Focus must be whole minutes" for 25.5.
+  function lengthProblem(label, n, max) {
+    if (Number.isFinite(n) && !Number.isInteger(n)) return `${label} must be whole minutes`;
+    return `${label} must be 1–${max} min`;
   }
 
   const LIMITS = [
@@ -618,9 +630,15 @@
     const problems = [];
     const nameEl = $("presetName");
     nameEl.removeAttribute("aria-invalid");
+    // Two levels with one name would sit side by side in the level menu, so a name is taken once:
+    // the built-in levels' (Sparsha, Tapas…) and your other combinations'.
+    const same = v.name && presets.find((p) => p.id !== editingId && String(p.name || "").trim().toLowerCase() === v.name.toLowerCase());
     if (!v.name) {
       nameEl.setAttribute("aria-invalid", "true");
       problems.push("Give it a name");
+    } else if (same) {
+      nameEl.setAttribute("aria-invalid", "true");
+      problems.push(`“${same.name}” is already ${String(same.id).startsWith("custom-") ? "one of your combinations" : "a built-in level"}. Pick another name`);
     }
     LIMITS.forEach(([id, key, label, max]) => {
       const el = $(id);
@@ -628,7 +646,7 @@
       const n = v[key];
       if (!Number.isInteger(n) || n < 1 || n > max) {
         el.setAttribute("aria-invalid", "true");
-        problems.push(`${label} must be 1–${max} min`);
+        problems.push(lengthProblem(label, n, max));
       }
     });
     return problems;
@@ -643,7 +661,7 @@
       // A length typed but out of range says which and why ("Focus must be 1–180 min"), and stays
       // here, where the message strip after Save fades after a few seconds.
       const off = LIMITS.find(([id, key, , max]) => $(id).value !== "" && !(Number.isInteger(v[key]) && v[key] >= 1 && v[key] <= max));
-      el.textContent = off ? `${off[2]} must be 1–${off[3]} min.` : "Fill in the durations to see the full cycle.";
+      el.textContent = off ? `${lengthProblem(off[2], v[off[1]], off[3])}.` : "Fill in the durations to see the full cycle.";
       el.classList.remove("is-ready");
       return;
     }
