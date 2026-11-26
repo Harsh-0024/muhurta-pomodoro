@@ -46,6 +46,15 @@
     return null;
   }
 
+  // The part of the running block that fell today, in seconds (0 when nothing runs).
+  function liveTodaySec(now = Date.now()) {
+    const start = liveStart();
+    const midnight = new Date(now).setHours(0, 0, 0, 0);
+    return start ? Math.max(0, (now - Math.max(start, midnight)) / 1000) : 0;
+  }
+  // The Dashboard's Today ring counts the running block too, so it agrees with this line.
+  window.MuhurtaToday = { liveTodaySec };
+
   function format(sec) {
     const m = Math.floor(sec / 60);
     if (m < 60) return `${m}m`;
@@ -94,8 +103,7 @@
       window.setTimeout(load, 700);
     }
     // Only the part of the running block that fell today counts for today.
-    const midnight = new Date(now).setHours(0, 0, 0, 0);
-    const liveSec = start ? Math.max(0, (now - Math.max(start, midnight)) / 1000) : 0;
+    const liveSec = liveTodaySec(now);
     let sec = loggedSec + liveSec;
     if (shown.day === today && settling && sec < shown.sec) sec = shown.sec;
     shown = { day: today, sec };

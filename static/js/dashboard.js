@@ -632,7 +632,9 @@
     const recent = data.recent_days || [];
     const goal = Number(data.goal_minutes || 0);
     const today = recent[0] || { focus_minutes: 0 };
-    const todayMinutes = Number(today.focus_minutes || 0);
+    // What is logged plus the block running now, as the Today line under the clock counts it.
+    const liveMinutes = (window.MuhurtaToday?.liveTodaySec?.() || 0) / 60;
+    const todayMinutes = Number(today.focus_minutes || 0) + liveMinutes;
 
     // Whole minutes only, counted down like the "Today" line under the clocks (today.js):
     // 1.6 minutes reads "1m" on both pages, and "1m" plus "1h 59m to go" adds up to the goal.
@@ -657,6 +659,7 @@
           // so the rest is 1h 59m, not ceil(119.4) = "2h" as if nothing had happened.
           : `${formatMinutes(Math.max(1, goal - Math.round(todayMinutes)))} to your ${formatMinutes(goal)} goal`;
     }
+    if (liveMinutes >= 1) note = note ? `${note} · counting now` : "Counting now";
     setText("todayNote", note);
     if (ring) ring.setAttribute("aria-label", `Today: ${formatMinutes(todayShown)} of focus. ${note}`);
 
