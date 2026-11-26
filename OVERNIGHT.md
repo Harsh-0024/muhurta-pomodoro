@@ -1013,3 +1013,10 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Checked on the iPhone 18 Pro simulator (http://127.0.0.1:8141/timer). `git diff --check`
   clean; Node tests 18/18 (venv python on PATH), Python tests pass.
 - Also looked over Liftbook's Settings and AI coach on the phone: nothing to change there.
+
+## design/flow-ring (26 Nov)
+- Flow's ring sat at 0.55 opacity at rest, so it already looked like a session was running.
+  Now it is a faint full circle (0.22) at rest and lights to 0.55 (and breathes) once you press
+  Start, like the Rhythm and Timer rings filling as they run.
+- Checked on the iPhone simulator: dim at rest, lit after Start; stopped again after.
+- Tests: node 18/18, unittest ALL PASSED.
