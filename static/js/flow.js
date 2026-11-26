@@ -133,7 +133,7 @@
     state.startedAt = Number(saved.startedAt) || null;
     state.runStartedAt = saved.mode === "running" ? Number(saved.runStartedAt || saved.savedAt || Date.now()) : null;
     state.focusedSec = Math.max(0, Number(saved.focusedSec || 0));
-    state.currentQuote = saved.currentQuote || null;
+    state.currentQuote = credited(saved.currentQuote);
     applyQuote(state.currentQuote);
     if (fromExternal && saved.notice) showNotice(saved.notice);
     render();
@@ -180,6 +180,12 @@
     const elapsed = elapsedSec();
     if (!state.startedAt || elapsed < 0.5) return null;
     return Math.min(100, (focusedSec() / elapsed) * 100);
+  }
+
+  // A quote saved before the server dropped "Unknown" credits: let the page's own checked quote show.
+  const UNCREDITED = new Set(["unknown", "anonymous", "anon", "unknown author", "zenquotes.io"]);
+  function credited(quote) {
+    return quote?.author && !UNCREDITED.has(String(quote.author).trim().toLowerCase()) ? quote : null;
   }
 
   function readDisplayedQuote() {
