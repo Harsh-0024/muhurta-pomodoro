@@ -685,6 +685,9 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   Checked on the iPhone 18 Pro: it opens at Sep to Dec with today in view. 16 tests pass.
 - iPhone check of round 2 (was on the Waiting list): the Dashboard's figures are lining ("40m",
   "20m", "2 of 2"), not old-style. Done.
+## design/gold-edges (25 Nov)
+- On the phone, every gold-gradient control (Add a session, the chosen segment, the active nav pill and others) showed a thin dark-gold sliver down its left edge: the gradient was laid out inside the border and repeated underneath it.
+- All eight gold fills now use `background-origin: border-box`. Checked on the iPhone simulator (Settings > History).
 
 ## Waiting list
 
