@@ -559,6 +559,10 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
 
+- design/level-picker: Rhythm's level button ("Sparsha") looked exactly like the page tabs beside
+  it, so on the phone it read as a sixth page. It now has a small chevron (up while its menu is
+  open) and a faint gold edge. Checked on the iPhone, closed and open.
+
 ## Waiting list
 
 Tasks skipped because something they need isn't there yet; the work moved on meanwhile.

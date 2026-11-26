@@ -274,6 +274,31 @@ body[data-theme="light"] .ambient {
   box-shadow: 0 10px 32px rgba(201, 169, 98, 0.16);
 }
 
+/* The level is a choice, not a page: a small chevron and a faint gold edge set it apart from
+   the page tabs beside it, which it otherwise matched exactly ("Sparsha" read as a sixth page). */
+.nav-level-button {
+  gap: 0.45rem;
+  border-color: color-mix(in srgb, var(--gold) 34%, transparent);
+}
+
+.nav-level-button::after {
+  content: "";
+  flex: none;
+  width: 0.36rem;
+  height: 0.36rem;
+  margin-top: -0.2rem;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(45deg);
+  opacity: 0.75;
+  transition: transform 0.2s;
+}
+
+.nav-level-button[aria-expanded="true"]::after {
+  margin-top: 0.2rem;
+  transform: rotate(-135deg);
+}
+
 .nav-level-menu {
   position: absolute;
   top: calc(100% + 2.5rem);
