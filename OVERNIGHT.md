@@ -558,6 +558,7 @@ the Dashboard's charts label values on their bars, so they have no odd side scal
 2. **Dashboard zeros read as numbers.** Cormorant's old-style zero is a small round "o", so the big
    figures read "om", "o/wk" and "o days". The Dashboard's tiles, today's ring and the Rhythm
    profile count now use lining figures. Checked in light and dark.
+- Settings goal stepper: "2h" in lining figures too (Cormorant's old-style 2 dipped below the h). Checked on the iPhone.
 
 ## Waiting list
 
