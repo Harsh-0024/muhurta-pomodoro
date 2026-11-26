@@ -763,6 +763,14 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
   row stacks into four lines (date, bar, minutes, rest), so the squeezed rows drew "0m rest" over
   the next day's "25 Nov". Rows (and the Rhythm list's rows) now keep their height and the list
   scrolls. Checked on the iPhone in dark mode. 16 tests pass.
+### Branch `design/recent-days-narrow` (26 Nov)
+
+- **Dashboard, Recent days on a narrow screen: two lines a day, like the phone app.** Under 720px
+  each day stacked into four lines (date, status, bar, then minutes and rest left-aligned under
+  it), so three days filled the panel. Now the day and its minutes sit side by side, minutes on
+  the right, with the bar underneath, the layout the phone app (mobile.css) already used. Rows
+  also keep their height (`flex-shrink: 0`), which on its own fixes the overlap fixed on
+  `fix/recent-days-overlap`. Checked on the iPhone in dark mode. 16 tests pass.
 
 ## Waiting list
 

@@ -3527,6 +3527,7 @@ body[data-theme="light"] .rhythm-track {
   /* Phone: the day and its minutes on one line, the bar under both, so the
      minutes don't sit below the bar looking like the start of the next day. */
   .recent-row {
+    flex-shrink: 0;
     grid-template-columns: minmax(0, 1fr) auto;
     grid-template-areas: "date minutes" "bar bar";
     gap: 0.45rem 0.8rem;
