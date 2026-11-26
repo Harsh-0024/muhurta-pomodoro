@@ -890,6 +890,8 @@ Tasks skipped because something they need isn't there yet; the work moved on mea
    so "Settings" sat alone on a second line. Slimmer pills on phones fit all five on one row, which
    also gives the page a row back. Rhythm keeps its two rows of three; narrower phones still wrap.
    Checked on the iPhone; 16 tests pass.
+   *Not kept in the 26 Nov merge:* `design/topnav-phone` (rows of three on every page) won, so
+   the bar keeps one shape as you move between tabs. The branch stays on GitHub.
 
 ## Checked in the real apps (19 Nov)
 
@@ -970,3 +972,22 @@ only(PHONES, "Turn your phone on its side and the clock sits beside its buttons,
 ## design/lining-figures (from improve/round-2-polish)
 - The live strip on Timer/Rhythm/Flow ("0:00 focused" read "o:oo", "25m" dipped) and the Timer's minute picks (24/48/72 sat lower than 12/36/60) now use lining figures, like the Dashboard. The big timer face keeps its old-style display figures. Checked on the iPhone.
 - The big clock faces too: Flow at rest read "oo:oo" in Cormorant's old-style figures. Rhythm, Timer and Flow faces now use lining figures, so the whole page reads one way. (Earlier I'd kept the faces old-style; the all-zeros Flow face changed my mind.) Checked Flow and Timer on the iPhone.
+
+## Merge of the run's branches (26 Nov, approved by you)
+
+All 43 topic branches of this run are now merged into `improve/round-2-polish` (never `main`;
+every branch is kept). Left out as older work: `ccr-fa74c739-y3z13x` and `test-builds`.
+Where two branches changed the same thing:
+- Top tabs on a phone: `design/topnav-phone` (rows of three everywhere) over `design/phone-nav`
+  (one slim row on some pages), so the bar doesn't change shape between tabs.
+- Goal stepper: the CSS-drawn minus and plus (`stepper-minus` / `stepper-plus`) over the SVG icons;
+  same size and stroke, less markup.
+- Year grid: `showLatestWeeks` from `fix/year-chart-latest` over heatmap-today's `showRecentWeeks`
+  (same job; the first already scrolls to the newest weeks).
+- Recent days: `design/dashboard-recent-phone`'s rules, plus `flex-shrink: 0` from the narrow fix.
+- Today line: the 3-hour cap on a forgotten running block now sits in `liveTodaySec`, so the
+  Dashboard ring and the line under the clocks agree.
+- Everywhere else both sides were kept.
+Tests: clocks 10/10, sign-in, shared time, devices and streak pass, phone tests 8/8. Checked on the
+iPhone 18 Pro simulator: Dashboard (tabs, 2×2 figures, ring, last 7 days, recent days, year grid,
+month and time-of-day charts), Timer and Settings (stepper).
