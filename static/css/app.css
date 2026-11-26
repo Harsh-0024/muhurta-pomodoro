@@ -327,6 +327,7 @@ body[data-theme="light"] .ambient {
   box-shadow: var(--menu-shadow);
   backdrop-filter: blur(18px);
   max-height: calc(100vh - 10rem);
+  max-height: calc(100dvh - 10rem); /* Safari's 100vh counts its hidden toolbar */
   overflow: auto;
   transform-origin: top right;
   transform: translateY(0) scale(1);
@@ -4409,6 +4410,7 @@ a.btn {
 .history-sheet {
   width: min(480px, 100%);
   max-height: calc(100vh - 3rem);
+  max-height: calc(100dvh - 3rem); /* the visible height, so Save never sits under Safari's toolbar */
   overflow-y: auto;
   background:
     linear-gradient(135deg, rgba(216, 189, 121, 0.08), transparent 46%),

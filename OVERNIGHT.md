@@ -1077,3 +1077,8 @@ month and time-of-day charts), Timer and Settings (stepper).
 - The dashboard now uses "—" too. (Admin's stat tiles still use "–"; admin only, left as is.)
 - Looked at, left alone: the 404 page's two buttons look a little left of centre because the "Dashboard" ghost button has invisible padding; as boxes they are centred.
 - Checked on the iPhone. Tests pass (node 18, Python all).
+
+## fix/sheets-visible-height (27 Nov)
+- Liftbook's footer hid under its tab bar because Safari's 100vh counts its hidden toolbar. Muhurta had two caps with the same 100vh and no 100dvh partner: the History editor sheet (Add a session / edit) and the level menu.
+- Both now also set the 100dvh version (100vh stays as the fallback), like the two sheets that already did.
+- Preventive: on this iPhone the editor's Cancel and Save already fit, and still do. Tests pass (node 18, Python all).
