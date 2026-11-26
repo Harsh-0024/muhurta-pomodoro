@@ -688,6 +688,12 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
 ## design/gold-edges (25 Nov)
 - On the phone, every gold-gradient control (Add a session, the chosen segment, the active nav pill and others) showed a thin dark-gold sliver down its left edge: the gradient was laid out inside the border and repeated underneath it.
 - All eight gold fills now use `background-origin: border-box`. Checked on the iPhone simulator (Settings > History).
+## design/sound-cues (25 Nov)
+
+- Settings > Sound on a phone: the Sound and Minute pulse switches sat on the right, but each cue's
+  switch (Focus begins, Focus ends, ...) started its row on the left. On a phone the cue switches
+  now sit on the right too, so every switch on the page is in one column. On wider screens nothing
+  changes (there the switch sits beside its sound picker). Checked on the iPhone.
 
 ## Waiting list
 
