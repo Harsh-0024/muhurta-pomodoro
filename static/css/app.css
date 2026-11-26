@@ -3962,7 +3962,15 @@ body[data-theme="light"] .trend-now {
   opacity: 0.4;
 }
 
+/* Before the profile is ready the card only holds a count ("1 / 15"): it takes the height that
+   needs instead of a chart's, which on a phone left most of the card empty. Beside another card
+   the grid still stretches it to that card's height. */
+.dashboard-lower .bell-curve-panel:has(.bell-curve-threshold, .bell-curve-container > .empty-note) {
+  height: auto;
+}
+
 .bell-curve-threshold {
+  padding: 1.6rem 0 1.2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
