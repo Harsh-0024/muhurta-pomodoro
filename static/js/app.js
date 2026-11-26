@@ -1560,7 +1560,8 @@
     skipExtend?.classList.toggle("hidden", !inExtend || inChoice);
     if (beginRest) beginRest.textContent = "Rest";
     if (skipExtend) skipExtend.textContent = "Skip";
-    reset?.classList.toggle("hidden", inChoice);
+    // Nothing to reset before the first Start: Timer and Flow show only Start at rest too.
+    reset?.classList.toggle("hidden", inChoice || !state.session.active);
 
     if (inChoice) {
       primary?.classList.add("hidden");
