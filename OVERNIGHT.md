@@ -736,6 +736,17 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
    bar, in whole minutes done, like the clocks: "1m" in all three places. Checked on the iPhone.
 2. **The same for Recent days and the day pop-up.** Today's row in Recent days and its pop-up
    ("… · 2m focus so far") also count whole minutes now. Past days are unchanged.
+## improve/heatmap-today (25 Nov)
+
+1. **The year's grid opens on recent weeks.** On a phone the Yearly consistency grid is wider
+   than the screen and opened at January, so in November all you saw was Jan–Apr, empty. It now
+   opens with today's week near the right edge (Sep–Dec in late November), one faded week after
+   it; a past year opens at its end. Wide screens show the whole year and do not scroll. Checked
+   on the iPhone.
+2. **Mon / Wed / Fri stay at the left edge** while the year scrolls sideways. The day names now
+   sit outside the scrolling part, beside it, so nothing has to cover the squares (a backing in
+   the card's colour showed as a lighter band, since the card is see-through). Checked on the
+   iPhone in light and dark.
 
 ## Waiting list
 
