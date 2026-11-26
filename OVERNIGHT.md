@@ -829,6 +829,10 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
 
 - History (Mend the record) and the feedback timestamp show clock times without a leading zero: "5:05 AM – 8:05 AM", not "05:05 AM – 08:05 AM". Checked on the phone.
 
+- design/level-picker: Rhythm's level button ("Sparsha") looked exactly like the page tabs beside
+  it, so on the phone it read as a sixth page. It now has a small chevron (up while its menu is
+  open) and a faint gold edge. Checked on the iPhone, closed and open.
+
 ## Waiting list
 
 - ~~**Slow first paint on the iPhone simulator**~~ **Solved 25 Nov by `fix/font-blocking`**: the ~2 s gap was Safari waiting on the render-blocking Google Fonts stylesheet; on that branch HTML and app.css arrive in the same second. Original note (cause not pinned down): pages sometimes sit blank
