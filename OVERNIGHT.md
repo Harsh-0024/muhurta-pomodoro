@@ -699,6 +699,17 @@ From here on each kind of work has its own branch (design/, fix/, feature/, impr
 - The timer's main button changes label (Start, Pause, Resume) and its width changed with it, so
   "Reset" beside it shifted sideways each time. It now keeps one width for all three. Checked on
   the iPhone through Start, Pause and Resume.
+### Branch `fix/under-a-minute` (from `improve/round-2-polish`)
+
+- Under half a minute of focus today: the bars and ring rightly showed a sliver, but every number
+  rounded it to "0m" ("Today · So far · 0m", a lone "0m" over Wednesday in By weekday), and the
+  Today card said "2h to your 2h goal" since its test was `<= 0`. Now it reads "<1m", and the
+  Today card names the goal ("Daily goal: 2h") until half a minute is in. Checked on the iPhone.
+- History: a few seconds inside one minute read "12:13 AM – 12:13 AM". Now one time, "12:13 AM"
+  (the list, the edit dialog's "Recorded …" line and Undo sentences). Checked on the iPhone; 16 tests pass.
+- Today card past half a minute: the ring said "1m" but the note said "2h to your 2h goal"
+  (it took ceil of the unrounded 119.4 m). It now counts from the minutes the ring shows:
+  "1h 59m to your 2h goal". Checked on the iPhone; 16 tests pass.
 
 ## Waiting list
 
