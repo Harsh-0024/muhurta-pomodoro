@@ -1052,3 +1052,8 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Settings → History: the section promises "add one the timer missed", but its card was titled "Edit past sessions" and spoke only of changing times, so adding looked missing (it's the "Add a session" button inside the history page). The card is now "Edit or add sessions", and its text mentions adding one the timer missed.
 - Also looked at this round: Timer, Flow (its faint ring at rest and "00:00" are deliberate) and the Settings list; nothing else to change. The Timer's Marcus Aurelius quote is correctly credited (Meditations 12.17).
 - Node 18 pass, Python ALL PASSED. Checked on the iPhone.
+
+## fix/dashboard-seconds-charts
+- Dashboard charts with only seconds of focus: "By weekday" said "Thursday is your strongest day" and "By month" said "Most in November: <1m". Its "two weeks" check counted calendar days in the year, not days with focus. A strongest day now needs 3 days with a minute or more of focus too (until then: "Your strongest day shows after a few days of focus."), and a best month needs a whole minute.
+- The same 15 seconds were a thin sliver as a Thursday average but a quarter-high pill as November's total, because bars scaled to at least 1 minute. They now scale to at least 30 minutes, so seconds are a sliver in both. The goal charts are unchanged (their scale already starts at the goal).
+- Node 18 pass, Python ALL PASSED. Checked on the iPhone.

@@ -501,7 +501,9 @@
   function renderBars(el, bars, options) {
     if (!el) return;
     const goal = Number(options?.goal || 0);
-    const top = Math.max(...bars.map((b) => Number(b.minutes || 0)), goal, 1);
+    // Scaled to at least half an hour: with a 1-minute floor, 15 seconds in November filled a
+    // quarter of its bar while the same seconds as a weekday average were a sliver.
+    const top = Math.max(...bars.map((b) => Number(b.minutes || 0)), goal, 30);
     el.innerHTML = "";
     el.style.setProperty("--bar-count", String(bars.length));
     const asImage = !bars.some((b) => b.day);
@@ -741,10 +743,11 @@
     setText(
       "weekdaySubtitle",
       // One good Tuesday isn't "your strongest day": name one once every weekday has come round twice.
-      bestWeekday.minutes > 0 && days.length >= 14
+      // ...and once there are a few real days of focus: seconds on one Thursday named it before.
+      bestWeekday.minutes > 0 && days.length >= 14 && days.filter((d) => Number(d.focus_minutes || 0) >= 1).length >= 3
         ? `Average focus per day in ${year}. ${bestWeekday.long} is your strongest day.`
         : bestWeekday.minutes > 0
-          ? `Average focus per day in ${year}. Your strongest day shows after two weeks.`
+          ? `Average focus per day in ${year}. Your strongest day shows after a few days of focus.`
           : `Average focus per day in ${year}.`
     );
     renderBars(byId("weekdayChart"), weekdayBars, { label: `Average focus by weekday in ${year}` });
@@ -761,7 +764,8 @@
     const bestMonth = monthBars.reduce((best, b) => (b.minutes > best.minutes ? b : best), monthBars[0]);
     setText(
       "monthSubtitle",
-      bestMonth.minutes > 0
+      // "Most in November: <1m" crowned a few seconds; a best month needs a whole minute.
+      bestMonth.minutes >= 1
         ? `Total focus each month of ${year}. Most in ${bestMonth.long}: ${formatMinutes(bestMonth.minutes)}.`
         : `Total focus each month of ${year}.`
     );
