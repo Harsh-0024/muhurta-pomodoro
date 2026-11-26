@@ -1003,3 +1003,13 @@ month and time-of-day charts), Timer and Settings (stepper).
 - Checked on the iPhone 18 Pro simulator (http://127.0.0.1:8141/dashboard). `git diff --check`
   clean; Node tests 18/18 (with the app's venv python on PATH, which the phone build needs for
   jinja2), Python tests pass.
+
+## design/timer-pick (26 Nov)
+
+- Timer: the chosen quick length (6 · 12 · 24 · 36 · 48 · 60) was shown only in the pale
+  --gold2, which read as "a little brighter" than the others. It now also has a small gold dot
+  under it (::before; ::after is already the phone's touch area). Tapping 48 moved the dot and
+  set 48:00; set back to 24 afterwards.
+- Checked on the iPhone 18 Pro simulator (http://127.0.0.1:8141/timer). `git diff --check`
+  clean; Node tests 18/18 (venv python on PATH), Python tests pass.
+- Also looked over Liftbook's Settings and AI coach on the phone: nothing to change there.

@@ -5172,7 +5172,22 @@ body[data-theme="light"] .signin-message[data-tone="error"] {
 }
 
 .countdown-pick.is-active {
+  position: relative;
   color: var(--gold2);
+}
+
+/* The chosen length also gets a small gold dot under it: the pale --gold2 alone read as "a little
+   brighter", easy to miss among the other numbers. (::after is the touch area on phones.) */
+.countdown-pick.is-active::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -0.2rem;
+  width: 0.28rem;
+  height: 0.28rem;
+  margin-left: -0.14rem;
+  border-radius: 999px;
+  background: var(--gold);
 }
 
 @media (hover: hover) {
