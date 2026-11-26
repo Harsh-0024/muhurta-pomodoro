@@ -664,6 +664,17 @@
     if (!el) return;
     const v = formValues();
     const ok = LIMITS.every(([, key, , max]) => Number.isInteger(v[key]) && v[key] >= 1 && v[key] <= max);
+    // Nothing typed yet: work the example in the boxes (25 · 5 · 15) through, quietly, so the
+    // preview shows what a combination adds up to instead of only asking to be filled in.
+    if (LIMITS.every(([id]) => $(id).value === "")) {
+      const ex = Object.fromEntries(LIMITS.map(([id, key]) => [key, Number($(id).placeholder)]));
+      if (LIMITS.every(([, key, , max]) => Number.isInteger(ex[key]) && ex[key] >= 1 && ex[key] <= max)) {
+        const c = cycleOf(ex);
+        el.innerHTML = `For example, ${ex.work_min} · ${ex.short_rest_min} · ${ex.long_rest_min} min: one cycle is <strong>${formatMinutes(c.total)}</strong>, <strong>${c.ratio}%</strong> focus`;
+        el.classList.remove("is-ready");
+        return;
+      }
+    }
     if (!ok) {
       // A length typed but out of range says which and why ("Focus must be 1–180 min"), and stays
       // here, where the message strip after Save fades after a few seconds.
@@ -936,6 +947,7 @@
       e.target.removeAttribute?.("aria-invalid");
       renderPresetPreview();
     });
+    renderPresetPreview(); // the example cycle shows before anything is typed
     $("btnCancelEdit")?.addEventListener("click", endEdit);
     $("btnResetSettings")?.addEventListener("click", resetSettings);
 
